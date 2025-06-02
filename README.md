@@ -24,7 +24,7 @@ While the template includes example modules (such as user management and activit
 - ✅ **Database infrastructure**: Azure SQL + Cosmos DB infrastructure templates created
 - [ ] **Database integration**: Data access layer implementation
 
-> **Note**: We've downgraded to React 18.2.0 to ensure full compatibility with MSAL authentication, though we're maintaining React 19 TypeScript types for future upgrade preparation.
+> **Note**: We're using React 18.2.0 to ensure full compatibility with MSAL authentication.
 
 ### 📋 Phase 3: Example Extensions (PLANNED)
 - [ ] Example: User management (Azure SQL)

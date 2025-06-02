@@ -38,14 +38,13 @@ export const usersApi = api.injectEndpoints({
         body: user,
       }),
       invalidatesTags: ['User'],
-    }),
-    updateUser: builder.mutation<User, { id: string; updates: Partial<User> }>({
+    }),    updateUser: builder.mutation<User, { id: string; updates: Partial<User> }>({
       query: ({ id, updates }) => ({
         url: `/users/${id}`,
         method: 'PUT',
         body: updates,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'User', id }],
+      invalidatesTags: (_, __, { id }) => [{ type: 'User', id }],
     }),
   }),
 })

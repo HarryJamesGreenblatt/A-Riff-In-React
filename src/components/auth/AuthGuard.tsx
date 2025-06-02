@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { Button } from '../ui/button';
+import { Button } from '../ui/Button';
 
 interface AuthGuardProps {
   children: React.ReactNode;

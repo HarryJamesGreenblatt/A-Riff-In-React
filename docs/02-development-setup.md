@@ -122,9 +122,7 @@ src/
 - ✅ Dependencies installed successfully (189 packages)
 - ✅ Development server running on `http://localhost:5173/`
 - ✅ Hot Module Replacement (HMR) working
-- ✅ Basic React 18.x app with TypeScript 5.8.3 (downgraded from 19 to support MSAL)
-
-> **Version Note**: While we're using React 18.2.0 runtime for MSAL compatibility, we're maintaining React 19 TypeScript types (@types/react: ^19.1.2) for future upgrade preparation.
+- ✅ Basic React 18.x app with TypeScript 5.8.3 (using React 18.2.0 for MSAL compatibility)
 
 **Generated files:**
 - `package.json` - Project configuration and dependencies
