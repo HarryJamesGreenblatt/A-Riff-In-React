@@ -19,7 +19,7 @@ While the template includes example modules (such as user management and activit
 
 ### 🚧 Phase 2: Core Features (IN PROGRESS)
 - ✅ **UI framework integration**: Tailwind CSS + shadcn/ui-style components implemented
-- [ ] State management setup (Redux Toolkit)
+- ✅ **State management setup**: Redux Toolkit + RTK Query implemented
 - [ ] Authentication system (MSAL)
 - [ ] Database integration (Azure SQL + Cosmos DB)
 
@@ -37,7 +37,7 @@ While the template includes example modules (such as user management and activit
 
 - **Frontend**: React 19 + TypeScript + Vite
 - **UI Framework**: Tailwind CSS + shadcn/ui-style components ✅
-- **State Management**: Redux Toolkit + RTK Query *(planned)*
+- **State Management**: Redux Toolkit + RTK Query ✅
 - **Authentication**: Microsoft Authentication Library (MSAL) *(planned)*
 - **Databases**: Azure SQL Database + Cosmos DB *(planned)*
 - **Hosting**: Azure Static Web Apps or Container Apps *(planned)*

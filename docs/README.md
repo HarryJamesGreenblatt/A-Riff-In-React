@@ -5,6 +5,8 @@ Welcome to the documentation for **A Riff In React**.
 ## Index
 - [Project Overview](./01-project-overview.md)
 - [Development Setup](./02-development-setup.md)
+- [UI Framework Setup](./03-ui-framework-setup.md)
+- [State Management](./04-state-management.md)
 - [Architecture](./architecture.md)
 - [Azure Deployment Guide](./azure_deployment.md)
 - [GitHub Actions: Azure CI/CD Pipeline](./github_actions_azure.md)
