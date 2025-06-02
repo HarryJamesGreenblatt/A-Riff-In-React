@@ -15,7 +15,7 @@ While the template includes example modules (such as user management and activit
 ### ✅ Phase 1: Foundation (COMPLETED)
 - ✅ **Documentation Framework**: Comprehensive docs structure established
 - ✅ **Project Vision**: General-purpose, Azure-ready template defined
-- ✅ **Basic React App Structure**: Vite + TypeScript + React 19 setup complete
+- ✅ **Basic React App Structure**: Vite + TypeScript + React 18 setup complete
 
 ### 🚧 Phase 2: Core Features (IN PROGRESS)
 - ✅ **UI framework integration**: Tailwind CSS + shadcn/ui-style components implemented
@@ -23,6 +23,8 @@ While the template includes example modules (such as user management and activit
 - ✅ **Authentication system (MSAL)**: Azure AD B2C integration complete
 - ✅ **Database infrastructure**: Azure SQL + Cosmos DB infrastructure templates created
 - [ ] **Database integration**: Data access layer implementation
+
+> **Note**: We've downgraded to React 18.2.0 to ensure full compatibility with MSAL authentication, though we're maintaining React 19 TypeScript types for future upgrade preparation.
 
 ### 📋 Phase 3: Example Extensions (PLANNED)
 - [ ] Example: User management (Azure SQL)
@@ -36,11 +38,11 @@ While the template includes example modules (such as user management and activit
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React 19 + TypeScript + Vite
+- **Frontend**: React 18 + TypeScript + Vite
 - **UI Framework**: Tailwind CSS + shadcn/ui-style components ✅
 - **State Management**: Redux Toolkit + RTK Query ✅
-- **Authentication**: Microsoft Authentication Library (MSAL) *(planned)*
-- **Databases**: Azure SQL Database + Cosmos DB *(planned)*
+- **Authentication**: Microsoft Authentication Library (MSAL) ✅
+- **Databases**: Azure SQL Database + Cosmos DB ✅
 - **Hosting**: Azure Static Web Apps or Container Apps *(planned)*
 
 ## 🚀 Quick Start
