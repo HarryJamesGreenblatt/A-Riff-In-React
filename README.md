@@ -20,8 +20,9 @@ While the template includes example modules (such as user management and activit
 ### 🚧 Phase 2: Core Features (IN PROGRESS)
 - ✅ **UI framework integration**: Tailwind CSS + shadcn/ui-style components implemented
 - ✅ **State management setup**: Redux Toolkit + RTK Query implemented
-- [ ] Authentication system (MSAL)
-- [ ] Database integration (Azure SQL + Cosmos DB)
+- ✅ **Authentication system (MSAL)**: Azure AD B2C integration complete
+- ✅ **Database infrastructure**: Azure SQL + Cosmos DB infrastructure templates created
+- [ ] **Database integration**: Data access layer implementation
 
 ### 📋 Phase 3: Example Extensions (PLANNED)
 - [ ] Example: User management (Azure SQL)

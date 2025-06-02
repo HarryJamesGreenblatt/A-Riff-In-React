@@ -116,6 +116,7 @@ ENV_NAME=a-riff-in-react
 B2C_TENANT_NAME=your-b2c-tenant
 B2C_CLIENT_ID=your-client-id
 B2C_SIGNIN_POLICY=B2C_1_signupsignin
+SQL_ADMIN_PASSWORD=your-complex-password # Must meet SQL complexity requirements
 
 # Create resource group if needed
 az group create --name $RESOURCE_GROUP --location $LOCATION
@@ -128,7 +129,8 @@ az deployment group create \
   --parameters location=$LOCATION \
   --parameters b2cTenantName=$B2C_TENANT_NAME \
   --parameters b2cClientId=$B2C_CLIENT_ID \
-  --parameters b2cSigninPolicy=$B2C_SIGNIN_POLICY
+  --parameters b2cSigninPolicy=$B2C_SIGNIN_POLICY \
+  --parameters sqlAdminPassword=$SQL_ADMIN_PASSWORD
 ```
 
 ### Using Terraform (Alternative)
@@ -174,7 +176,8 @@ terraform apply -var="environment_name=$ENV_NAME" \
   -var="location=$LOCATION" \
   -var="b2c_tenant_name=$B2C_TENANT_NAME" \
   -var="b2c_client_id=$B2C_CLIENT_ID" \
-  -var="b2c_signin_policy=$B2C_SIGNIN_POLICY"
+  -var="b2c_signin_policy=$B2C_SIGNIN_POLICY" \
+  -var="sql_admin_password=$SQL_ADMIN_PASSWORD"
 ```
 
 ### Configure GitHub Secrets for CI/CD
@@ -183,9 +186,23 @@ Add these secrets to your GitHub repository:
 - `AZURE_CREDENTIALS`: JSON credentials from Service Principal
 - `AZURE_SUBSCRIPTION_ID`: Your Azure subscription ID
 - `AZURE_RESOURCE_GROUP`: Resource group name
+- `AZURE_ENV_NAME`: Environment name (e.g., `a-riff-in-react`)
+- `AZURE_LOCATION`: Azure region (e.g., `eastus`)
 - `B2C_TENANT_NAME`: Your B2C tenant name
 - `B2C_CLIENT_ID`: Your B2C client ID
 - `B2C_SIGNIN_POLICY`: Your B2C policy name
+- `SQL_ADMIN_PASSWORD`: SQL Server admin password
+
+To create the `AZURE_CREDENTIALS` secret, run the following command:
+
+```bash
+# Create a service principal for GitHub Actions
+az ad sp create-for-rbac --name "github-actions-a-riff-in-react" --role contributor \
+  --scopes /subscriptions/{subscription-id}/resourceGroups/{resource-group} \
+  --sdk-auth
+
+# The output is a JSON object that should be stored in the AZURE_CREDENTIALS GitHub secret
+```
 
 ## 3. Update Configuration Files
 Ensure your application can use both local development settings and deployed settings:
@@ -197,14 +214,22 @@ Ensure your application can use both local development settings and deployed set
    VITE_B2C_SIGNIN_POLICY=B2C_1_signupsignin
    VITE_REDIRECT_URI=http://localhost:5173
    VITE_POST_LOGOUT_URI=http://localhost:5173
+   
+   # Database connection strings (for local development)
+   SQL_CONNECTION_STRING=Server=localhost;Database=ARiffInReact;User Id=sa;Password=YourPassword;TrustServerCertificate=True;
+   COSMOS_ENDPOINT=https://localhost:8081
+   COSMOS_KEY=your-local-cosmos-key
+   COSMOS_DATABASE=ARiffInReact
    ```
 
 2. **Update `src/config/authConfig.ts` to use B2C configuration**
    Update your configuration to use the B2C settings as shown in the `05-authentication-msal.md` documentation.
 
 ## 4. Deploy the App
-- Use GitHub Actions or Azure CLI for CI/CD
-- See `docs/github_actions_azure.md` for pipeline setup
+- Two GitHub Actions workflows have been set up for CI/CD:
+  - `deploy-infrastructure.yml`: Deploys the Azure infrastructure using Bicep
+  - `deploy-app.yml`: Builds and deploys the React application
+- See `docs/github_actions_azure.md` for detailed pipeline setup instructions
 
 ## 4. Monitor and Maintain
 - Use Application Insights for telemetry

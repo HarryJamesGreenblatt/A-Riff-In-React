@@ -16,6 +16,9 @@
     },
     "b2cSigninPolicy": {
       "value": "${B2C_SIGNIN_POLICY}"
+    },
+    "sqlAdminPassword": {
+      "value": "${SQL_ADMIN_PASSWORD}"
     }
   }
 }
