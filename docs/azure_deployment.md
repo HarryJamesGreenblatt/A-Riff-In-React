@@ -226,10 +226,18 @@ Ensure your application can use both local development settings and deployed set
    Update your configuration to use the B2C settings as shown in the `05-authentication-msal.md` documentation.
 
 ## 4. Deploy the App
-- Two GitHub Actions workflows have been set up for CI/CD:
-  - `deploy-infrastructure.yml`: Deploys the Azure infrastructure using Bicep
-  - `deploy-app.yml`: Builds and deploys the React application
-- See `docs/github_actions_azure.md` for detailed pipeline setup instructions
+The project includes three GitHub Actions workflows for CI/CD:
+
+1. **deploy-infrastructure.yml**: Deploys only the Azure infrastructure using Bicep
+2. **deploy-app.yml**: Builds and deploys only the React application
+3. **azure-deploy.yml**: Combined workflow that deploys both infrastructure and application
+
+You can choose which workflow best fits your deployment needs:
+
+- For initial setup, use the combined `azure-deploy.yml` workflow
+- For ongoing development, use the separate workflows to deploy only what has changed
+
+See `docs/github_actions_azure.md` for detailed pipeline setup instructions.
 
 ## 4. Monitor and Maintain
 - Use Application Insights for telemetry

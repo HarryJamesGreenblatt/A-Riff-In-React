@@ -53,6 +53,7 @@ jobs:
             b2cTenantName=${{ secrets.B2C_TENANT_NAME }}
             b2cClientId=${{ secrets.B2C_CLIENT_ID }}
             b2cSigninPolicy=${{ secrets.B2C_SIGNIN_POLICY }}
+            sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
           deploymentName: a-riff-in-react-${{ github.run_number }}
           failOnStdErr: false
       
