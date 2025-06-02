@@ -3,10 +3,21 @@ import type { Configuration, PopupRequest } from "@azure/msal-browser";
 // MSAL configuration
 export const msalConfig: Configuration = {
   auth: {
-    clientId: import.meta.env.VITE_AZURE_CLIENT_ID || "your-client-id",
-    authority: import.meta.env.VITE_AZURE_AUTHORITY || `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID || "common"}`,
-    redirectUri: import.meta.env.VITE_AZURE_REDIRECT_URI || window.location.origin,
-    postLogoutRedirectUri: import.meta.env.VITE_AZURE_POST_LOGOUT_REDIRECT_URI || window.location.origin,
+    // Support for both B2C and regular Azure AD configurations
+    clientId: import.meta.env.VITE_B2C_CLIENT_ID || import.meta.env.VITE_AZURE_CLIENT_ID || "your-client-id",
+    
+    // If B2C tenant is specified, use B2C authority format, otherwise use regular AAD authority
+    authority: import.meta.env.VITE_B2C_TENANT_NAME 
+      ? `https://${import.meta.env.VITE_B2C_TENANT_NAME}.b2clogin.com/${import.meta.env.VITE_B2C_TENANT_NAME}.onmicrosoft.com/${import.meta.env.VITE_B2C_SIGNIN_POLICY || 'B2C_1_signupsignin'}`
+      : import.meta.env.VITE_AZURE_AUTHORITY || `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID || "common"}`,
+    
+    // Add known authorities for B2C to prevent authority validation issues
+    knownAuthorities: import.meta.env.VITE_B2C_TENANT_NAME 
+      ? [`${import.meta.env.VITE_B2C_TENANT_NAME}.b2clogin.com`] 
+      : [],
+      
+    redirectUri: import.meta.env.VITE_REDIRECT_URI || import.meta.env.VITE_AZURE_REDIRECT_URI || window.location.origin,
+    postLogoutRedirectUri: import.meta.env.VITE_POST_LOGOUT_URI || import.meta.env.VITE_AZURE_POST_LOGOUT_REDIRECT_URI || window.location.origin,
   },
   cache: {
     cacheLocation: "sessionStorage", // This configures where your cache will be stored
@@ -40,7 +51,10 @@ export const msalConfig: Configuration = {
 
 // Add here scopes for id token to be used at MS Identity Platform endpoints.
 export const loginRequest: PopupRequest = {
-  scopes: ["User.Read", "openid", "profile", "email"],
+  // For B2C, we typically only need openid, profile scopes
+  scopes: import.meta.env.VITE_B2C_TENANT_NAME 
+    ? ["openid", "profile", "email"] 
+    : ["User.Read", "openid", "profile", "email"],
 };
 
 // Add here the endpoints for MS Graph API services you would like to use.
