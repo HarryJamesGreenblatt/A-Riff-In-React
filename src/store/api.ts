@@ -1,5 +1,4 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { AuthService } from '../services/auth/authService'
 
 // Define a service using a base URL and expected endpoints
 export const api = createApi({
@@ -8,18 +7,20 @@ export const api = createApi({
     baseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
     prepareHeaders: async (headers) => {
       try {
+        // Dynamically import AuthService to avoid circular dependency
+        const { AuthService } = await import('../services/auth/authService')
         // Try to get fresh token from MSAL
-        const tokenResponse = await AuthService.getApiToken();
+        const tokenResponse = await AuthService.getApiToken()
         if (tokenResponse) {
           headers.set('authorization', `Bearer ${tokenResponse.accessToken}`);
         }
-      } catch (error) {
-        // Fallback to stored token if MSAL fails
-        const token = localStorage.getItem('authToken');
-        if (token) {
-          headers.set('authorization', `Bearer ${token}`);
-        }
-      }
+      } catch {
+         // Fallback to stored token if MSAL fails
+         const token = localStorage.getItem('authToken');
+         if (token) {
+           headers.set('authorization', `Bearer ${token}`);
+         }
+       }
       return headers;
     },
   }),

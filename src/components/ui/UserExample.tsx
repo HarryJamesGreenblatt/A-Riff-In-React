@@ -1,7 +1,8 @@
 import React from 'react'
-import { useAppSelector, useAppDispatch } from '../../store/hooks'
-import { useGetUsersQuery, useCreateActivityMutation } from '../../features/users/slice'
-import { Button } from './button'
+import { useAppSelector } from '../../store/hooks'
+import { useGetUsersQuery } from '../../features/users/slice'
+import { useCreateActivityMutation } from '../../features/activity/slice'
+import { Button } from './Button'
 
 /**
  * UserExample Component
@@ -10,7 +11,6 @@ import { Button } from './button'
  * Cosmos DB (activities) through RTK Query.
  */
 const UserExample: React.FC = () => {
-  const dispatch = useAppDispatch()
   const { currentUser, isAuthenticated } = useAppSelector((state) => state.users)
   const { data: users, isLoading, error } = useGetUsersQuery()
   const [createActivity] = useCreateActivityMutation()

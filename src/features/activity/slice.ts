@@ -1,16 +1,17 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
+import type { PayloadAction } from '@reduxjs/toolkit'
 import { api } from '../../store/api'
 
 export interface Activity {
   id: string
   userId: string
   type: string
-  data: Record<string, any>
+  data: Record<string, unknown>
   timestamp: string
   metadata?: {
     ip?: string
     userAgent?: string
-    [key: string]: any
+    [key: string]: unknown
   }
 }
 

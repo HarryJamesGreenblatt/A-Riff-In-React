@@ -153,6 +153,63 @@ const makeApiCall = async () => {
 };
 ```
 
+## Switching to Azure AD B2C for Consumer Sign-up/Sign-in
+
+If you want public-facing email/password and social login (Google, Facebook, Microsoft, etc.) without requiring existing Microsoft accounts, Azure AD B2C is the recommended option. Your React app continues to use MSAL, but points at a B2C tenant and user flows (policies).
+
+### 1. Create an Azure AD B2C Tenant
+1. In the Azure Portal, search for **Azure AD B2C** and follow the wizard to create a new B2C directory.
+2. Switch your portal session to the new B2C directory (top-right corner).
+
+### 2. Register the SPA App in B2C
+1. Under **App registrations**, click **New registration**.
+2. Name: `A-Riff-In-React-B2C`, Supported account types: **Accounts in any identity provider or organizational directory (for authenticating users with user flows)**, Redirect URI: `http://localhost:5173`
+3. Note the **Application (client) ID**.
+
+### 3. Configure Identity Providers & User Flows (Policies)
+1. Under **Identity providers**, register any social providers you need (Google, Facebook, Microsoft personal).
+2. Under **User flows**, create a **Sign up and sign in** flow (e.g. `B2C_1_signupsignin`) enabling Local Accounts (Email + Password) and any social providers.
+3. Copy the **User flow name** (policy) and the metadata endpoint, which looks like:
+   ```text
+   https://<your-b2c-tenant>.b2clogin.com/<your-b2c-tenant>.onmicrosoft.com/B2C_1_signupsignin/v2.0/.well-known/openid-configuration
+   ```
+
+### 4. Update Environment Variables
+Create or update your `.env`:
+```bash
+VITE_B2C_CLIENT_ID=<your-client-id>
+VITE_B2C_TENANT_NAME=<your-b2c-tenant>
+VITE_B2C_SIGNIN_POLICY=B2C_1_signupsignin
+VITE_REDIRECT_URI=http://localhost:5173
+VITE_POST_LOGOUT_URI=http://localhost:5173
+```
+
+### 5. Update MSAL Configuration
+Modify `src/config/authConfig.ts` to point at B2C:
+```ts
+import type { Configuration, PopupRequest } from '@azure/msal-browser'
+
+export const msalConfig: Configuration = {
+  auth: {
+    clientId: import.meta.env.VITE_B2C_CLIENT_ID!,
+    authority: `https://${import.meta.env.VITE_B2C_TENANT_NAME}.b2clogin.com/${import.meta.env.VITE_B2C_TENANT_NAME}.onmicrosoft.com/${import.meta.env.VITE_B2C_SIGNIN_POLICY}`,
+    knownAuthorities: [
+      `${import.meta.env.VITE_B2C_TENANT_NAME}.b2clogin.com`
+    ],
+    redirectUri: import.meta.env.VITE_REDIRECT_URI,
+    postLogoutRedirectUri: import.meta.env.VITE_POST_LOGOUT_URI,
+  },
+  // ...existing cache & system configs...
+}
+
+export const loginRequest: PopupRequest = {
+  scopes: ['openid', 'profile']
+}
+```
+
+### 6. Use MSAL in Your React App
+Everything else in your React code (MsalProvider, hooks, AuthGuard, API calls) remains unchanged. MSAL will now show a combined email/password form and social buttons defined in your B2C user flow.
+
 ## Security Best Practices
 
 1. **Token Storage**: Tokens are stored in sessionStorage (not localStorage) for better security

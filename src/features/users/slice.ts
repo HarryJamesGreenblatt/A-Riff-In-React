@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import { api } from '../../store/api'
 
 export interface User {
@@ -29,7 +29,7 @@ export const usersApi = api.injectEndpoints({
     }),
     getUserById: builder.query<User, string>({
       query: (id) => `/users/${id}`,
-      providesTags: (result, error, id) => [{ type: 'User', id }],
+      providesTags: (_result, _error, id) => [{ type: 'User', id }],
     }),
     createUser: builder.mutation<User, Partial<User>>({
       query: (user) => ({
