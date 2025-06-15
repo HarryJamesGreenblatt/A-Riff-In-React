@@ -169,7 +169,7 @@ src/
 - Basic React app foundation
 - UI framework with Tailwind CSS and shadcn/ui patterns
 - Redux Toolkit state management with RTK Query
-- Authentication system with MSAL and Azure AD B2C
+- Authentication system with MSAL and Microsoft Entra External ID
 
 **🎯 NEXT**: Database integration
 

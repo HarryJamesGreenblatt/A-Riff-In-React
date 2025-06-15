@@ -6,20 +6,16 @@ targetScope = 'resourceGroup'
 param environmentName string
 
 @description('The location for all resources')
-param location string = resourceGroup().location
+param location string = 'westus'
 
 @description('The name of the Azure Static Web App')
 param staticWebAppName string = 'swa-${environmentName}'
 
-@description('The Azure AD B2C Tenant Name (e.g., "yourtenant")')
-param b2cTenantName string
+@description('The Microsoft Entra tenant ID for External ID')
+param externalTenantId string
 
-@description('The Azure AD B2C Client ID')
-@secure()
-param b2cClientId string
-
-@description('The Azure AD B2C Sign-in Policy Name')
-param b2cSigninPolicy string = 'B2C_1_signupsignin'
+@description('The Microsoft Entra External ID Application (client) ID')
+param externalClientId string
 
 @description('The Azure App service plan name')
 param appServicePlanName string = 'asp-${environmentName}'
@@ -77,31 +73,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = {
   }
 }
 
-// Add B2C configuration to Key Vault
-resource b2cClientIdSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
-  parent: keyVault
-  name: 'B2C-CLIENT-ID'
-  properties: {
-    value: b2cClientId
-  }
-}
-
-resource b2cTenantNameSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
-  parent: keyVault
-  name: 'B2C-TENANT-NAME'
-  properties: {
-    value: b2cTenantName
-  }
-}
-
-resource b2cSigninPolicySecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
-  parent: keyVault
-  name: 'B2C-SIGNIN-POLICY'
-  properties: {
-    value: b2cSigninPolicy
-  }
-}
-
 // App Service Plan
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: appServicePlanName
@@ -141,16 +112,12 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
     siteConfig: {
       appSettings: [
         {
-          name: 'VITE_B2C_CLIENT_ID'
-          value: '@Microsoft.KeyVault(SecretUri=${b2cClientIdSecret.properties.secretUri})'
+          name: 'VITE_ENTRA_TENANT_ID'
+          value: externalTenantId
         }
         {
-          name: 'VITE_B2C_TENANT_NAME'
-          value: '@Microsoft.KeyVault(SecretUri=${b2cTenantNameSecret.properties.secretUri})'
-        }
-        {
-          name: 'VITE_B2C_SIGNIN_POLICY'
-          value: '@Microsoft.KeyVault(SecretUri=${b2cSigninPolicySecret.properties.secretUri})'
+          name: 'VITE_ENTRA_CLIENT_ID'
+          value: externalClientId
         }
         {
           name: 'VITE_REDIRECT_URI'
@@ -309,9 +276,8 @@ resource webAppSettings 'Microsoft.Web/sites/config@2022-09-01' = {
     COSMOS_ENDPOINT: cosmosAccount.properties.documentEndpoint
     COSMOS_KEY: cosmosAccount.listKeys().primaryMasterKey
     COSMOS_DATABASE: cosmosDatabaseName
-    VITE_B2C_CLIENT_ID: '@Microsoft.KeyVault(SecretUri=${b2cClientIdSecret.properties.secretUri})'
-    VITE_B2C_TENANT_NAME: '@Microsoft.KeyVault(SecretUri=${b2cTenantNameSecret.properties.secretUri})'
-    VITE_B2C_SIGNIN_POLICY: '@Microsoft.KeyVault(SecretUri=${b2cSigninPolicySecret.properties.secretUri})'
+    VITE_ENTRA_TENANT_ID: externalTenantId
+    VITE_ENTRA_CLIENT_ID: externalClientId
     VITE_REDIRECT_URI: 'https://app-${environmentName}.azurewebsites.net'
     VITE_POST_LOGOUT_URI: 'https://app-${environmentName}.azurewebsites.net'
   }

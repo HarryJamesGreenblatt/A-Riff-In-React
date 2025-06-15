@@ -135,7 +135,7 @@ on:
 
 env:
   AZURE_ENV_NAME: a-riff-in-react
-  AZURE_LOCATION: eastus
+  AZURE_LOCATION: westus
 
 jobs:
   build-and-deploy:
@@ -209,10 +209,9 @@ Set up the following secrets in your GitHub repository:
 - `AZURE_SUBSCRIPTION_ID`: Your Azure subscription ID
 - `AZURE_RESOURCE_GROUP`: Resource group name
 - `AZURE_ENV_NAME`: Environment name (e.g., `a-riff-in-react`)
-- `AZURE_LOCATION`: Azure region (e.g., `eastus`)
-- `B2C_TENANT_NAME`: Your B2C tenant name
-- `B2C_CLIENT_ID`: Your B2C client ID
-- `B2C_SIGNIN_POLICY`: Your B2C policy name
+- `AZURE_LOCATION`: Azure region (e.g., `westus`)
+- `VITE_ENTRA_CLIENT_ID`: Microsoft Entra External ID Application (client) ID
+- `VITE_ENTRA_TENANT_ID`: Microsoft Entra tenant ID
 - `SQL_ADMIN_PASSWORD`: SQL Server admin password
 
 ## Setting Up Service Principal
@@ -233,7 +232,7 @@ az ad sp create-for-rbac --name "github-actions-a-riff-in-react" --role contribu
 1. Create the Azure resource group manually:
 
 ```bash
-az group create --name your-resource-group --location eastus
+az group create --name your-resource-group --location westus
 ```
 
 2. Set up all required GitHub secrets

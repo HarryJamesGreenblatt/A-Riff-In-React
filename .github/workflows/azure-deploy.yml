@@ -1,4 +1,4 @@
-name: Azure CI/CD for React App with B2C Auth
+name: Azure CI/CD for React App with Entra External ID
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 env:
   AZURE_ENV_NAME: a-riff-in-react
-  AZURE_LOCATION: eastus
+  AZURE_LOCATION: westus
 
 jobs:
   build-and-deploy:
@@ -22,37 +22,34 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-      
       - name: Install dependencies
         run: npm ci
       
       - name: Build React app
         run: npm run build
-        env:
+        env: 
           # These placeholder values are needed for build but will be replaced by actual values in Azure
-          VITE_B2C_CLIENT_ID: "placeholder-for-build"
-          VITE_B2C_TENANT_NAME: "placeholder-for-build"
-          VITE_B2C_SIGNIN_POLICY: "placeholder-for-build"
+          VITE_ENTRA_CLIENT_ID: "placeholder-for-build"
+          VITE_ENTRA_TENANT_ID: "placeholder-for-build"
       
       - name: Login to Azure
         uses: azure/login@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
       
-      - name: Deploy Azure Infrastructure with B2C Configuration
+      - name: Deploy Azure Infrastructure with Entra External ID Configuration
         id: deploy-bicep
         uses: azure/arm-deploy@v1
         with:
           scope: resourcegroup
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: ${{ secrets.AZURE_RESOURCE_GROUP }}
+          resourceGroupName: riffinreact-rg
           template: ./infra/main.bicep
           parameters: >
             environmentName=${{ env.AZURE_ENV_NAME }}
             location=${{ env.AZURE_LOCATION }}
-            b2cTenantName=${{ secrets.B2C_TENANT_NAME }}
-            b2cClientId=${{ secrets.B2C_CLIENT_ID }}
-            b2cSigninPolicy=${{ secrets.B2C_SIGNIN_POLICY }}
+            externalTenantId=${{ secrets.ENTRA_TENANT_ID }}
+            externalClientId=${{ secrets.ENTRA_CLIENT_ID }}
             sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
           deploymentName: a-riff-in-react-${{ github.run_number }}
           failOnStdErr: false
@@ -63,10 +60,10 @@ jobs:
           app-name: app-${{ env.AZURE_ENV_NAME }}
           package: ./dist
       
-      - name: Verify B2C Configuration
+      - name: Verify Entra External ID Configuration
         run: |
-          echo "Verifying B2C configuration in Azure Web App..."
-          az webapp config appsettings list --name app-${{ env.AZURE_ENV_NAME }} --resource-group ${{ secrets.AZURE_RESOURCE_GROUP }} --query "[?name.startsWith('VITE_B2C_')].{Name:name, Value:value}" --output table
+          echo "Verifying Entra External ID configuration in Azure Web App..."
+          az webapp config appsettings list --name app-${{ env.AZURE_ENV_NAME }} --resource-group riffinreact-rg --query "[?name.startsWith('VITE_ENTRA_')].{Name:name, Value:value}" --output table
       
       - name: Logout from Azure
         run: az logout

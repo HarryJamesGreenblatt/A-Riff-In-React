@@ -8,17 +8,14 @@
     "location": {
       "value": "${AZURE_LOCATION}"
     },
-    "b2cTenantName": {
-      "value": "${B2C_TENANT_NAME}"
-    },
-    "b2cClientId": {
-      "value": "${B2C_CLIENT_ID}"
-    },
-    "b2cSigninPolicy": {
-      "value": "${B2C_SIGNIN_POLICY}"
-    },
     "sqlAdminPassword": {
       "value": "${SQL_ADMIN_PASSWORD}"
+    },
+    "externalTenantId": {
+      "value": "${ENTRA_TENANT_ID}"
+    },
+    "externalClientId": {
+      "value": "${ENTRA_CLIENT_ID}"
     }
   }
 }

@@ -1,6 +1,6 @@
 # Azure Deployment Guide
 
-This guide explains how to deploy **A Riff In React** to Azure, following best practices for App Service, Azure SQL, Cosmos DB, Key Vault, and Application Insights, with a focus on the Azure AD B2C authentication setup.
+This guide explains how to deploy **A Riff In React** to Azure, following best practices for App Service, Azure SQL, Cosmos DB, Key Vault, and Application Insights, with a focus on the Microsoft Entra External ID authentication setup.
 
 > _Deployment strategies and rationale are adapted from [A Fugue In Flask: azure_deployment.md](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask/blob/main/docs/azure_deployment.md)_
 
@@ -9,53 +9,36 @@ This guide explains how to deploy **A Riff In React** to Azure, following best p
 - Azure CLI installed
 - Resource group created
 
-## 1. Azure B2C Tenant Setup
+## 1. Microsoft Entra Tenant Setup
 
-To enable external user authentication with B2C, you can set up an Azure AD B2C tenant either through the Azure portal or programmatically:
+To enable external user authentication with Microsoft Entra External ID, you can set up app registration either through the Azure portal or programmatically:
 
-### Option A: Azure Portal (Manual Setup)
+## Manual Setup (Azure Portal)
 
-1. **Create an Azure AD B2C Tenant**
-   - In the Azure Portal, search for **Azure AD B2C** and follow the wizard to create a new B2C directory
-   - Switch your portal session to the new B2C directory after creation (using the top-right directory switcher)
+1. **Register Your App in Microsoft Entra**
+   - In the Azure Portal, go to **Azure Active Directory** > **App registrations** > **New registration**
+   - Configure redirect URIs and authentication settings
+   - Note the Application (client) ID and Directory (tenant) ID
 
-2. **Register the SPA Application**
-   - In your B2C tenant, go to **App registrations** and click **New registration**
-   - Name: `A-Riff-In-React-B2C`
-   - Supported account types: **Accounts in any identity provider or organizational directory**
-   - Redirect URI: Add both your development URL (e.g., `http://localhost:5173`) and production URL
+## Programmatic Setup
 
-### Option B: Programmatic Setup (Azure CLI)
-
-1. **Create an Azure AD B2C Tenant**
+1. **Register Your App in Microsoft Entra**
    ```bash
    # Login to Azure
    az login
    
-   # Create B2C tenant (one-time operation)
-   az ad b2c tenant create \
-     --organization-name "YourB2CTenant" \
-     --initial-domain-name "your-b2c-tenant" \
-     --sku-name "PremiumP1"
-   
-   # Switch to the B2C tenant
-   az login --tenant your-b2c-tenant.onmicrosoft.com
-   ```
-
-2. **Register the SPA Application**
-   ```bash
    # Create app registration
    az ad app create \
-     --display-name "A-Riff-In-React-B2C" \
+     --display-name "A-Riff-In-React-Entra" \
      --sign-in-audience "AzureADandPersonalMicrosoftAccount" \
      --web-redirect-uris "http://localhost:5173" "https://your-production-url"
    
    # Get the application ID (client ID)
-   az ad app list --display-name "A-Riff-In-React-B2C" --query "[].appId" -o tsv
+   az ad app list --display-name "A-Riff-In-React-Entra" --query "[].appId" -o tsv
    ```
 
-3. **Configure User Flows**
-   - In your B2C tenant, go to **User flows**
+2. **Configure User Flows**
+   - In your Entra tenant, go to **User flows**
    - Create a **Sign up and sign in** flow (e.g., `B2C_1_signupsignin`)
    - Configure the user attributes, application claims, and identity providers
    - Save the flow name for your deployment configuration
@@ -74,15 +57,15 @@ To enable external user authentication with B2C, you can set up an Azure AD B2C 
      "https://graph.microsoft.com/beta/identity/b2cUserFlows"
    ```
 
-4. **Gather Configuration Values**
-   - B2C Tenant Name (e.g., `yourtenant`)
+3. **Gather Configuration Values**
+   - Entra Tenant Name (e.g., `yourtenant`)
    - Application (Client) ID from the app registration
    - User Flow (Policy) Name (e.g., `B2C_1_signupsignin`)
 
    **With Azure CLI:**
    ```bash
    # Get the application ID (client ID)
-   clientId=$(az ad app list --display-name "A-Riff-In-React-B2C" --query "[0].appId" -o tsv)
+   clientId=$(az ad app list --display-name "A-Riff-In-React-Entra" --query "[0].appId" -o tsv)
    
    # Get the tenant ID
    tenantId=$(az account show --query tenantId -o tsv)
@@ -111,7 +94,7 @@ az login
 
 # Set variables
 RESOURCE_GROUP=your-resource-group
-LOCATION=eastus
+LOCATION=westus
 ENV_NAME=a-riff-in-react
 B2C_TENANT_NAME=your-b2c-tenant
 B2C_CLIENT_ID=your-client-id
@@ -187,7 +170,7 @@ Add these secrets to your GitHub repository:
 - `AZURE_SUBSCRIPTION_ID`: Your Azure subscription ID
 - `AZURE_RESOURCE_GROUP`: Resource group name
 - `AZURE_ENV_NAME`: Environment name (e.g., `a-riff-in-react`)
-- `AZURE_LOCATION`: Azure region (e.g., `eastus`)
+- `AZURE_LOCATION`: Azure region (e.g., `westus`)
 - `B2C_TENANT_NAME`: Your B2C tenant name
 - `B2C_CLIENT_ID`: Your B2C client ID
 - `B2C_SIGNIN_POLICY`: Your B2C policy name
@@ -209,8 +192,8 @@ Ensure your application can use both local development settings and deployed set
 
 1. **Create a `.env.local` file for local development**
    ```
-   VITE_B2C_CLIENT_ID=your-client-id
-   VITE_B2C_TENANT_NAME=your-b2c-tenant
+   VITE_ENTRA_CLIENT_ID=your-client-id
+   VITE_ENTRA_TENANT_ID=your-b2c-tenant
    VITE_B2C_SIGNIN_POLICY=B2C_1_signupsignin
    VITE_REDIRECT_URI=http://localhost:5173
    VITE_POST_LOGOUT_URI=http://localhost:5173
@@ -222,8 +205,8 @@ Ensure your application can use both local development settings and deployed set
    COSMOS_DATABASE=ARiffInReact
    ```
 
-2. **Update `src/config/authConfig.ts` to use B2C configuration**
-   Update your configuration to use the B2C settings as shown in the `05-authentication-msal.md` documentation.
+2. **Update `src/config/authConfig.ts` to use Entra configuration**
+   Update your configuration to use the Entra settings as shown in the `05-authentication-msal.md` documentation.
 
 ## 4. Deploy the App
 The project includes three GitHub Actions workflows for CI/CD:
