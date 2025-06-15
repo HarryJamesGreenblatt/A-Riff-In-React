@@ -87,19 +87,19 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   }
 }
 
-// Static Web App for hosting the React application
-resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
-  name: staticWebAppName
-  location: location
-  tags: tags
-  sku: {
-    name: 'Standard'
-    tier: 'Standard'
-  }
-  properties: {
-    // Link to GitHub repository would go here in a production deployment
-  }
-}
+// Static Web App commented out for now to troubleshoot deployment issues
+// resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
+//   name: staticWebAppName
+//   location: location
+//   tags: tags
+//   sku: {
+//     name: 'Standard'
+//     tier: 'Standard'
+//   }
+//   properties: {
+//     // Link to GitHub repository would go here in a production deployment
+//   }
+// }
 
 // App Configuration for environment variables
 resource webApp 'Microsoft.Web/sites@2022-09-01' = {
@@ -310,7 +310,7 @@ resource cosmosKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
 
 // Output the web app URL
 output webAppUrl string = webApp.properties.defaultHostName
-output staticWebAppUrl string = staticWebApp.properties.defaultHostname
+// output staticWebAppUrl string = staticWebApp.properties.defaultHostname
 output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
 output cosmosEndpoint string = cosmosAccount.properties.documentEndpoint
 output appInsightsConnectionString string = appInsights.properties.ConnectionString
