@@ -8,9 +8,6 @@ param environmentName string
 @description('The location for all resources')
 param location string = 'westus'
 
-@description('The name of the Azure Static Web App')
-param staticWebAppName string = 'swa-${environmentName}'
-
 @description('The Microsoft Entra tenant ID for External ID')
 param externalTenantId string
 
@@ -42,8 +39,8 @@ param cosmosAccountName string = 'cosmos-${environmentName}'
 @description('The Cosmos DB database name')
 param cosmosDatabaseName string = 'cosmosdb-${environmentName}'
 
-@description('The Application Insights name')
-param appInsightsName string = 'ai-${environmentName}'
+// @description('The Application Insights name')
+// param appInsightsName string = 'ai-${environmentName}'
 
 @description('The Log Analytics workspace name')
 param logAnalyticsName string = 'log-${environmentName}'
@@ -148,19 +145,20 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
   }
 }
 
-// Application Insights for monitoring
-resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: appInsightsName
-  location: location
-  tags: tags
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    WorkspaceResourceId: logAnalyticsWorkspace.id
-    publicNetworkAccessForIngestion: 'Enabled'
-    publicNetworkAccessForQuery: 'Enabled'
-  }
-}
+// Application Insights for monitoring (commented out to reduce costs)
+// Uncomment if you need application monitoring and telemetry
+// resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+//   name: appInsightsName
+//   location: location
+//   tags: tags
+//   kind: 'web'
+//   properties: {
+//     Application_Type: 'web'
+//     WorkspaceResourceId: logAnalyticsWorkspace.id
+//     publicNetworkAccessForIngestion: 'Enabled'
+//     publicNetworkAccessForQuery: 'Enabled'
+//   }
+// }
 
 // SQL Server for structured data
 resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' = {
@@ -265,13 +263,13 @@ resource activityContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
   }
 }
 
-// Update App Service to include connection strings for databases and Application Insights
+// Update App Service to include connection strings for databases
 resource webAppSettings 'Microsoft.Web/sites/config@2022-09-01' = {
   parent: webApp
   name: 'appsettings'
   properties: {
-    APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
-    APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
+    // APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
+    // APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
     SQL_CONNECTION_STRING: 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlAdminLogin};Password=${sqlAdminPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
     COSMOS_ENDPOINT: cosmosAccount.properties.documentEndpoint
     COSMOS_KEY: cosmosAccount.listKeys().primaryMasterKey
@@ -313,4 +311,4 @@ output webAppUrl string = webApp.properties.defaultHostName
 // output staticWebAppUrl string = staticWebApp.properties.defaultHostname
 output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
 output cosmosEndpoint string = cosmosAccount.properties.documentEndpoint
-output appInsightsConnectionString string = appInsights.properties.ConnectionString
+// output appInsightsConnectionString string = appInsights.properties.ConnectionString
