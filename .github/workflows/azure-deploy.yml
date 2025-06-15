@@ -61,7 +61,7 @@ jobs:
       - name: Verify Entra External ID Configuration
         run: |
           echo "Verifying Entra External ID configuration in Azure Web App..."
-          az webapp config appsettings list --name app-${{ env.AZURE_ENV_NAME }} --resource-group riffinreact-rg --query "[?name.startsWith('VITE_ENTRA_')].{Name:name, Value:value}" --output table
+          az webapp config appsettings list --name app-${{ env.AZURE_ENV_NAME }} --resource-group riffinreact-rg --query "[?contains(name, 'VITE_ENTRA_')].{Name:name, Value:value}" --output table
       
       - name: Logout from Azure
         run: az logout
