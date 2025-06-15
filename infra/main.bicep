@@ -100,7 +100,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
 
 // App Configuration for environment variables
 resource webApp 'Microsoft.Web/sites@2022-09-01' = {
-  name: 'app-${environmentName}'
+  name: environmentName
   location: location
   tags: union(tags, { 'azd-service-name': 'web' })
   properties: {

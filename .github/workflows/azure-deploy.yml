@@ -51,11 +51,10 @@ jobs:
             sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
           deploymentName: a-riff-in-react-${{ github.run_number }}
           failOnStdErr: false
-      
       - name: Deploy React app to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: app-${{ env.AZURE_ENV_NAME }}
+          app-name: ${{ env.AZURE_ENV_NAME }}
           package: ./dist
       
       - name: Verify Entra External ID Configuration
