@@ -24,7 +24,7 @@ jobs:
           cache: 'npm'
       - name: Install dependencies
         run: npm ci
-        - name: Build React app
+      - name: Build React app
         run: npm run build
         env: 
           # These placeholder values are needed for build but will be replaced by actual values in Azure
