@@ -1,3 +1,29 @@
+# Azure Deployment Guide - ✅ DEPLOYED
+
+**Status**: ✅ **SUCCESSFULLY DEPLOYED** to https://a-riff-in-react.azurewebsites.net
+
+This guide documents the deployment of **A Riff In React** to Azure, including the complete infrastructure setup with Microsoft Entra External ID authentication.
+
+> _Successfully migrated from Azure AD B2C to Microsoft Entra External ID for cost optimization._
+
+## 🎉 Current Deployment Status
+
+- ✅ **Azure Infrastructure**: Deployed via Bicep templates
+- ✅ **Web Application**: Live at https://a-riff-in-react.azurewebsites.net
+- ✅ **Authentication**: Microsoft Entra External ID configured
+- ✅ **CI/CD Pipeline**: GitHub Actions workflow operational
+- ✅ **Cost Optimized**: Application Insights disabled to reduce costs
+
+## Deployed Resources
+
+| Resource | Name | Purpose | Status |
+|----------|------|---------|--------|
+| Web App | `a-riff-in-react` | React app hosting | ✅ Active |
+| SQL Server | `sql-a-riff-in-react` | Relational database | ✅ Active |
+| Cosmos DB | `cosmos-a-riff-in-react` | NoSQL database | ✅ Active |
+| Key Vault | `kv-a-riff-in-react` | Secrets management | ✅ Active |
+| Log Analytics | `log-a-riff-in-react` | Monitoring | ✅ Active |
+
 # Azure Deployment Guide
 
 This guide explains how to deploy **A Riff In React** to Azure, following best practices for App Service, Azure SQL, Cosmos DB, Key Vault, and Application Insights, with a focus on the Microsoft Entra External ID authentication setup.

@@ -1,6 +1,26 @@
-# GitHub Actions: Azure CI/CD Pipeline
+# GitHub Actions: Azure CI/CD Pipeline - ✅ OPERATIONAL
 
-This document provides GitHub Actions workflows for deploying **A Riff In React** to Azure, following the patterns established in [A Fugue In Flask](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask).
+**Status**: ✅ **SUCCESSFULLY CONFIGURED AND RUNNING**
+
+This document covers the GitHub Actions workflow for **A Riff In React**, which is now successfully deploying to Azure with Microsoft Entra External ID authentication.
+
+## 🎉 Current Status
+
+- ✅ **Workflow Status**: Fully operational and tested
+- ✅ **Last Deployment**: Successful - June 15, 2025
+- ✅ **Live Application**: https://a-riff-in-react.azurewebsites.net
+- ✅ **Authentication**: Microsoft Entra External ID integrated
+
+## Active Workflow: `azure-deploy.yml`
+
+We're using a **single, combined workflow** that handles both infrastructure and application deployment in one streamlined process.
+
+### Workflow Features
+- **Infrastructure deployment** using Azure Bicep templates
+- **React application build** with TypeScript compilation
+- **Azure App Service deployment** with environment variables
+- **Authentication verification** for Entra External ID
+- **Cost-optimized** deployment (Application Insights disabled)
 
 ## Overview
 - Deploy Azure infrastructure using Bicep templates

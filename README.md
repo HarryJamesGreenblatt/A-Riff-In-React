@@ -17,16 +17,18 @@ While the template includes example modules (such as user management and activit
 - ✅ **Project Vision**: General-purpose, Azure-ready template defined
 - ✅ **Basic React App Structure**: Vite + TypeScript + React 18 setup complete
 
-### 🚧 Phase 2: Core Features (IN PROGRESS)
+### 🚧 Phase 2: Core Features (COMPLETED ✅)
 - ✅ **UI framework integration**: Tailwind CSS + shadcn/ui-style components implemented
 - ✅ **State management setup**: Redux Toolkit + RTK Query implemented
 - ✅ **Authentication system (MSAL)**: Microsoft Entra External ID integration complete
-- ✅ **Database infrastructure**: Azure SQL + Cosmos DB infrastructure templates created
+- ✅ **Database infrastructure**: Azure SQL + Cosmos DB infrastructure deployed
+- ✅ **Azure deployment**: Complete CI/CD pipeline with GitHub Actions
+- ✅ **Production deployment**: Live at https://a-riff-in-react.azurewebsites.net
 - [ ] **Database integration**: Data access layer implementation
 
-> **Note**: We're using React 18.2.0 to ensure full compatibility with MSAL authentication.
+> **Note**: Successfully migrated from Azure AD B2C to Microsoft Entra External ID for cost optimization and modern authentication.
 
-### 📋 Phase 3: Example Extensions (PLANNED)
+### 📋 Phase 3: Example Extensions (READY)
 - [ ] Example: User management (Azure SQL)
 - [ ] Example: Activity log (Cosmos DB)
 - [ ] Example: Real-time updates
@@ -38,12 +40,18 @@ While the template includes example modules (such as user management and activit
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React 18 + TypeScript + Vite
+- **Frontend**: React 18 + TypeScript + Vite ✅
 - **UI Framework**: Tailwind CSS + shadcn/ui-style components ✅
 - **State Management**: Redux Toolkit + RTK Query ✅
-- **Authentication**: Microsoft Authentication Library (MSAL) ✅
+- **Authentication**: Microsoft Entra External ID (MSAL) ✅
 - **Databases**: Azure SQL Database + Cosmos DB ✅
-- **Hosting**: Azure Static Web Apps or Container Apps *(planned)*
+- **Infrastructure**: Azure Bicep templates ✅
+- **Hosting**: Azure App Service ✅
+- **CI/CD**: GitHub Actions ✅
+
+## 🌐 Live Demo
+
+**Production URL**: https://a-riff-in-react.azurewebsites.net
 
 ## 🚀 Quick Start
 
