@@ -1,4 +1,6 @@
-# GitHub Actions: Azure CI/CD Pipeline - ✅ OPERATIONAL
+# GitHub Actions: Azure CI/CD Pipeline
+
+> **Note on Current Refactoring (2025-08-30):** The workflows described here are based on the original infrastructure plan which provisions a dedicated SQL Server. These workflows will be updated as part of the consolidation to a shared SQL server.
 
 **Status**: ✅ **SUCCESSFULLY CONFIGURED AND RUNNING**
 

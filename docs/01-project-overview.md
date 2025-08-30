@@ -15,6 +15,10 @@ The template is designed to be reusable across a variety of business scenarios, 
 
 ## 🏗️ Architecture
 
+### The "Scaffolding" Project Philosophy
+
+As part of a larger collection of template projects under the "Scaffolding" umbrella, this project follows a cost-effective infrastructure strategy. Instead of provisioning a dedicated Azure SQL Server for each template, we utilize a single, shared server (`sequitur-sql-server`) and create a dedicated database for each project. This approach reduces cost and management overhead while still demonstrating a full-stack, database-driven architecture.
+
 ### Core Architecture Principles
 
 The architecture of A Riff In React follows these key principles:

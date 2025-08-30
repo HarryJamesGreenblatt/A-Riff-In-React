@@ -1,4 +1,6 @@
-# Azure Deployment Guide - ✅ DEPLOYED
+# Azure Deployment Guide
+
+> **Note on Current Refactoring (2025-08-30):** This document describes the original deployment process which provisions a dedicated SQL Server. We are currently refactoring the infrastructure to use a shared SQL server (`sequitur-sql-server`) to reduce costs. This document will be updated once the transition is complete.
 
 **Status**: ✅ **SUCCESSFULLY DEPLOYED** to https://a-riff-in-react.azurewebsites.net
 

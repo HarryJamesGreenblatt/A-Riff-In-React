@@ -1,5 +1,15 @@
 # A Riff In React
 
+## 📢 Front Page News: Current Task
+
+**Date:** 2025-08-30
+
+**Task:** Consolidating Azure SQL resources.
+
+**Summary:** We are modifying the project's infrastructure to use a single shared Azure SQL Server (`sequitur-sql-server`) instead of provisioning a dedicated server for this project. This aligns with the "Scaffolding" project philosophy to reduce costs and centralize management for multiple template applications. The next step is to update the Bicep templates to reflect this change.
+
+---
+
 A modern, production-ready React application template demonstrating hybrid Azure SQL Database + Cosmos DB architecture.
 
 ## 🎯 Project Vision
