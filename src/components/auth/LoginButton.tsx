@@ -25,7 +25,7 @@ export const LoginButton: React.FC = () => {
 
   return (
     <Button
-      variant="default"
+      variant="primary"
       onClick={signIn}
       disabled={isLoading}
     >
