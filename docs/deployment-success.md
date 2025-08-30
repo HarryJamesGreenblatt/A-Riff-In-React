@@ -4,7 +4,7 @@
 
 **Live URL**: https://a-riff-in-react.azurewebsites.net  
 **Deployment Date**: August 30, 2025  
-**Status**: ✅ Full-Stack Ready (Frontend + Backend API)
+**Status**: ✅ Full-Stack Infrastructure Ready
 
 ## What Was Accomplished
 
@@ -40,9 +40,9 @@ Resource Group: riffinreact-rg
 - **Reason**: Cost-effective, modern, and suitable for external users
 - **Alternative considered**: Azure AD B2C (rejected due to complexity and cost)
 
-### Cost Optimization
-- **Removed**: Application Insights (expensive for development)
-- **Kept**: Log Analytics (basic monitoring, cost-effective)
+### Cost Optimization Strategy
+- **Shared SQL Server**: Uses existing `sequitur-sql-server` instead of provisioning new server
+- **Log Analytics**: Basic monitoring without expensive Application Insights
 - **Result**: Significant monthly cost reduction
 
 ### Domain Naming
@@ -62,6 +62,12 @@ Resource Group: riffinreact-rg
 - ARM deployments are idempotent - safe to run multiple times
 - Template validation helps catch issues before deployment
 
+### TypeScript Build Issues Resolved
+- **Issue**: Property access errors on MSAL token responses
+- **Root cause**: `AuthService.getApiToken()` returns string, not object
+- **Solution**: Updated `api.ts` and `useAuth.ts` to access token directly
+- **Result**: Clean builds and successful deployments
+
 ### GitHub Actions Workflows
 - YAML formatting is critical and easily corrupted
 - Secret management through GitHub Secrets is secure and reliable
@@ -69,16 +75,23 @@ Resource Group: riffinreact-rg
 
 ## Next Steps
 
-### Immediate (Optional)
-1. **Clean up old web app**: Delete `app-a-riff-in-react` to avoid duplicate costs
-2. **Test authentication flow**: Verify Entra External ID login works correctly
-3. **Update redirect URIs**: Add production domain to Entra app registration
+### 🎯 IMMEDIATE PRIORITY: Frontend-Backend Integration
 
-### Development Phase
-1. **Frontend-Backend Integration**: Connect React app to deployed API endpoints (NEXT PRIORITY)
-2. **User management UI**: Implement user list, add/edit/delete forms using backend API
-3. **Error handling**: Add proper loading states and error boundaries
-4. **End-to-end testing**: Test complete authentication + CRUD workflows
+**Status**: Backend API deployed and functional, frontend needs connection.
+
+**Integration Tasks**:
+1. **Update RTK Query** (`src/store/api.ts`) with backend endpoints
+2. **Connect UI Components** to real API data instead of mock data  
+3. **Test Authentication Flow** with actual API calls
+4. **Implement Error Handling** for network/auth failures
+
+**Available API**: `https://a-riff-in-react.azurewebsites.net/api/users`
+
+### Development Priorities
+1. **Frontend-Backend Integration** (IMMEDIATE)
+2. **User management UI** implementation
+3. **Error handling** and loading states
+4. **End-to-end testing** of auth + CRUD flows
 
 ### Production Considerations
 1. **Custom domain**: Consider adding custom domain name
@@ -121,6 +134,8 @@ VITE_POST_LOGOUT_URI: https://a-riff-in-react.azurewebsites.net
 
 ---
 
-**Project Status**: ✅ **BACKEND API READY** - Next: Frontend Integration  
+**Project Status**: ✅ **DEPLOYED & READY** - Next: Frontend Integration  
 **Team**: Harry James Greenblatt & GitHub Copilot  
 **Last Updated**: August 30, 2025
+
+**Quick Start**: Frontend-Backend integration is the immediate priority. See `docs/06-backend-api.md` for API details.
