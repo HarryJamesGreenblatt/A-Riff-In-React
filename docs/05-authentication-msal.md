@@ -213,41 +213,20 @@ The `src/config/authConfig.ts` is already configured to use Microsoft Entra Exte
 
 ## Integration with Backend
 
-Your backend API should:
+The frontend authentication flow is tightly integrated with the backend API to ensure a persistent user record is created upon first login.
 
-1. Validate JWT tokens from Azure AD
-2. Extract user information from tokens
-3. Implement proper authorization based on roles/claims
+1.  **MSAL Login**: The user initiates a login via the `LoginButton`, which triggers the MSAL popup flow.
+2.  **Token Acquisition**: Upon successful authentication with Microsoft Entra, MSAL provides an account object and an ID token.
+3.  **Backend Sync (`authService.ts`)**: The `signIn` method in `src/services/auth/authService.ts` is called. This service orchestrates the communication with our backend:
+    *   It first calls the `createUser` endpoint on our Node.js API (`POST /api/users`), sending the user's name and email from the MSAL account.
+    *   The backend API checks if a user with that email already exists.
+        *   If not, it creates a new record in the Azure SQL database and returns a `201 Created` status.
+        *   If the user already exists, it returns a `409 Conflict` status, which is handled gracefully by the frontend.
+    *   The `signIn` service then dispatches a Redux action to store the user's data in the local state.
 
-Example backend validation (Node.js):
+This ensures that every user who logs in via MSAL has a corresponding, persistent user profile in the application's database, which can be enriched with application-specific roles and data.
 
-```javascript
-const jwt = require('jsonwebtoken');
-const jwksRsa = require('jwks-rsa');
-
-const client = jwksRsa({
-  jwksUri: `https://login.microsoftonline.com/${tenantId}/discovery/v2.0/keys`
-});
-
-function getKey(header, callback) {
-  client.getSigningKey(header.kid, (err, key) => {
-    const signingKey = key.publicKey || key.rsaPublicKey;
-    callback(null, signingKey);
-  });
-}
-
-function validateToken(token) {
-  return new Promise((resolve, reject) => {
-    jwt.verify(token, getKey, {
-      audience: clientId,
-      issuer: `https://login.microsoftonline.com/${tenantId}/v2.0`
-    }, (err, decoded) => {
-      if (err) reject(err);
-      else resolve(decoded);
-    });
-  });
-}
-```
+The backend API (`api/src/routes/userRoutes.ts`) is an Express.js application running on Azure Functions. It handles the database logic for creating and retrieving users from the Azure SQL database. The API itself is stateless and does not handle token validation in this flow, as it is currently designed to be called by the trusted frontend immediately after a successful MSAL login. For direct API calls from external clients, token validation would be a necessary security addition.
 
 ## Next Steps
 

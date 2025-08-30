@@ -32,7 +32,13 @@ The architecture of A Riff In React follows these key principles:
 
 ```
 a-riff-in-react/
-├── src/
+├── api/                    # Backend API (Node.js, Express on Azure Functions)
+│   ├── src/
+│   │   ├── functions/      # Azure Function endpoint triggers
+│   │   ├── routes/         # Express route definitions
+│   │   └── services/       # Database connection services
+│   └── package.json
+├── src/                    # Frontend (React)
 │   ├── components/         # Reusable UI components
 │   │   ├── ui/             # Base UI components (buttons, inputs, etc.)
 │   │   └── layout/         # Layout components (header, footer, etc.)
@@ -58,9 +64,7 @@ a-riff-in-react/
 │   ├── utils/              # Utility functions
 │   ├── App.tsx             # Main app component
 │   └── main.tsx            # Entry point
-├── azure/                  # Azure deployment configuration
-│   ├── bicep/              # Infrastructure as Code (Bicep templates)
-│   └── functions/          # Azure Functions (if needed)
+├── infra/                  # Azure deployment configuration (Bicep)
 ├── docs/                   # Documentation
 └── public/                 # Static assets
 ```
@@ -95,11 +99,11 @@ Cosmos DB is ideal for:
 The template is configured for seamless integration with the following Azure services:
 
 - **Azure App Service / Static Web Apps**: For hosting the React application
+- **Azure Functions**: For the serverless backend API (Node.js, Express)
 - **Azure SQL Database**: For structured, relational data
 - **Azure Cosmos DB**: For document-based and real-time data
 - **Azure Key Vault**: For secure storage of secrets and configuration
 - **Azure Application Insights**: For monitoring and analytics
-- **Azure Functions**: For serverless API endpoints (optional)
 - **Microsoft Authentication Library (MSAL)**: For Azure AD authentication
 
 ## 🚀 Getting Started

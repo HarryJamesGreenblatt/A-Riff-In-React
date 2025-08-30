@@ -107,6 +107,7 @@ To enable external user authentication with Microsoft Entra External ID, you can
 The project includes a Bicep template in the `infra` folder that provisions:
 
 - Azure App Service (for frontend hosting)
+- Azure Function App (for backend Node.js API)
 - Azure Key Vault (for secure storage of credentials)
 - **Azure SQL Database** (for structured data, deployed to a shared server)
 - Azure Cosmos DB (for flexible data)
@@ -240,7 +241,17 @@ The project includes a primary GitHub Actions workflow for CI/CD:
 
 *   **`azure-deploy.yml`**: A comprehensive workflow that deploys both the Azure infrastructure via Bicep and builds/deploys the React application to App Service.
 
-This workflow is triggered on pushes to the `main` branch.
+This workflow is triggered on pushes to the `main` branch. It performs the following steps:
+
+1.  **Provision Infrastructure**: Runs the Bicep templates from the `infra/` directory to create or update all necessary Azure resources, including the App Service for the frontend and the Function App for the backend.
+2.  **Build & Deploy Backend**:
+    *   Navigates to the `api/` directory.
+    *   Builds the Node.js/TypeScript project.
+    *   Deploys the compiled code to the Azure Function App.
+3.  **Build & Deploy Frontend**:
+    *   Navigates to the root directory.
+    *   Builds the React application.
+    *   Deploys the static assets to the Azure App Service.
 
 See `docs/github_actions_azure.md` for detailed pipeline setup instructions.
 

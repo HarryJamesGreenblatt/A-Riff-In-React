@@ -163,6 +163,53 @@ src/
 
 **Details**: See [State Management](./04-state-management.md)
 
+### Backend API Setup (Node.js / Azure Functions)
+
+The backend is a Node.js application using Express, designed to run as an Azure Function.
+
+**Prerequisites**:
+- Node.js (LTS version recommended)
+- Azure Functions Core Tools (optional, for local testing)
+
+**Setup Steps**:
+
+1. **Navigate to the API directory**:
+   ```bash
+   cd api
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure local settings**:
+   - Rename `local.settings.example.json` to `local.settings.json`.
+   - Fill in the required values, especially your database credentials:
+     ```json
+     {
+       "IsEncrypted": false,
+       "Values": {
+         "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+         "FUNCTIONS_WORKER_RUNTIME": "node",
+         "SQL_SERVER": "your_server.database.windows.net",
+         "SQL_DATABASE": "your_database",
+         "SQL_USER": "your_username",
+         "SQL_PASSWORD": "your_password"
+       }
+     }
+     ```
+
+4. **Run the database schema**:
+   - Connect to your Azure SQL database using your preferred tool (e.g., Azure Data Studio, SSMS).
+   - Execute the script in `api/schema.sql` to create the `Users` table and related trigger.
+
+5. **Start the backend development server**:
+   ```bash
+   npm start
+   ```
+   - The API will be available at `http://localhost:7071/api`.
+
 ### Current Status
 
 **✅ COMPLETED**:
@@ -170,17 +217,19 @@ src/
 - UI framework with Tailwind CSS and shadcn/ui patterns
 - Redux Toolkit state management with RTK Query
 - Authentication system with MSAL and Microsoft Entra External ID
+- Backend API for user persistence
 
-**🎯 NEXT**: Database integration
+**🎯 NEXT**: End-to-end testing and Cosmos DB integration.
 
 ### Success Criteria
 
 - [x] React development server runs successfully
+- [x] Backend API server runs successfully
 - [x] TypeScript compilation works without errors
 - [x] UI framework integrated and functional
 - [x] Redux state management configured
 - [x] Authentication system implemented
-- [ ] Database connections established
+- [ ] Database connections established and tested end-to-end
 
 ---
 
