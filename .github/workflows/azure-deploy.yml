@@ -8,6 +8,7 @@ on:
 env:
   AZURE_ENV_NAME: a-riff-in-react
   AZURE_LOCATION: westus
+  SHARED_SQL_SERVER_NAME: sequitur-sql-server
 
 jobs:
   build-and-deploy:
@@ -49,6 +50,7 @@ jobs:
             externalTenantId=${{ secrets.ENTRA_TENANT_ID }}
             externalClientId=${{ secrets.ENTRA_CLIENT_ID }}
             sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
+            sharedSqlServerName=${{ env.SHARED_SQL_SERVER_NAME }}
           deploymentName: a-riff-in-react-${{ github.run_number }}
           failOnStdErr: false
       - name: Deploy React app to Azure Web App
