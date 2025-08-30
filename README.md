@@ -4,9 +4,9 @@
 
 **Date:** 2025-08-30
 
-**Task:** Implement the Data Access Layer.
+**Task:** Integrate Frontend with Backend API
 
-**Summary:** With the Azure infrastructure successfully refactored to use a shared SQL server, the next critical step is to build the data access layer within the React application. This involves using RTK Query to create hooks that will communicate with our backend APIs (which we will also need to define and build) to perform CRUD operations on the Azure SQL and Cosmos DB databases. This will bring the application to life by connecting the frontend UI to our persistent data stores.
+**Summary:** The backend API (Express on Azure Functions) has been successfully implemented and documented. The next critical step is to connect the React frontend to the API endpoints using RTK Query. This involves creating API service layers, updating components to use the backend data, and implementing the complete user management flow. All infrastructure is deployed and ready - now we need to wire up the full-stack integration.
 
 ---
 
@@ -32,11 +32,12 @@ While the template includes example modules (such as user management and activit
 - ✅ **State management setup**: Redux Toolkit + RTK Query implemented
 - ✅ **Authentication system (MSAL)**: Microsoft Entra External ID integration complete
 - ✅ **Database infrastructure**: Azure SQL + Cosmos DB infrastructure deployed
+- ✅ **Backend API**: Express on Azure Functions with user management endpoints
 - ✅ **Azure deployment**: Complete CI/CD pipeline with GitHub Actions
 - ✅ **Production deployment**: Live at https://a-riff-in-react.azurewebsites.net
-- [ ] **Database integration**: Data access layer implementation
+- [ ] **Frontend-Backend Integration**: Connect React app to API endpoints
 
-> **Note**: Successfully migrated from Azure AD B2C to Microsoft Entra External ID for cost optimization and modern authentication.
+> **Note**: Successfully migrated from Azure AD B2C to Microsoft Entra External ID for cost optimization and modern authentication. Backend API implemented using "Express on Functions" pattern.
 
 ### 📋 Phase 3: Example Extensions (READY)
 - [ ] Example: User management (Azure SQL)

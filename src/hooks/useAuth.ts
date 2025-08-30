@@ -35,8 +35,8 @@ export const useAuth = () => {
 
   const getAccessToken = useCallback(async () => {
     try {
-      const tokenResponse = await AuthService.getApiToken();
-      return tokenResponse?.accessToken || null;
+      const accessToken = await AuthService.getApiToken();
+      return accessToken || null;
     } catch (err) {
       setError(err as Error);
       return null;

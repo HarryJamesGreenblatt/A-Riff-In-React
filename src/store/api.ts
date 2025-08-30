@@ -10,9 +10,9 @@ export const api = createApi({
         // Dynamically import AuthService to avoid circular dependency
         const { AuthService } = await import('../services/auth/authService')
         // Try to get fresh token from MSAL
-        const tokenResponse = await AuthService.getApiToken()
-        if (tokenResponse) {
-          headers.set('authorization', `Bearer ${tokenResponse.accessToken}`);
+        const accessToken = await AuthService.getApiToken()
+        if (accessToken) {
+          headers.set('authorization', `Bearer ${accessToken}`);
         }
       } catch {
          // Fallback to stored token if MSAL fails
