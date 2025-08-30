@@ -20,11 +20,11 @@ param appServicePlanName string = 'asp-${environmentName}'
 @description('The Azure Key Vault name')
 param keyVaultName string = 'kv-${environmentName}'
 
-@description('The SQL Server name')
-param sqlServerName string = 'sql-${environmentName}'
+@description('The name of the shared SQL Server to use')
+param sharedSqlServerName string = 'sequitur-sql-server'
 
 @description('The SQL Database name')
-param sqlDatabaseName string = 'sqldb-${environmentName}'
+param sqlDatabaseName string = 'riff-react-db'
 
 @description('The SQL Server administrator login')
 param sqlAdminLogin string = 'sqladmin'
@@ -160,27 +160,9 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
 //   }
 // }
 
-// SQL Server for structured data
-resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' = {
-  name: sqlServerName
-  location: location
-  tags: tags
-  properties: {
-    administratorLogin: sqlAdminLogin
-    administratorLoginPassword: sqlAdminPassword
-    version: '12.0'
-    publicNetworkAccess: 'Enabled' // Consider setting to 'Disabled' for production
-  }
-}
-
-// Allow Azure services to access the SQL Server
-resource sqlServerFirewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
-  parent: sqlServer
-  name: 'AllowAllAzureIps'
-  properties: {
-    startIpAddress: '0.0.0.0'
-    endIpAddress: '0.0.0.0'
-  }
+// Reference to the existing shared SQL Server
+resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' existing = {
+  name: sharedSqlServerName
 }
 
 // SQL Database
