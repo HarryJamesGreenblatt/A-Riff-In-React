@@ -31,6 +31,10 @@ export const usersApi = api.injectEndpoints({
       query: (id) => `/users/${id}`,
       providesTags: (_result, _error, id) => [{ type: 'User', id }],
     }),
+    getUserByEmail: builder.query<User, string>({
+      query: (email) => `/users/email/${email}`,
+      providesTags: (_result, _error, email) => [{ type: 'User', email }],
+    }),
     createUser: builder.mutation<User, Partial<User>>({
       query: (user) => ({
         url: '/users',
@@ -65,5 +69,11 @@ export const usersSlice = createSlice({
 })
 
 export const { setCurrentUser, logout } = usersSlice.actions
-export const { useGetUsersQuery, useGetUserByIdQuery, useCreateUserMutation, useUpdateUserMutation } = usersApi
+export const {
+  useGetUsersQuery,
+  useGetUserByIdQuery,
+  useGetUserByEmailQuery,
+  useCreateUserMutation,
+  useUpdateUserMutation,
+} = usersApi
 export default usersSlice.reducer
