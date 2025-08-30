@@ -1,27 +1,26 @@
 # Azure Deployment Guide
 
-> **Note on Current Refactoring (2025-08-30):** This document describes the original deployment process which provisions a dedicated SQL Server. We are currently refactoring the infrastructure to use a shared SQL server (`sequitur-sql-server`) to reduce costs. This document will be updated once the transition is complete.
-
 **Status**: ✅ **SUCCESSFULLY DEPLOYED** to https://a-riff-in-react.azurewebsites.net
 
-This guide documents the deployment of **A Riff In React** to Azure, including the complete infrastructure setup with Microsoft Entra External ID authentication.
+This guide documents the deployment of **A Riff In React** to Azure, including the complete infrastructure setup with Microsoft Entra External ID authentication and a shared database server architecture.
 
-> _Successfully migrated from Azure AD B2C to Microsoft Entra External ID for cost optimization._
+> _Successfully migrated from Azure AD B2C to Microsoft Entra External ID and refactored to use a shared SQL Server for cost optimization._
 
 ## 🎉 Current Deployment Status
 
-- ✅ **Azure Infrastructure**: Deployed via Bicep templates
+- ✅ **Azure Infrastructure**: Deployed via Bicep templates using a shared SQL Server.
 - ✅ **Web Application**: Live at https://a-riff-in-react.azurewebsites.net
-- ✅ **Authentication**: Microsoft Entra External ID configured
-- ✅ **CI/CD Pipeline**: GitHub Actions workflow operational
-- ✅ **Cost Optimized**: Application Insights disabled to reduce costs
+- ✅ **Authentication**: Microsoft Entra External ID configured.
+- ✅ **CI/CD Pipeline**: GitHub Actions workflow is fully operational.
+- ✅ **Cost Optimized**: Uses a shared SQL server and has Application Insights disabled by default.
 
 ## Deployed Resources
 
 | Resource | Name | Purpose | Status |
 |----------|------|---------|--------|
 | Web App | `a-riff-in-react` | React app hosting | ✅ Active |
-| SQL Server | `sql-a-riff-in-react` | Relational database | ✅ Active |
+| SQL Server | `sequitur-sql-server` (Shared) | Relational database server | ✅ Active |
+| SQL Database | `riff-react-db` | Application-specific database | ✅ Active |
 | Cosmos DB | `cosmos-a-riff-in-react` | NoSQL database | ✅ Active |
 | Key Vault | `kv-a-riff-in-react` | Secrets management | ✅ Active |
 | Log Analytics | `log-a-riff-in-react` | Monitoring | ✅ Active |
@@ -108,13 +107,14 @@ To enable external user authentication with Microsoft Entra External ID, you can
 The project includes a Bicep template in the `infra` folder that provisions:
 
 - Azure App Service (for frontend hosting)
-- Azure Key Vault (for secure storage of B2C credentials)
-- Azure Static Web App (alternative hosting option)
-- Azure SQL Database (for structured data)
+- Azure Key Vault (for secure storage of credentials)
+- **Azure SQL Database** (for structured data, deployed to a shared server)
 - Azure Cosmos DB (for flexible data)
-- Application Insights (for monitoring)
+- Application Insights (for monitoring, disabled by default)
 
 ### Deploy Infrastructure Using Bicep
+
+The Bicep template is designed to deploy the application's database to a pre-existing, shared SQL server to optimize costs.
 
 ```bash
 # Login to Azure
@@ -124,9 +124,10 @@ az login
 RESOURCE_GROUP=your-resource-group
 LOCATION=westus
 ENV_NAME=a-riff-in-react
-B2C_TENANT_NAME=your-b2c-tenant
-B2C_CLIENT_ID=your-client-id
-B2C_SIGNIN_POLICY=B2C_1_signupsignin
+EXTERNAL_TENANT_ID=your-external-tenant-id
+EXTERNAL_CLIENT_ID=your-external-client-id
+SHARED_SQL_SERVER_NAME=sequitur-sql-server
+SHARED_SQL_SERVER_RG=db-rg
 SQL_ADMIN_PASSWORD=your-complex-password # Must meet SQL complexity requirements
 
 # Create resource group if needed
@@ -138,9 +139,10 @@ az deployment group create \
   --template-file ./infra/main.bicep \
   --parameters environmentName=$ENV_NAME \
   --parameters location=$LOCATION \
-  --parameters b2cTenantName=$B2C_TENANT_NAME \
-  --parameters b2cClientId=$B2C_CLIENT_ID \
-  --parameters b2cSigninPolicy=$B2C_SIGNIN_POLICY \
+  --parameters externalTenantId=$EXTERNAL_TENANT_ID \
+  --parameters externalClientId=$EXTERNAL_CLIENT_ID \
+  --parameters sharedSqlServerName=$SHARED_SQL_SERVER_NAME \
+  --parameters sharedSqlServerResourceGroupName=$SHARED_SQL_SERVER_RG \
   --parameters sqlAdminPassword=$SQL_ADMIN_PASSWORD
 ```
 
@@ -193,27 +195,25 @@ terraform apply -var="environment_name=$ENV_NAME" \
 
 ### Configure GitHub Secrets for CI/CD
 
-Add these secrets to your GitHub repository:
-- `AZURE_CREDENTIALS`: JSON credentials from Service Principal
-- `AZURE_SUBSCRIPTION_ID`: Your Azure subscription ID
-- `AZURE_RESOURCE_GROUP`: Resource group name
-- `AZURE_ENV_NAME`: Environment name (e.g., `a-riff-in-react`)
-- `AZURE_LOCATION`: Azure region (e.g., `westus`)
-- `B2C_TENANT_NAME`: Your B2C tenant name
-- `B2C_CLIENT_ID`: Your B2C client ID
-- `B2C_SIGNIN_POLICY`: Your B2C policy name
-- `SQL_ADMIN_PASSWORD`: SQL Server admin password
+The CI/CD pipeline requires a Service Principal with sufficient permissions to deploy resources. Since the deployment targets two different resource groups (`riffinreact-rg` and the shared `db-rg`), the Service Principal must have the **Contributor** role assigned at the **Subscription** scope.
 
-To create the `AZURE_CREDENTIALS` secret, run the following command:
+1.  **Create the Service Principal**:
+    ```bash
+    # Create a service principal with Contributor role over the entire subscription
+    az ad sp create-for-rbac --name "GitHub-A-Riff-In-React" --role contributor \
+      --scopes /subscriptions/{subscription-id} \
+      --sdk-auth
+    
+    # The output is a JSON object. Copy it.
+    ```
 
-```bash
-# Create a service principal for GitHub Actions
-az ad sp create-for-rbac --name "github-actions-a-riff-in-react" --role contributor \
-  --scopes /subscriptions/{subscription-id}/resourceGroups/{resource-group} \
-  --sdk-auth
-
-# The output is a JSON object that should be stored in the AZURE_CREDENTIALS GitHub secret
-```
+2.  **Add GitHub Secrets**:
+    Add the following secrets to your GitHub repository's settings:
+    *   `AZURE_CREDENTIALS`: Paste the entire JSON output from the `az ad sp create-for-rbac` command.
+    *   `AZURE_SUBSCRIPTION_ID`: Your Azure subscription ID.
+    *   `AZURE_RESOURCE_GROUP`: The primary resource group for this project (e.g., `riffinreact-rg`).
+    *   `SHARED_SQL_SERVER_RG`: The resource group of the shared SQL server (e.g., `db-rg`).
+    *   `SQL_ADMIN_PASSWORD`: The administrator password for the shared SQL server.
 
 ## 3. Update Configuration Files
 Ensure your application can use both local development settings and deployed settings:
@@ -221,8 +221,7 @@ Ensure your application can use both local development settings and deployed set
 1. **Create a `.env.local` file for local development**
    ```
    VITE_ENTRA_CLIENT_ID=your-client-id
-   VITE_ENTRA_TENANT_ID=your-b2c-tenant
-   VITE_B2C_SIGNIN_POLICY=B2C_1_signupsignin
+   VITE_ENTRA_TENANT_ID=your-external-tenant-id
    VITE_REDIRECT_URI=http://localhost:5173
    VITE_POST_LOGOUT_URI=http://localhost:5173
    
@@ -237,18 +236,14 @@ Ensure your application can use both local development settings and deployed set
    Update your configuration to use the Entra settings as shown in the `05-authentication-msal.md` documentation.
 
 ## 4. Deploy the App
-The project includes three GitHub Actions workflows for CI/CD:
+The project includes a primary GitHub Actions workflow for CI/CD:
 
-1. **deploy-infrastructure.yml**: Deploys only the Azure infrastructure using Bicep
-2. **deploy-app.yml**: Builds and deploys only the React application
-3. **azure-deploy.yml**: Combined workflow that deploys both infrastructure and application
+*   **`azure-deploy.yml`**: A comprehensive workflow that deploys both the Azure infrastructure via Bicep and builds/deploys the React application to App Service.
 
-You can choose which workflow best fits your deployment needs:
-
-- For initial setup, use the combined `azure-deploy.yml` workflow
-- For ongoing development, use the separate workflows to deploy only what has changed
+This workflow is triggered on pushes to the `main` branch.
 
 See `docs/github_actions_azure.md` for detailed pipeline setup instructions.
+
 
 ## 4. Monitor and Maintain
 - Use Application Insights for telemetry

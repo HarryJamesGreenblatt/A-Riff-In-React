@@ -39,22 +39,20 @@ jobs:
       
       - name: Deploy Azure Infrastructure with Entra External ID Configuration
         id: deploy-bicep
-        uses: azure/arm-deploy@v2
-        with:
-          scope: resourcegroup
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          resourceGroupName: riffinreact-rg
-          template: ./infra/main.bicep
-          parameters: >
-            environmentName=${{ env.AZURE_ENV_NAME }}
-            location=${{ env.AZURE_LOCATION }}
-            externalTenantId=${{ secrets.ENTRA_TENANT_ID }}
-            externalClientId=${{ secrets.ENTRA_CLIENT_ID }}
-            sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
-            sharedSqlServerName=${{ env.SHARED_SQL_SERVER_NAME }}
-            sharedSqlServerResourceGroupName=${{ env.SHARED_SQL_SERVER_RG }}
-          deploymentName: a-riff-in-react-${{ github.run_number }}
-          failOnStdErr: false
+        run: |
+          az deployment group create \
+            --resource-group riffinreact-rg \
+            --template-file ./infra/main.bicep \
+            --parameters \
+              environmentName=${{ env.AZURE_ENV_NAME }} \
+              location=${{ env.AZURE_LOCATION }} \
+              externalTenantId=${{ secrets.ENTRA_TENANT_ID }} \
+              externalClientId=${{ secrets.ENTRA_CLIENT_ID }} \
+              sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }} \
+              sharedSqlServerName=${{ env.SHARED_SQL_SERVER_NAME }} \
+              sharedSqlServerResourceGroupName=${{ env.SHARED_SQL_SERVER_RG }} \
+            --name a-riff-in-react-${{ github.run_number }} \
+            --verbose
       - name: Deploy React app to Azure Web App
         uses: azure/webapps-deploy@v3
         with:

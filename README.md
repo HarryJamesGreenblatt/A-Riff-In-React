@@ -4,9 +4,9 @@
 
 **Date:** 2025-08-30
 
-**Task:** Consolidating Azure SQL resources.
+**Task:** Implement the Data Access Layer.
 
-**Summary:** We are modifying the project's infrastructure to use a single shared Azure SQL Server (`sequitur-sql-server`) instead of provisioning a dedicated server for this project. This aligns with the "Scaffolding" project philosophy to reduce costs and centralize management for multiple template applications. The next step is to update the Bicep templates to reflect this change.
+**Summary:** With the Azure infrastructure successfully refactored to use a shared SQL server, the next critical step is to build the data access layer within the React application. This involves using RTK Query to create hooks that will communicate with our backend APIs (which we will also need to define and build) to perform CRUD operations on the Azure SQL and Cosmos DB databases. This will bring the application to life by connecting the frontend UI to our persistent data stores.
 
 ---
 

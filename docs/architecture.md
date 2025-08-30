@@ -8,7 +8,22 @@ This document describes the modular architecture of **A Riff In React**, a produ
 
 - **Component-based structure**: All UI and logic are organized into reusable components and feature modules.
 - **Hybrid persistence**: Demonstrates integration with both Azure SQL Database (for structured data) and Cosmos DB (for flexible, real-time data).
-- **Azure-ready**: Designed for seamless deployment to Azure App Service, with extension points for Key Vault and Application Insights.
+- **Azure-ready**: Designed for seamless deployment to Azure App Service.
+
+## Azure Infrastructure Architecture
+
+A core principle of the "Scaffolding" series of templates (`A Fugue in Flask`, `A Riff in React`, etc.) is resource optimization and cost management. To that end, the Azure infrastructure is designed around a **shared resource model** for expensive components.
+
+### Database Strategy: Shared Server, Dedicated Databases
+
+- **Shared SQL Server**: Instead of provisioning a new, costly Azure SQL Server for each project, all templates are designed to deploy their databases to a single, pre-existing shared server (e.g., `sequitur-sql-server` in the `db-rg` resource group).
+- **Dedicated Databases**: Each project provisions its own dedicated database (e.g., `riff-react-db`) on the shared server. This provides complete data and schema isolation between applications.
+- **Cross-Resource Group Deployment**: The database is deployed to the shared server's resource group using a dedicated Bicep module (`infra/modules/sqlDatabase.bicep`), which is the best practice for deploying child resources (the database) to a parent resource (the server) located in a different resource group.
+
+This pattern provides the best of both worlds:
+1.  **Cost Efficiency**: Avoids the high cost of running multiple SQL server instances.
+2.  **Isolation & Security**: Each application has its own database and credentials, ensuring strong security and data boundaries.
+3.  **Independent Schemas**: Each database has a completely independent schema, allowing for tailored data models per application without conflict.
 
 ## State Management
 
