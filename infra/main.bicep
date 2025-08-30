@@ -163,25 +163,15 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
 //   }
 // }
 
-// Reference to the existing shared SQL Server
-resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' existing = {
-  name: sharedSqlServerName
+// Deploy SQL Database to shared server using module
+module sqlDatabaseModule 'modules/sqlDatabase.bicep' = {
+  name: 'sql-database-deployment'
   scope: resourceGroup(sharedSqlServerResourceGroupName)
-}
-
-// SQL Database
-resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
-  parent: sqlServer
-  name: sqlDatabaseName
-  location: location
-  tags: tags
-  sku: {
-    name: 'Basic'
-    tier: 'Basic'
-  }
-  properties: {
-    collation: 'SQL_Latin1_General_CP1_CI_AS'
-    maxSizeBytes: 1073741824 // 1GB
+  params: {
+    sqlServerName: sharedSqlServerName
+    sqlDatabaseName: sqlDatabaseName
+    location: location
+    tags: tags
   }
 }
 
@@ -256,7 +246,7 @@ resource webAppSettings 'Microsoft.Web/sites/config@2022-09-01' = {
   properties: {
     // APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
     // APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
-    SQL_CONNECTION_STRING: 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlAdminLogin};Password=${sqlAdminPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+    SQL_CONNECTION_STRING: 'Server=tcp:${sqlDatabaseModule.outputs.sqlServerFqdn},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlAdminLogin};Password=${sqlAdminPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
     COSMOS_ENDPOINT: cosmosAccount.properties.documentEndpoint
     COSMOS_KEY: cosmosAccount.listKeys().primaryMasterKey
     COSMOS_DATABASE: cosmosDatabaseName
@@ -272,7 +262,7 @@ resource sqlConnectionSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
   parent: keyVault
   name: 'SQL-CONNECTION-STRING'
   properties: {
-    value: 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlAdminLogin};Password=${sqlAdminPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+    value: 'Server=tcp:${sqlDatabaseModule.outputs.sqlServerFqdn},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlAdminLogin};Password=${sqlAdminPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
   }
 }
 
@@ -295,6 +285,6 @@ resource cosmosKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
 // Output the web app URL
 output webAppUrl string = webApp.properties.defaultHostName
 // output staticWebAppUrl string = staticWebApp.properties.defaultHostname
-output sqlServerFqdn string = sqlServer.properties.fullyQualifiedDomainName
+output sqlServerFqdn string = sqlDatabaseModule.outputs.sqlServerFqdn
 output cosmosEndpoint string = cosmosAccount.properties.documentEndpoint
 // output appInsightsConnectionString string = appInsights.properties.ConnectionString
