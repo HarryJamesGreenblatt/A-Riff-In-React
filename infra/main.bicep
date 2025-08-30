@@ -23,6 +23,9 @@ param keyVaultName string = 'kv-${environmentName}'
 @description('The name of the shared SQL Server to use')
 param sharedSqlServerName string = 'sequitur-sql-server'
 
+@description('The name of the resource group containing the shared SQL Server')
+param sharedSqlServerResourceGroupName string = 'db-rg'
+
 @description('The SQL Database name')
 param sqlDatabaseName string = 'riff-react-db'
 
@@ -163,6 +166,7 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
 // Reference to the existing shared SQL Server
 resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' existing = {
   name: sharedSqlServerName
+  scope: resourceGroup(sharedSqlServerResourceGroupName)
 }
 
 // SQL Database

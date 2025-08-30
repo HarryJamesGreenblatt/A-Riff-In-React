@@ -36,6 +36,7 @@ jobs:
             b2cSigninPolicy=${{ secrets.B2C_SIGNIN_POLICY }}
             sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
             sharedSqlServerName=sequitur-sql-server
+            sharedSqlServerResourceGroupName=db-rg
       
       - name: Azure Logout
         run: az logout
