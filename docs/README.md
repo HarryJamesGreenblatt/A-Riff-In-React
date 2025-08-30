@@ -8,6 +8,7 @@ Welcome to the documentation for **A Riff In React**.
 - [UI Framework Setup](./03-ui-framework-setup.md)
 - [State Management](./04-state-management.md)
 - [Authentication with MSAL](./05-authentication-msal.md)
+- [Backend API](./06-backend-api.md)
 - [Architecture](./architecture.md)
 - [Azure Deployment Guide](./azure_deployment.md)
 - [GitHub Actions: Azure CI/CD Pipeline](./github_actions_azure.md)
