@@ -29,9 +29,13 @@ jobs:
       - name: Build React app
         run: npm run build
         env: 
-          # These placeholder values are needed for build but will be replaced by actual values in Azure
-          VITE_ENTRA_CLIENT_ID: "placeholder-for-build"
-          VITE_ENTRA_TENANT_ID: "placeholder-for-build"
+          # Use actual values during build - Vite embeds these at build time
+          VITE_ENTRA_CLIENT_ID: ${{ secrets.ENTRA_CLIENT_ID }}
+          VITE_ENTRA_TENANT_ID: ${{ secrets.ENTRA_TENANT_ID }}
+          VITE_REDIRECT_URI: "https://a-riff-in-react.azurewebsites.net"
+          VITE_POST_LOGOUT_URI: "https://a-riff-in-react.azurewebsites.net"
+          VITE_API_BASE_URL: "https://a-riff-in-react.azurewebsites.net/api"
+          VITE_API_SCOPE: "api://a-riff-in-react/access_as_user"
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -62,7 +66,7 @@ jobs:
       - name: Verify Entra External ID Configuration
         run: |
           echo "Verifying Entra External ID configuration in Azure Web App..."
-          az webapp config appsettings list --name app-${{ env.AZURE_ENV_NAME }} --resource-group riffinreact-rg --query "[?contains(name, 'VITE_ENTRA_')].{Name:name, Value:value}" --output table
+          az webapp config appsettings list --name ${{ env.AZURE_ENV_NAME }} --resource-group riffinreact-rg --query "[?contains(name, 'VITE_ENTRA_')].{Name:name, Value:value}" --output table
       
       - name: Logout from Azure
         run: az logout
