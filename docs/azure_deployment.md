@@ -1,18 +1,26 @@
 # Azure Deployment Guide
 
-**Status**: ✅ **SUCCESSFULLY DEPLOYED** to https://a-riff-in-react.azurewebsites.net
+**Status**: ✅ **FRONTEND DEPLOYED** | 🔄 **BACKEND PENDING REDEPLOYMENT**
 
-This guide documents the deployment of **A Riff In React** to Azure, including the complete infrastructure setup with Microsoft Entra External ID authentication and a shared database server architecture.
-
-> _Successfully migrated from Azure AD B2C to Microsoft Entra External ID and refactored to use a shared SQL Server for cost optimization._
+This guide documents the deployment of **A Riff In React** to Azure, including the complete infrastructure setup with Microsoft Entra External ID authentication.
 
 ## 🎉 Current Deployment Status
 
-- ✅ **Azure Infrastructure**: Deployed via Bicep templates using a shared SQL Server.
+- ✅ **Azure Infrastructure**: Deployed via Bicep templates
 - ✅ **Web Application**: Live at https://a-riff-in-react.azurewebsites.net
-- ✅ **Authentication**: Microsoft Entra External ID configured.
-- ✅ **CI/CD Pipeline**: GitHub Actions workflow is fully operational.
-- ✅ **Cost Optimized**: Uses a shared SQL server and has Application Insights disabled by default.
+- ✅ **Authentication**: Microsoft Entra External ID **FULLY WORKING** ✅
+- ✅ **CI/CD Pipeline**: GitHub Actions workflow operational
+- 🔄 **Azure Functions API**: Needs redeployment (currently returning 404)
+- ✅ **Frontend Authentication**: Complete and production-ready
+
+## Authentication Status: ✅ FULLY WORKING
+
+**Microsoft Entra External ID Integration:**
+- Client ID: `8e217770-697f-497e-b30b-27b214e87db1`
+- Tenant ID: `813307d1-6d39-4c75-8a38-2e34128203bc`
+- Redirect URIs: Configured for both localhost and production
+- Token Flow: Working perfectly with redirect-based authentication
+- User Profiles: Successfully extracted and displayed
 
 ## Deployed Resources
 

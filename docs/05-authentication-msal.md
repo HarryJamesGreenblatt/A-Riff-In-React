@@ -2,14 +2,25 @@
 
 This document describes the MSAL authentication implementation in **A Riff In React**.
 
+## Current Status: ✅ FULLY WORKING
+
+As of August 31, 2025, the Microsoft Entra External ID authentication system is **fully functional**:
+
+- ✅ **User Authentication**: Microsoft login/logout working perfectly
+- ✅ **Token Management**: Access token acquisition and refresh working
+- ✅ **Redux Integration**: User state properly managed in Redux store
+- ✅ **Redirect Flow**: Secure redirect-based authentication (no popup issues)
+- ✅ **Environment Configuration**: Proper port handling and redirect URIs
+- ✅ **TypeScript Compliance**: All type imports properly configured
+
 ## Overview
 
-The application uses MSAL (Microsoft Authentication Library) for React to provide secure authentication through Azure Active Directory. This enables:
+The application uses MSAL (Microsoft Authentication Library) for React to provide secure authentication through Microsoft Entra External ID. This enables:
 
 - Single Sign-On (SSO) with Microsoft accounts
-- Secure token management
-- Integration with Microsoft Graph API
-- Protected API access with OAuth 2.0
+- Secure token management with automatic refresh
+- User profile extraction from Microsoft identity
+- Protected API access preparation (backend deployment pending)
 
 ## Architecture
 
@@ -70,15 +81,24 @@ In your app registration:
    - Microsoft Graph: `User.Read` (for user profile)
    - Your API: Add any custom API scopes
 
-### 3. Environment Configuration
+### Environment Configuration
 
-Create a `.env` file based on `.env.example`:
+Create a `.env` file in the project root:
 
 ```bash
-VITE_AZURE_CLIENT_ID=your-client-id
-VITE_AZURE_TENANT_ID=your-tenant-id
-VITE_API_SCOPE=api://your-api-client-id/access_as_user
+# Working configuration as of August 31, 2025
+VITE_ENTRA_CLIENT_ID="8e217770-697f-497e-b30b-27b214e87db1"
+VITE_ENTRA_TENANT_ID="813307d1-6d39-4c75-8a38-2e34128203bc"
+VITE_REDIRECT_URI="http://localhost:5173"
+VITE_POST_LOGOUT_URI="http://localhost:5173"
+VITE_API_BASE_URL="https://a-riff-in-react.azurewebsites.net/api"
+VITE_API_SCOPE="api://a-riff-in-react/access_as_user"
 ```
+
+**Important Notes:**
+- The app is configured to run on port 5173 to match redirect URIs
+- API scope is currently not used (basic scopes work fine)
+- Backend API URL is configured but deployment is pending
 
 ### 4. Install Dependencies
 
@@ -191,25 +211,51 @@ The `src/config/authConfig.ts` is already configured to use Microsoft Entra Exte
 4. **Token Validation**: Validate tokens on the backend
 5. **Error Handling**: Implement proper error handling for auth failures
 
-## Troubleshooting
+## Current Implementation Details
 
-### Common Issues
+### Authentication Flow (Working)
 
-1. **Redirect URI Mismatch**
-   - Ensure the redirect URI in Azure matches your app URL exactly
-   - Add both `http://localhost:5173` (dev) and your production URL
+1. **User clicks "Login"** → Triggers `AuthService.signIn()`
+2. **MSAL redirect flow** → User redirected to Microsoft login
+3. **Successful authentication** → User redirected back to app with tokens
+4. **Token validation** → MSAL validates and caches tokens
+5. **User state update** → Redux store updated with user profile
+6. **UI update** → App shows authenticated state with user info
 
-2. **Popup Blocked**
-   - The app uses popup authentication by default
-   - Users may need to allow popups for your domain
+### Token Management (Working)
 
-3. **Token Expiration**
-   - MSAL automatically handles token refresh
-   - If issues persist, check token lifetimes in Azure AD
+- **Basic scopes**: `['openid', 'profile', 'email']` - Working perfectly
+- **API scopes**: Currently disabled (will be re-enabled when backend is deployed)
+- **Token storage**: Session storage (secure)
+- **Automatic refresh**: MSAL handles token refresh automatically
 
-4. **CORS Errors**
-   - Ensure your API is configured to accept requests from your app domain
-   - Check that the API validates tokens properly
+### Known Working Configuration
+
+**Azure AD App Registration:**
+- Client ID: `8e217770-697f-497e-b30b-27b214e87db1`
+- Tenant ID: `813307d1-6d39-4c75-8a38-2e34128203bc`
+- Redirect URIs: `http://localhost:5173`, `https://a-riff-in-react.azurewebsites.net`
+- Platform: Single Page Application (SPA)
+
+### Troubleshooting - Issues Fixed
+
+1. **✅ Fixed: Invalid API Scope Error**
+   - **Problem**: 400 Bad Request when requesting `api://a-riff-in-react/access_as_user`
+   - **Cause**: API scope not configured in Azure AD app registration
+   - **Solution**: Temporarily use basic scopes until backend API is deployed
+
+2. **✅ Fixed: Port Mismatch**
+   - **Problem**: App running on port 5174 but redirect URI set to 5173
+   - **Cause**: Vite port auto-increment and environment variable mismatch
+   - **Solution**: Consistent port configuration in .env files
+
+3. **✅ Fixed: Popup Authentication Issues**
+   - **Problem**: Popup authentication blocked/unreliable
+   - **Solution**: Switched to redirect-based authentication flow
+
+4. **✅ Fixed: TypeScript Errors**
+   - **Problem**: `AuthenticationResult` import error with verbatimModuleSyntax
+   - **Solution**: Used type-only import: `import type { AuthenticationResult }`
 
 ## Integration with Backend
 
