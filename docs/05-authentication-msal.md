@@ -2,10 +2,11 @@
 
 This document describes the MSAL authentication implementation in **A Riff In React**.
 
-## Current Status: ✅ FULLY WORKING
+## Current Status: 🔄 TRANSITIONING TO EXTERNAL USER AUTHENTICATION
 
-As of August 31, 2025, the Microsoft Entra External ID authentication system is **fully functional**:
+As of August 31, 2025:
 
+### ✅ **Phase 1 Complete**: Microsoft Entra ID authentication system is **fully functional**
 - ✅ **User Authentication**: Microsoft login/logout working perfectly
 - ✅ **Token Management**: Access token acquisition and refresh working
 - ✅ **Redux Integration**: User state properly managed in Redux store
@@ -13,42 +14,62 @@ As of August 31, 2025, the Microsoft Entra External ID authentication system is 
 - ✅ **Environment Configuration**: Proper port handling and redirect URIs
 - ✅ **TypeScript Compliance**: All type imports properly configured
 
+### 🔄 **Phase 2 In Progress**: Transition to External User Authentication
+**Current Issue Identified**: App currently uses regular Azure AD which requires Microsoft accounts
+**Solution**: Switch to **Microsoft Entra External ID for Customers** to enable:
+- ✅ External user registration (email/password, no Microsoft account required)
+- ✅ Social login options (Google, Facebook, etc.)
+- ✅ Modern authentication features (passkeys, email OTP)
+- ✅ Cost-effective (FREE for <50K users)
+
+## Architecture Decision: Microsoft Entra External ID
+
+After cost analysis and requirements review:
+
+**Why Microsoft Entra External ID (not Azure AD B2C):**
+- 🎯 **Scale**: Under 1,000 users = FREE on both platforms
+- 🚀 **Future-proof**: Microsoft's recommended CIAM solution
+- 💻 **Developer Experience**: No complex XML policies required
+- 🔐 **Modern Security**: Passkeys, adaptive risk, phishing-resistant MFA
+- 🏗️ **Infrastructure Ready**: Bicep templates already configured
+
+**Cost Analysis for Our Scale:**
+| Users | Azure AD B2C | Entra External ID | Our Cost |
+|-------|-------------|-------------------|----------|
+| <1K | FREE | FREE | **FREE** ✅ |
+| 50K | FREE | FREE | FREE |
+| 100K | €155/month | €780/month | N/A |
+
 ## Overview
 
-The application uses MSAL (Microsoft Authentication Library) for React to provide secure authentication through Microsoft Entra External ID. This enables:
+The application will use MSAL (Microsoft Authentication Library) for React to provide secure authentication through **Microsoft Entra External ID for Customers**. This enables:
 
-- Single Sign-On (SSO) with Microsoft accounts
-- Secure token management with automatic refresh
-- User profile extraction from Microsoft identity
-- Protected API access preparation (backend deployment pending)
+- ✅ **External user registration** with email/password (no Microsoft account required)
+- ✅ **Social login options** (Google, Facebook, Apple, etc.)
+- ✅ **Modern authentication features** (passkeys, email OTP, adaptive MFA)
+- ✅ **Secure token management** with automatic refresh
+- ✅ **User profile management** for external customers
+- ✅ **Protected API access** with OAuth 2.0 flows
 
-## Architecture
+## Transition Plan: Azure AD → Entra External ID
 
-### MSAL Configuration
+### **Phase 1: ✅ COMPLETE**
+Working authentication with regular Azure AD (Microsoft accounts only)
 
-The MSAL configuration is centralized in `src/config/authConfig.ts`:
+### **Phase 2: 🔄 IN PROGRESS** 
+Switch to Entra External ID for Customers
 
-```typescript
-export const msalConfig: Configuration = {
-  auth: {
-    clientId: "your-client-id",
-    authority: "https://login.microsoftonline.com/your-tenant-id",
-    redirectUri: window.location.origin,
-  },
-  cache: {
-    cacheLocation: "sessionStorage",
-    storeAuthStateInCookie: false,
-  },
-};
-```
+**Infrastructure Impact: ✅ NO CLEANUP NEEDED**
+- Bicep templates use parameterized tenant/client IDs
+- No hardcoded Azure AD resources
+- Clean transition with environment variable updates only
 
-### Authentication Service
-
-The `AuthService` class in `src/services/auth/authService.ts` provides:
-
-- Sign in/out functionality
-- Token acquisition for API calls
-- User profile fetching from Microsoft Graph
+**Steps Required:**
+1. Create Microsoft Entra External ID tenant for customers
+2. Register new app in customer tenant
+3. Update environment variables with new tenant/client IDs
+4. Configure email/password and social login flows
+5. Test external user registration
 - Integration with Redux store
 
 ### React Integration

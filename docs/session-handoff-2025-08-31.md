@@ -69,21 +69,32 @@
 - **Impact**: Frontend authentication works, but API calls fail
 - **Priority**: High - needed for complete integration
 
+#### Authentication Strategy Update: 🎯 CRITICAL DISCOVERY
+- **Issue**: Current Azure AD setup only allows Microsoft account users
+- **User Need**: External user registration (email/password, no Microsoft account required)
+- **Solution**: Transition to Microsoft Entra External ID for Customers
+- **Cost Impact**: ✅ FREE for <1K users (same as current cost)
+- **Infrastructure Impact**: ✅ NO CLEANUP NEEDED (parameter-based design)
+
 #### Next Session Priorities:
-1. **Deploy/Fix Azure Functions Backend**
+1. **Create Entra External ID for Customers Tenant**
+   - Set up proper external user authentication
+   - Configure email/password registration flows
+   - Add social login options (Google, Facebook)
+
+2. **Update Authentication Configuration**
+   - Update environment variables with new tenant/client IDs
+   - Test external user registration flow
+   - Verify social login integration
+
+3. **Deploy/Fix Azure Functions Backend**
    - Investigate current deployment status
    - Redeploy if necessary
    - Test API endpoints directly
 
-2. **Re-enable API Integration**
-   - Remove mock user data
-   - Restore backend user creation/fetching
-   - Test complete end-to-end flow
-
-3. **API Scope Configuration (Optional)**
-   - Add proper API scopes to Azure AD app
-   - Configure backend token validation
-   - Enhance security for production
+4. **Complete Integration**
+   - Re-enable API integration with proper external authentication
+   - Test complete end-to-end flow with external users
 
 ### 📊 Development Metrics
 

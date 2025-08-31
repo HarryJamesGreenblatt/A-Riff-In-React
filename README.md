@@ -1,21 +1,25 @@
 # A Riff In React
 
-## 📢 Front Page News: Current Progress Update
+## 📢 Front Page News: Authentication Strategy Update
 
 **Date:** 2025-08-31
 
-**Latest Achievement:** ✅ **Microsoft Entra External ID Authentication - FULLY WORKING**
+**Latest Achievement:** ✅ **Microsoft Authentication Working + Strategy Clarification**
 
-**Summary:** Authentication system is now completely functional! Users can successfully log in with Microsoft credentials, tokens are properly managed, and user profiles are displayed. The frontend authentication flow is production-ready. Next steps: Deploy Azure Functions backend and complete the full-stack integration.
+**Key Discovery:** Current setup uses regular Azure AD (Microsoft accounts only) but we need **external user registration**. Analysis shows Microsoft Entra External ID for Customers is the right solution.
 
-**What's Working:**
-- ✅ Microsoft login/logout flow
-- ✅ Token acquisition and management
-- ✅ User profile display
-- ✅ Redux state management
-- ✅ Secure redirect-based authentication
+**What's Working Now:**
+- ✅ Microsoft Entra ID authentication system working perfectly
+- ✅ Login/logout, token management, user profiles all functional
+- ✅ Technical foundation solid and production-ready
 
-**Next Priority:** Backend API deployment to complete full-stack functionality
+**Next Step:** Transition to **Microsoft Entra External ID for Customers** to enable:
+- 🎯 External user registration (email/password, no Microsoft account required)  
+- 🔐 Social login options (Google, Facebook, etc.)
+- 💰 Cost-effective (FREE for our <1K user scale)
+- 🏗️ No infrastructure cleanup needed (parameters-based design)
+
+**Impact:** Clean transition with environment variable updates only
 
 ---
 
@@ -36,19 +40,20 @@ While the template includes example modules (such as user management and activit
 - ✅ **Project Vision**: General-purpose, Azure-ready template defined
 - ✅ **Basic React App Structure**: Vite + TypeScript + React 18 setup complete
 
-### 🚧 Phase 2: Core Features (95% COMPLETED ✅)
+### 🚧 Phase 2: Core Features (90% COMPLETED ✅)
 - ✅ **UI framework integration**: Tailwind CSS + shadcn/ui-style components implemented
 - ✅ **State management setup**: Redux Toolkit + RTK Query implemented
-- ✅ **Authentication system (MSAL)**: Microsoft Entra External ID integration **FULLY WORKING** ✅
+- 🔄 **Authentication system (MSAL)**: Microsoft authentication working, transitioning to external user support
 - ✅ **Database infrastructure**: Azure SQL + Cosmos DB infrastructure deployed
 - ✅ **Backend API**: Express on Azure Functions with user management endpoints (needs redeployment)
 - ✅ **Azure deployment**: Complete CI/CD pipeline with GitHub Actions  
 - ✅ **Production deployment**: Frontend live at https://a-riff-in-react.azurewebsites.net
 - ✅ **TypeScript build fixes**: All compilation errors resolved
+- 🔄 **External user authentication**: Transitioning to Entra External ID for customer registration
 - 🔄 **Backend API deployment**: Azure Functions need to be redeployed/configured
-- [ ] **Frontend-Backend Integration**: Connect authenticated React app to working API endpoints
+- [ ] **Frontend-Backend Integration**: Connect authenticated app to working API endpoints
 
-> **Major Milestone**: Authentication system is now production-ready! Users can successfully authenticate with Microsoft Entra External ID, with full token management and user profile display working perfectly.
+> **Current Focus**: Implementing external user authentication (email/password registration) using Microsoft Entra External ID for Customers. Technical foundation is solid - this is a clean parameter-based transition with no infrastructure cleanup needed.
 
 ### 📋 Phase 3: Example Extensions (READY)
 - [ ] Example: User management (Azure SQL)
