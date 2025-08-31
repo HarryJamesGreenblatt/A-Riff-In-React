@@ -4,7 +4,12 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 export const api = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({ 
-    baseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
+    baseUrl: (() => {
+      const apiUrl = import.meta.env.VITE_API_BASE_URL || '/api';
+      console.log('🔍 API Base URL:', apiUrl);
+      console.log('🔍 Environment variables:', import.meta.env);
+      return apiUrl;
+    })(),
     prepareHeaders: async (headers) => {
       try {
         // Dynamically import AuthService to avoid circular dependency

@@ -1,7 +1,7 @@
 import { msalInstance } from "./msalInstance";
-import { loginRequest, apiConfig } from "../../config/authConfig";
+import { loginRequest } from "../../config/authConfig";
 import { store } from "../../store";
-import { setCurrentUser, usersApi } from "../../features/users/slice";
+import { setCurrentUser } from "../../features/users/slice";
 
 export class AuthService {
   /**
@@ -9,34 +9,8 @@ export class AuthService {
    */
   static async signIn() {
     try {
-      const loginResponse = await msalInstance.loginPopup(loginRequest);
-      
-      if (loginResponse.account) {
-        const entraUser = loginResponse.account;
-
-        try {
-          // Attempt to create the user. The backend should handle "upsert" logic.
-          const backendUser = await store.dispatch(usersApi.endpoints.createUser.initiate({
-            name: entraUser.name,
-            email: entraUser.username,
-          })).unwrap();
-          
-          store.dispatch(setCurrentUser(backendUser));
-
-        } catch (error: any) {
-          // If user already exists, backend might return 409 Conflict.
-          // In that case, fetch the existing user's data.
-          if (error.status === 409 && entraUser.username) {
-            console.warn("User already exists, fetching existing user data.");
-            const existingUser = await store.dispatch(usersApi.endpoints.getUserByEmail.initiate(entraUser.username)).unwrap();
-            store.dispatch(setCurrentUser(existingUser));
-          } else {
-            throw error; // Re-throw other errors
-          }
-        }
-        
-        msalInstance.setActiveAccount(loginResponse.account);
-      }
+      // Use redirect instead of popup for more reliable authentication
+      await msalInstance.loginRedirect(loginRequest);
     } catch (error) {
       console.error("MSAL sign-in error:", error);
       throw error;
@@ -65,9 +39,9 @@ export class AuthService {
     }
 
     try {
+      // For now, just use the basic scopes since we don't have API scopes configured
       const response = await msalInstance.acquireTokenSilent({
-        ...apiConfig,
-        scopes: apiConfig.scopes,
+        scopes: ["openid", "profile", "email"],
         account,
       });
       return response.accessToken;
@@ -75,8 +49,7 @@ export class AuthService {
       console.warn("Silent token acquisition failed. Falling back to popup.", error);
       try {
         const response = await msalInstance.acquireTokenPopup({
-          ...apiConfig,
-          scopes: apiConfig.scopes,
+          scopes: ["openid", "profile", "email"],
           account,
         });
         return response.accessToken;

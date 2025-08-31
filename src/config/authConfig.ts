@@ -42,6 +42,7 @@ export const msalConfig: Configuration = {
 // Scopes for id token to be used at MS Identity Platform endpoints.
 export const loginRequest: PopupRequest = {
   scopes: ["openid", "profile", "email"],
+  redirectUri: import.meta.env.VITE_REDIRECT_URI || window.location.origin,
 };
 
 export const graphConfig = {
