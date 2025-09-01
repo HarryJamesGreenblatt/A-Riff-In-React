@@ -24,7 +24,11 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
-app.use('/api/users', userRoutes);
-// app.use('/api/activities', activityRoutes);
+app.get('/health', (req, res) => {
+  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+app.use('/users', userRoutes);
+// app.use('/activities', activityRoutes);
 
 export default app;
