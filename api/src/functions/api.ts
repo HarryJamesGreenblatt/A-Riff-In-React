@@ -27,23 +27,51 @@ export async function api(request: HttpRequest, context: InvocationContext): Pro
 
             // 2. Create a mock Express Response object. Its methods will resolve the promise,
             // effectively sending the response back to the Azure Functions host.
+            const headers: Record<string, string> = {};
             const res: Partial<Response> & { statusCode?: number } = {};
+            
             res.status = (code: number) => {
                 res.statusCode = code;
                 return res as Response;
             };
+            
+            res.setHeader = (name: string, value: string | string[]) => {
+                headers[name] = Array.isArray(value) ? value.join(', ') : value;
+                return res as Response;
+            };
+            
+            res.getHeader = (name: string) => {
+                return headers[name];
+            };
+            
+            res.removeHeader = (name: string) => {
+                delete headers[name];
+                return res as Response;
+            };
+            
             res.json = (body: unknown) => {
                 resolve({
                     status: res.statusCode || 200,
                     jsonBody: body,
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { ...headers, 'Content-Type': 'application/json' },
                 });
                 return res as Response;
             };
+            
             res.send = (body: unknown) => {
                 resolve({
                     status: res.statusCode || 200,
                     body: String(body),
+                    headers,
+                });
+                return res as Response;
+            };
+            
+            res.end = (body?: unknown) => {
+                resolve({
+                    status: res.statusCode || 200,
+                    body: body ? String(body) : '',
+                    headers,
                 });
                 return res as Response;
             };
