@@ -162,6 +162,77 @@ app.use('/activities', activityRoutes);
 
 ---
 
+---
+
+## 🧹 **CLEANUP CHECKLIST** - Remove When Database Issues Resolved
+
+> **Important**: The following experimental/debugging code was added during troubleshooting and should be removed once the database connection is working properly.
+
+### 🗑️ **Code to Remove After Success**
+
+#### 1. **Debugging Endpoints in Azure Function** 
+**File**: `api/src/functions/api.ts`
+```typescript
+// REMOVE: Health check endpoint (lines ~12-20)
+if (request.params.route === 'health') { ... }
+
+// REMOVE: Database test endpoint (lines ~22-52) 
+if (request.params.route === 'dbtest') { ... }
+```
+**Reason**: These were added for debugging. Production should only have the main API routes.
+
+#### 2. **Test Route in User Routes**
+**File**: `api/src/routes/userRoutes.ts`
+```typescript
+// REMOVE: Test endpoint (lines ~4-6)
+router.get('/test', async (req, res) => {
+    res.status(200).json({ message: 'User route test works!', timestamp: new Date().toISOString() });
+});
+```
+**Reason**: This was added to test routing without database dependency.
+
+#### 3. **Enhanced Error Logging**
+**File**: `api/src/routes/userRoutes.ts`
+```typescript
+// SIMPLIFY: Remove excessive console.log statements in main route (lines ~12-26)
+console.log('Attempting to get database pool...');
+console.log('Database pool obtained successfully');
+console.log('Executing query...');
+console.log('Query executed successfully, rows:', result.recordset.length);
+```
+**Reason**: Replace with production-appropriate error handling (keep basic error logging).
+
+#### 4. **Development Files Created During Session**
+**Files to Remove**:
+- `api/src/functions/health.ts` (standalone health function - unused)
+- Any temporary test files created during debugging
+
+### 🔧 **Automation Scripts** (Keep or Clean)
+
+#### Keep (Useful for Deployment):
+- ✅ `configure-function-app.ps1` - Useful for environment setup
+- ✅ `deploy-function-app.ps1` - Useful for automated deployment
+- ✅ `azure.yaml` - Required for azd deployment
+
+#### Consider Removing Later:
+- 🤔 PowerShell scripts once azd deployment is fully working
+
+### 🎯 **Post-Cleanup Goals**
+Once database connection works and cleanup is complete:
+
+1. **Clean API Endpoints**: Only production `/users` and `/activities` routes
+2. **Professional Error Handling**: Appropriate logging without debug spam
+3. **Streamlined Deployment**: Using azd or clean manual process
+4. **Production-Ready Function App**: No test/debug endpoints
+
+### ✅ **Validation After Cleanup**
+- [ ] API endpoints return 200 with real data
+- [ ] No test/debug routes accessible in production
+- [ ] Error logging is appropriate for production
+- [ ] Documentation updated to reflect final clean state
+
+---
+
 ## 🎯 Next Session Priorities
 
 ### 1. **Database Connection Investigation** (HIGH PRIORITY)

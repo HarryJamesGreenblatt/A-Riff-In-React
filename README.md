@@ -20,6 +20,8 @@
 
 **Current Focus:** Database connection troubleshooting for final API functionality
 
+> **Note**: The `api-routing-fixes` branch contains some debugging/test code that should be cleaned up once the database connection is resolved. See [API Debugging Session](./docs/api-debugging-session-2025-09-01.md#-cleanup-checklist---remove-when-database-issues-resolved) for cleanup checklist.
+
 **Architecture Fix:** 
 - **Problem**: Double `/api` prefix in routing (Function name + Express routes)
 - **Solution**: Updated Express routes from `/api/users` → `/users` to work with Azure Function routing
