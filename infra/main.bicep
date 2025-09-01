@@ -42,11 +42,15 @@ param cosmosAccountName string = 'cosmos-${environmentName}'
 @description('The Cosmos DB database name')
 param cosmosDatabaseName string = 'cosmosdb-${environmentName}'
 
-// @description('The Application Insights name')
-// param appInsightsName string = 'ai-${environmentName}'
+@description('The Application Insights name')
+param appInsightsName string = 'appi-${environmentName}'
 
 @description('The Log Analytics workspace name')
 param logAnalyticsName string = 'log-${environmentName}'
+
+@description('The Storage Account name for the Function App')
+param storageAccountName string = 'st${replace(environmentName, '-', '')}'
+
 
 // Tags
 var tags = {
@@ -87,21 +91,48 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   }
 }
 
-// Static Web App commented out for now to troubleshoot deployment issues
-// resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
-//   name: staticWebAppName
-//   location: location
-//   tags: tags
-//   sku: {
-//     name: 'Standard'
-//     tier: 'Standard'
-//   }
-//   properties: {
-//     // Link to GitHub repository would go here in a production deployment
-//   }
-// }
+// Storage Account for Function App
+resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+  name: storageAccountName
+  location: location
+  tags: tags
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+}
 
-// App Configuration for environment variables
+// Log Analytics Workspace for Application Insights
+resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+  name: logAnalyticsName
+  location: location
+  tags: tags
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 30
+    features: {
+      enableLogAccessUsingOnlyResourcePermissions: true
+    }
+  }
+}
+
+// Application Insights for monitoring
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: appInsightsName
+  location: location
+  tags: tags
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalyticsWorkspace.id
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Enabled'
+  }
+}
+
+// Frontend Web App
 resource webApp 'Microsoft.Web/sites@2022-09-01' = {
   name: environmentName
   location: location
@@ -132,36 +163,73 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
   }
 }
 
-// Log Analytics Workspace for Application Insights
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
-  name: logAnalyticsName
+// Backend Function App
+resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
+  name: 'func-${environmentName}'
   location: location
-  tags: tags
+  kind: 'functionapp,linux'
+  tags: union(tags, { 'azd-service-name': 'api' })
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {
-    sku: {
-      name: 'PerGB2018'
-    }
-    retentionInDays: 30
-    features: {
-      enableLogAccessUsingOnlyResourcePermissions: true
+    serverFarmId: appServicePlan.id
+    httpsOnly: true
+    siteConfig: {
+      linuxFxVersion: 'NODE|20-lts'
+      appSettings: [
+        {
+          name: 'AzureWebJobsStorage'
+          value: 'DefaultEndpointsProtocol=https,AccountName=${storageAccount.name},EndpointSuffix=${environment().suffixes.storage},AccountKey=${storageAccount.listKeys().keys[0].value}'
+        }
+        {
+          name: 'WEBSITE_RUN_FROM_PACKAGE'
+          value: '1'
+        }
+        {
+          name: 'FUNCTIONS_EXTENSION_VERSION'
+          value: '~4'
+        }
+        {
+          name: 'FUNCTIONS_WORKER_RUNTIME'
+          value: 'node'
+        }
+        {
+          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+          value: appInsights.properties.InstrumentationKey
+        }
+        {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: appInsights.properties.ConnectionString
+        }
+        {
+          name: 'AZURE_SQL_CONNECTIONSTRING'
+          value: '@Microsoft.KeyVault(SecretUri=${sqlConnectionStringSecret.properties.secretUri})'
+        }
+      ]
     }
   }
 }
 
-// Application Insights for monitoring (commented out to reduce costs)
-// Uncomment if you need application monitoring and telemetry
-// resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
-//   name: appInsightsName
-//   location: location
-//   tags: tags
-//   kind: 'web'
-//   properties: {
-//     Application_Type: 'web'
-//     WorkspaceResourceId: logAnalyticsWorkspace.id
-//     publicNetworkAccessForIngestion: 'Enabled'
-//     publicNetworkAccessForQuery: 'Enabled'
-//   }
-// }
+// Grant Function App access to Key Vault
+resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2023-02-01' = {
+  parent: keyVault
+  name: 'add'
+  properties: {
+    accessPolicies: [
+      {
+        tenantId: subscription().tenantId
+        objectId: functionApp.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+          ]
+        }
+      }
+    ]
+  }
+}
+
 
 // Deploy SQL Database to shared server using module
 module sqlDatabaseModule 'modules/sqlDatabase.bicep' = {
@@ -239,52 +307,18 @@ resource activityContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/c
   }
 }
 
-// Update App Service to include connection strings for databases
-resource webAppSettings 'Microsoft.Web/sites/config@2022-09-01' = {
-  parent: webApp
-  name: 'appsettings'
-  properties: {
-    // APPINSIGHTS_INSTRUMENTATIONKEY: appInsights.properties.InstrumentationKey
-    // APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
-    SQL_CONNECTION_STRING: 'Server=tcp:${sqlDatabaseModule.outputs.sqlServerFqdn},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlAdminLogin};Password=${sqlAdminPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-    COSMOS_ENDPOINT: cosmosAccount.properties.documentEndpoint
-    COSMOS_KEY: cosmosAccount.listKeys().primaryMasterKey
-    COSMOS_DATABASE: cosmosDatabaseName
-    VITE_ENTRA_TENANT_ID: externalTenantId
-    VITE_ENTRA_CLIENT_ID: externalClientId
-    VITE_REDIRECT_URI: 'https://app-${environmentName}.azurewebsites.net'
-    VITE_POST_LOGOUT_URI: 'https://app-${environmentName}.azurewebsites.net'
-  }
-}
-
 // Add database connection strings to Key Vault
-resource sqlConnectionSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
+resource sqlConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
   parent: keyVault
-  name: 'SQL-CONNECTION-STRING'
+  name: 'AZURE-SQL-CONNECTIONSTRING'
   properties: {
     value: 'Server=tcp:${sqlDatabaseModule.outputs.sqlServerFqdn},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlAdminLogin};Password=${sqlAdminPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
   }
 }
 
-resource cosmosEndpointSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
-  parent: keyVault
-  name: 'COSMOS-ENDPOINT'
-  properties: {
-    value: cosmosAccount.properties.documentEndpoint
-  }
-}
-
-resource cosmosKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
-  parent: keyVault
-  name: 'COSMOS-KEY'
-  properties: {
-    value: cosmosAccount.listKeys().primaryMasterKey
-  }
-}
-
 // Output the web app URL
 output webAppUrl string = webApp.properties.defaultHostName
-// output staticWebAppUrl string = staticWebApp.properties.defaultHostname
+output functionAppUrl string = functionApp.properties.defaultHostName
 output sqlServerFqdn string = sqlDatabaseModule.outputs.sqlServerFqdn
 output cosmosEndpoint string = cosmosAccount.properties.documentEndpoint
-// output appInsightsConnectionString string = appInsights.properties.ConnectionString
+output appInsightsConnectionString string = appInsights.properties.ConnectionString

@@ -12,10 +12,14 @@ export async function api(request: HttpRequest, context: InvocationContext): Pro
     return new Promise((resolve) => {
         (async () => {
             // 1. Adapt the Azure HttpRequest to a shape Express can understand.
-            // We only need to construct the properties our Express app actually uses.
+            // The `route` parameter in `request.params` contains the path after the function's route prefix.
+            const route = request.params.route;
+            const expressUrl = route ? `/${route}` : '/';
+            context.log(`Transforming request for Azure Functions route "${route}" to Express URL "${expressUrl}"`);
+
             const expressRequest = {
                 method: request.method,
-                url: request.params.route ? `/${request.params.route}` : '/',
+                url: expressUrl, // Pass the full path to Express
                 headers: request.headers,
                 query: Object.fromEntries(request.query.entries()),
                 body: await request.json().catch(() => undefined), // Safely parse JSON body

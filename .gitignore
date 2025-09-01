@@ -28,3 +28,7 @@ dist-ssr
 *.user
 *.userosscache
 *.sln.docstates
+
+# Environment files
+.env
+.env*.local
