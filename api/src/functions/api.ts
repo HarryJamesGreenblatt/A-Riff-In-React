@@ -9,6 +9,53 @@ import appInstance from '../app';
 export async function api(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     context.log(`Http function processed request for url "${request.url}"`);
 
+    // Simple health check
+    if (request.params.route === 'health') {
+        return {
+            status: 200,
+            jsonBody: {
+                status: 'ok',
+                timestamp: new Date().toISOString(),
+                environment: process.env.NODE_ENV || 'development',
+                hasConnectionString: !!process.env.SQL_CONNECTION_STRING
+            }
+        };
+    }
+
+    // Database test endpoint
+    if (request.params.route === 'dbtest') {
+        try {
+            const { getDbPool } = await import('../services/database');
+            context.log('Attempting to get database pool...');
+            const pool = await getDbPool();
+            context.log('Database pool created successfully');
+            
+            // Try a simple query
+            const result = await pool.request().query('SELECT 1 as test');
+            context.log('Test query executed successfully');
+            
+            return {
+                status: 200,
+                jsonBody: {
+                    status: 'success',
+                    message: 'Database connection successful',
+                    testResult: result.recordset
+                }
+            };
+        } catch (error) {
+            const err = error as Error;
+            context.log('Database test failed:', err);
+            return {
+                status: 500,
+                jsonBody: {
+                    status: 'error',
+                    message: err.message,
+                    stack: err.stack
+                }
+            };
+        }
+    }
+
     return new Promise((resolve) => {
         (async () => {
             // 1. Adapt the Azure HttpRequest to a shape Express can understand.
