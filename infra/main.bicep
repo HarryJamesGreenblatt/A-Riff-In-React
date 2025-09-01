@@ -87,6 +87,87 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   }
 }
 
+// Storage Account for Function App
+resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+  name: 'st${replace(environmentName, '-', '')}'
+  location: location
+  tags: tags
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    accessTier: 'Hot'
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+  }
+}
+
+// Function App for Backend API
+resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
+  name: 'func-${environmentName}'
+  location: location
+  tags: union(tags, { 'azd-service-name': 'api' })
+  kind: 'functionapp,linux'
+  properties: {
+    serverFarmId: appServicePlan.id
+    httpsOnly: true
+    siteConfig: {
+      linuxFxVersion: 'Node|20'
+      appSettings: [
+        {
+          name: 'AzureWebJobsStorage'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
+        }
+        {
+          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${storageAccount.listKeys().keys[0].value}'
+        }
+        {
+          name: 'WEBSITE_CONTENTSHARE'
+          value: toLower('func-${environmentName}')
+        }
+        {
+          name: 'FUNCTIONS_EXTENSION_VERSION'
+          value: '~4'
+        }
+        {
+          name: 'WEBSITE_NODE_DEFAULT_VERSION'
+          value: '~20'
+        }
+        {
+          name: 'FUNCTIONS_WORKER_RUNTIME'
+          value: 'node'
+        }
+        {
+          name: 'SQL_CONNECTION_STRING'
+          value: 'Server=tcp:${sqlDatabaseModule.outputs.sqlServerFqdn},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlAdminLogin};Password=${sqlAdminPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+        }
+        {
+          name: 'COSMOS_ENDPOINT'
+          value: cosmosAccount.properties.documentEndpoint
+        }
+        {
+          name: 'COSMOS_KEY'
+          value: cosmosAccount.listKeys().primaryMasterKey
+        }
+        {
+          name: 'COSMOS_DATABASE'
+          value: cosmosDatabaseName
+        }
+      ]
+      cors: {
+        allowedOrigins: [
+          'https://${environmentName}.azurewebsites.net'
+          'http://localhost:5173'
+          'https://localhost:5173'
+        ]
+        supportCredentials: true
+      }
+    }
+  }
+}
+
 // Static Web App commented out for now to troubleshoot deployment issues
 // resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
 //   name: staticWebAppName
@@ -126,6 +207,10 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'VITE_POST_LOGOUT_URI'
           value: 'https://app-${environmentName}.azurewebsites.net'
+        }
+        {
+          name: 'VITE_API_BASE_URL'
+          value: 'https://func-${environmentName}.azurewebsites.net'
         }
       ]
     }
@@ -254,6 +339,7 @@ resource webAppSettings 'Microsoft.Web/sites/config@2022-09-01' = {
     VITE_ENTRA_CLIENT_ID: externalClientId
     VITE_REDIRECT_URI: 'https://app-${environmentName}.azurewebsites.net'
     VITE_POST_LOGOUT_URI: 'https://app-${environmentName}.azurewebsites.net'
+    VITE_API_BASE_URL: 'https://func-${environmentName}.azurewebsites.net'
   }
 }
 
@@ -284,6 +370,7 @@ resource cosmosKeySecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
 
 // Output the web app URL
 output webAppUrl string = webApp.properties.defaultHostName
+output functionAppUrl string = functionApp.properties.defaultHostName
 // output staticWebAppUrl string = staticWebApp.properties.defaultHostname
 output sqlServerFqdn string = sqlDatabaseModule.outputs.sqlServerFqdn
 output cosmosEndpoint string = cosmosAccount.properties.documentEndpoint

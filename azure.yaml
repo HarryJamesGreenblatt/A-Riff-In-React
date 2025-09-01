@@ -1,0 +1,39 @@
+# azure.yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: a-riff-in-react
+metadata:
+  template: a-riff-in-react@0.0.1-beta
+
+# Hooks that are executed during the 'azd up' and 'azd deploy' commands
+hooks:
+  predeploy:
+    posix:
+      shell: sh
+      run: |
+        echo "Installing API dependencies..."
+        cd api && npm install
+    windows:
+      shell: pwsh
+      run: |
+        echo "Installing API dependencies..."
+        cd api && npm install
+
+services:
+  # Frontend React App
+  web:
+    project: .
+    dist: dist
+    language: js
+    host: appservice
+
+  # Backend API Azure Functions
+  api:
+    project: ./api
+    language: js
+    host: function
+
+# Infrastructure configuration
+infra:
+  provider: bicep
+  path: infra
