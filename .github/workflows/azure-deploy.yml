@@ -66,18 +66,22 @@ jobs:
           app-name: ${{ env.AZURE_ENV_NAME }}
           package: ./dist
       
-      - name: Build and Deploy Backend Function App
+      - name: Build Backend Function App
         run: |
           pushd ./api
           npm ci
           npm run build
           popd
-      - name: Deploy Backend Function App
-        uses: Azure/functions-action@v1
-        with:
-          app-name: func-${{ env.AZURE_ENV_NAME }}
-          package: ./api
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          
+      - name: Deploy Backend Function App (Zip Deployment)
+        run: |
+          cd ./api
+          zip -r function-app.zip . -x "node_modules/*" ".git/*" "*.md"
+          az functionapp deployment source config-zip \
+            --src function-app.zip \
+            --name func-${{ env.AZURE_ENV_NAME }} \
+            --resource-group riffinreact-rg \
+            --verbose
 
       - name: Verify Entra External ID Configuration
         run: |
