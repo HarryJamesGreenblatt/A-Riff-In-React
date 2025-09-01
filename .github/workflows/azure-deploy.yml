@@ -24,9 +24,10 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-      - name: Install dependencies
+      - name: Install Frontend dependencies
         run: npm ci
-      - name: Build React app
+
+      - name: Build Frontend React app
         run: npm run build
         env: 
           # Use actual values during build - Vite embeds these at build time
@@ -34,8 +35,9 @@ jobs:
           VITE_ENTRA_TENANT_ID: ${{ secrets.ENTRA_TENANT_ID }}
           VITE_REDIRECT_URI: "https://a-riff-in-react.azurewebsites.net"
           VITE_POST_LOGOUT_URI: "https://a-riff-in-react.azurewebsites.net"
-          VITE_API_BASE_URL: "https://a-riff-in-react.azurewebsites.net/api"
+          VITE_API_BASE_URL: "https://func-a-riff-in-react.azurewebsites.net"
           VITE_API_SCOPE: "api://a-riff-in-react/access_as_user"
+
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -57,12 +59,26 @@ jobs:
               sharedSqlServerResourceGroupName=${{ env.SHARED_SQL_SERVER_RG }} \
             --name a-riff-in-react-${{ github.run_number }} \
             --verbose
-      - name: Deploy React app to Azure Web App
+
+      - name: Deploy Frontend React app to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_ENV_NAME }}
           package: ./dist
       
+      - name: Build and Deploy Backend Function App
+        run: |
+          pushd ./api
+          npm ci
+          npm run build
+          popd
+      - name: Deploy Backend Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: func-${{ env.AZURE_ENV_NAME }}
+          package: ./api
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+
       - name: Verify Entra External ID Configuration
         run: |
           echo "Verifying Entra External ID configuration in Azure Web App..."
