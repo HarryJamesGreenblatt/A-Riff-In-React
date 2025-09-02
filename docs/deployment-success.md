@@ -9,16 +9,16 @@
 ## What Was Accomplished
 
 ### 🔄 Backend API Implementation
-- **Express on Functions** backend successfully implemented and deployed
-- **User CRUD endpoints** fully functional with Azure SQL Database
-- **MSAL authentication integration** between frontend and backend
-- **TypeScript build errors** resolved for continuous deployment
+- **Express on App Service** backend architecture implemented
+- **User CRUD endpoints** designed for Azure SQL Database integration
+- **MSAL authentication integration** framework ready for frontend/backend sync
+- **Architecture migration** from Azure Functions to App Service completed
 
 ### 🏗️ Infrastructure Deployed
 ```
 Resource Group: riffinreact-rg
 ├── Web App: a-riff-in-react (React Frontend)
-├── Function App: func-a-riff-in-react (Node.js Backend API)
+├── App Service: api-a-riff-in-react (Node.js Backend API)
 ├── App Service Plan: asp-a-riff-in-react
 ├── SQL Server: sequitur-sql-server (Shared)
 ├── SQL Database: riff-react-db

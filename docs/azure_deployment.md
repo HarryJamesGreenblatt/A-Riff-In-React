@@ -10,7 +10,7 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 - ✅ **Web Application**: Live at https://a-riff-in-react.azurewebsites.net
 - ✅ **Authentication**: Microsoft Entra External ID **FULLY WORKING** ✅
 - ✅ **CI/CD Pipeline**: GitHub Actions workflow operational
-- 🔄 **Azure Functions API**: Needs redeployment (currently returning 404)
+- 🔄 **Backend API**: App Service deployed but experiencing startup issues
 - ✅ **Frontend Authentication**: Complete and production-ready
 
 ## Authentication Status: ✅ FULLY WORKING
@@ -27,6 +27,7 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 | Resource | Name | Purpose | Status |
 |----------|------|---------|--------|
 | Web App | `a-riff-in-react` | React app hosting | ✅ Active |
+| App Service | `api-a-riff-in-react` | Node.js API hosting | 🔄 Deployment Issues |
 | SQL Server | `sequitur-sql-server` (Shared) | Relational database server | ✅ Active |
 | SQL Database | `riff-react-db` | Application-specific database | ✅ Active |
 | Cosmos DB | `cosmos-a-riff-in-react` | NoSQL database | ✅ Active |
@@ -115,7 +116,7 @@ To enable external user authentication with Microsoft Entra External ID, you can
 The project includes a Bicep template in the `infra` folder that provisions:
 
 - Azure App Service (for frontend hosting)
-- Azure Function App (for backend Node.js API)
+- Azure App Service (for backend Node.js API)
 - Azure Key Vault (for secure storage of credentials)
 - **Azure SQL Database** (for structured data, deployed to a shared server)
 - Azure Cosmos DB (for flexible data)

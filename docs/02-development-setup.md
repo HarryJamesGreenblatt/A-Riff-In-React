@@ -163,19 +163,18 @@ src/
 
 **Details**: See [State Management](./04-state-management.md)
 
-### Backend API Setup (Node.js / Azure Functions)
+### Backend API Setup (Node.js / Azure App Service)
 
-The backend is a Node.js application using Express, designed to run as an Azure Function.
+The backend is a Node.js application using Express, designed to run on Azure App Service.
 
 **Prerequisites**:
 - Node.js (LTS version recommended)
-- Azure Functions Core Tools (optional, for local testing)
 
 **Setup Steps**:
 
-1. **Navigate to the API directory**:
+1. **Navigate to the API deployment directory**:
    ```bash
-   cd api
+   cd api/deployment
    ```
 
 2. **Install dependencies**:
@@ -184,20 +183,14 @@ The backend is a Node.js application using Express, designed to run as an Azure 
    ```
 
 3. **Configure local settings**:
-   - Rename `local.settings.example.json` to `local.settings.json`.
+   - Create a `.env` file in the deployment directory
    - Fill in the required values, especially your database credentials:
-     ```json
-     {
-       "IsEncrypted": false,
-       "Values": {
-         "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-         "FUNCTIONS_WORKER_RUNTIME": "node",
-         "SQL_SERVER": "your_server.database.windows.net",
-         "SQL_DATABASE": "your_database",
-         "SQL_USER": "your_username",
-         "SQL_PASSWORD": "your_password"
-       }
-     }
+     ```env
+     PORT=8000
+     SQL_SERVER=your_server.database.windows.net
+     SQL_DATABASE=your_database
+     SQL_USER=your_username
+     SQL_PASSWORD=your_password
      ```
 
 4. **Run the database schema**:
@@ -208,7 +201,7 @@ The backend is a Node.js application using Express, designed to run as an Azure 
    ```bash
    npm start
    ```
-   - The API will be available at `http://localhost:7071/api`.
+   - The API will be available at `http://localhost:8000`.
 
 ### Current Status
 

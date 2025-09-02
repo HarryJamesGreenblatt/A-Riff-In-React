@@ -293,7 +293,7 @@ The frontend authentication flow is tightly integrated with the backend API to e
 
 This ensures that every user who logs in via MSAL has a corresponding, persistent user profile in the application's database, which can be enriched with application-specific roles and data.
 
-The backend API (`api/src/routes/userRoutes.ts`) is an Express.js application running on Azure Functions. It handles the database logic for creating and retrieving users from the Azure SQL database. The API itself is stateless and does not handle token validation in this flow, as it is currently designed to be called by the trusted frontend immediately after a successful MSAL login. For direct API calls from external clients, token validation would be a necessary security addition.
+The backend API (`api/deployment/server.js`) is an Express.js application running on Azure App Service. It handles the database logic for creating and retrieving users from the Azure SQL database. The API itself is stateless and does not handle token validation in this flow, as it is currently designed to be called by the trusted frontend immediately after a successful MSAL login. For direct API calls from external clients, token validation would be a necessary security addition.
 
 ## Next Steps
 

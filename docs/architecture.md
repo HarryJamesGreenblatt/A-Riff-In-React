@@ -25,27 +25,30 @@ This pattern provides the best of both worlds:
 2.  **Isolation & Security**: Each application has its own database and credentials, ensuring strong security and data boundaries.
 3.  **Independent Schemas**: Each database has a completely independent schema, allowing for tailored data models per application without conflict.
 
-## Backend Architecture: Express on Azure Functions
+## Backend Architecture: Express on Azure App Service
 
-To provide a scalable and maintainable serverless backend, this project uses the **"Express on Functions"** pattern. This hybrid approach combines the familiar structure and robust middleware ecosystem of the Express.js framework with the serverless, event-driven power of Azure Functions.
+The backend uses a standard Express.js server deployed to Azure App Service, providing a familiar development experience with the managed services and scalability of Azure.
 
 ### How It Works
 
-1.  **Express App (`api/src/app.ts`)**: A standard Express application is defined. This is where all middleware (CORS, body-parser), routes, and application logic reside. It's the heart of the API.
-2.  **Azure Function Trigger (`api/src/functions/api.ts`)**: A single, generic HTTP-triggered Azure Function is created. Its route is configured with a wildcard (`{*route}`) to catch all incoming API requests.
-3.  **The Adapter**: The core of the pattern is the adapter code within the Azure Function trigger. This code is responsible for:
-    *   Translating the incoming Azure Functions `HttpRequest` object into a format that Express can understand (`Request`).
-    *   Creating a mock Express `Response` object.
-    *   Passing both to the Express app instance.
-    *   Capturing the output from the mock `Response` (e.g., status code, JSON body) and translating it back into an `HttpResponseInit` object that the Azure Functions runtime can send back to the client.
+1.  **Express Server (`api/deployment/server.js`)**: A standard Express application with middleware (CORS, body-parser), routes, and application logic. This is the complete API server.
+2.  **Azure App Service Hosting**: The Express server runs directly on Azure App Service's Node.js runtime, providing automatic scaling, load balancing, and managed infrastructure.
+3.  **Simple Deployment**: The server is deployed as a complete Node.js application package containing the Express server and all dependencies.
 
 ### Advantages of this Pattern
 
--   **Structured & Scalable**: Allows for a well-organized API with routers, controllers, and services, which is difficult to achieve with many individual, disconnected functions.
--   **Full Middleware Support**: The entire Express middleware ecosystem is available, simplifying tasks like authentication, logging, and error handling.
--   **Developer Familiarity**: Developers with Express experience can be immediately productive without needing to learn a new paradigm for every piece of logic.
--   **Serverless Benefits**: Still retains the core benefits of Azure Functions, including automatic scaling, consumption-based pricing, and integrated triggers.
--   **Local Development**: The API can be developed and tested locally using the standard Azure Functions Core Tools, providing a high-fidelity development environment.
+-   **Familiar Development**: Standard Express.js development patterns with full middleware support
+-   **Simplified Architecture**: Direct server deployment without function wrappers or adapters
+-   **Full Express Features**: Complete access to Express ecosystem and patterns
+-   **Azure Benefits**: Managed infrastructure, automatic scaling, integrated monitoring
+-   **Cost Effective**: Predictable pricing with Basic tier App Service hosting
+-   **Local Development**: Standard Node.js development and testing workflows
+
+### Current Status
+
+**⚠️ Deployment Issue**: The API is currently experiencing startup failures due to TypeScript compiler errors in the Azure environment. The Express server code is functional, but the deployment environment contains conflicting TypeScript build configurations.
+
+**Resolution in Progress**: Clean deployment package with only JavaScript files and production dependencies has been created and deployed.
 
 ## State Management
 

@@ -32,12 +32,13 @@ The architecture of A Riff In React follows these key principles:
 
 ```
 a-riff-in-react/
-├── api/                    # Backend API (Node.js, Express on Azure Functions)
-│   ├── src/
-│   │   ├── functions/      # Azure Function endpoint triggers
+├── api/                    # Backend API (Node.js, Express on Azure App Service)
+│   ├── deployment/         # Clean deployment package
+│   │   ├── server.js       # Express server entry point
+│   │   ├── package.json    # Production dependencies
 │   │   ├── routes/         # Express route definitions
 │   │   └── services/       # Database connection services
-│   └── package.json
+│   └── schema.sql          # Database schema
 ├── src/                    # Frontend (React)
 │   ├── components/         # Reusable UI components
 │   │   ├── ui/             # Base UI components (buttons, inputs, etc.)
@@ -98,8 +99,7 @@ Cosmos DB is ideal for:
 
 The template is configured for seamless integration with the following Azure services:
 
-- **Azure App Service / Static Web Apps**: For hosting the React application
-- **Azure Functions**: For the serverless backend API (Node.js, Express)
+- **Azure App Service**: For hosting both the React application and Node.js API
 - **Azure SQL Database**: For structured, relational data
 - **Azure Cosmos DB**: For document-based and real-time data
 - **Azure Key Vault**: For secure storage of secrets and configuration
