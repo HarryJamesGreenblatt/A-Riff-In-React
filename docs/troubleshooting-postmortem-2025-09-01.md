@@ -3,50 +3,94 @@
 **Date:** September 1, 2025  
 **Session Type:** Extended Debugging Session  
 **Duration:** ~3 hours  
-**Status:** 🔴 **REVERTED TO KNOWN GOOD STATE**  
-**Outcome:** Lessons learned, codebase protected
+**Status:** � **MAJOR ARCHITECTURAL MIGRATION COMPLETED - API STILL FAILING**  
+**Outcome:** Migrated from Azure Functions to App Service, cleaned codebase, TypeScript errors identified but still having startup issues
 
-## 🚨 What Went Wrong
+## 🔄 What We Accomplished Today
 
-### Initial Problem
+### Major Architectural Changes ✅
+- **Migrated from Azure Functions to App Service** - complete infrastructure overhaul
+- **Updated Bicep infrastructure** - functionApp → apiApp conversion
+- **Cleaned up duplicate/conflicting package.json files** - eliminated "evil twins"
+- **Simplified deployment structure** - single clean deployment package
+- **Downgraded Express 5.x → 4.x** for Node.js 14 compatibility
+- **Manual deployment successful** - files confirmed uploaded to Azure
+
+### Current Problem Analysis �
+- **Container starts successfully** but **application crashes immediately** with exit code 1
+- **Root cause identified**: TypeScript compiler (tsc) looking for missing '../lib/tsc.js'
+- **Error pattern**: `npm run build` → `tsc` → "Cannot find module '../lib/tsc.js'" → startup failure
+- **Package.json still has build scripts** in deployed version despite local cleanup
+
+### Initial Problem (Session Started With)
 - Azure Function App deployed successfully but returning 404 for all `/api/*` routes
-- Function App root endpoint working (showing default Azure page)
+- Function App root endpoint working (showing default Azure page)  
 - All API endpoints (`/api`, `/api/health`, `/api/users`) returning 404
 
-### Critical Mistakes Made
+## 🎯 Current Status Summary
 
-#### 1. **Scattered Troubleshooting Approach** 🎯
-**Problem:** Jumped between multiple potential fixes without systematic diagnosis
-- Modified routing configuration multiple times
-- Changed Express.js integration approaches
-- Updated function registration methods
-- Made local environment changes thinking they'd affect deployed app
+### ✅ **What's Working**
+- **Frontend**: React app fully deployed and working at `a-riff-in-react.azurewebsites.net`
+- **Infrastructure**: Complete migration from Azure Functions to App Service
+- **Cost Optimization**: Saved $15.36/month by cleaning up orphaned resources
+- **Codebase**: Eliminated duplicate/conflicting package.json files
+- **Deployment**: Clean deployment package created and uploaded successfully
+- **File Structure**: All files confirmed deployed to Azure (`server.js`, `package.json`, `node_modules`)
 
-**Lesson:** Always diagnose systematically before attempting fixes
+### ❌ **What's Still Broken**  
+- **API Startup**: Application crashes immediately on startup with exit code 1
+- **Root Cause**: TypeScript compiler missing '../lib/tsc.js' causing build failure
+- **Error Flow**: `npm start` → `prestart: npm run build` → `tsc` → module not found → crash
+- **503 Errors**: API returning 503 Service Unavailable due to startup failure
 
-#### 2. **Assumption-Driven Debugging** 🤔
-**Problem:** Made assumptions about root cause without confirming evidence
-- Assumed routing configuration was wrong
-- Assumed Express.js integration was the issue
-- Assumed local environment changes would propagate to deployed app
+### 🔍 **Key Insight**
+Despite uploading clean `package.json` without TypeScript, Azure is still finding a version with:
+```json
+{
+  "scripts": {
+    "prestart": "npm run build",
+    "build": "tsc"
+  }
+}
+```
 
-**Lesson:** Gather concrete evidence before making changes
+This suggests either:
+1. Cache issue in Azure deployment
+2. Wrong files being prioritized during startup
+3. TypeScript dependencies still installed in node_modules
 
-#### 3. **Multiple Simultaneous Changes** ⚡
-**Problem:** Made several changes at once, making it impossible to isolate what worked
-- Modified function routing, path parsing, AND registration simultaneously
-- Changed both local and deployment configuration
-- Updated multiple files without testing individual changes
+## 🛠️ Next Session Action Plan
 
-**Lesson:** Make one change at a time and test each change
+### Priority 1: Verify Deployed Package Content
+1. **Check actual deployed package.json** in Kudu console
+2. **Verify no TypeScript scripts** in deployed version
+3. **Confirm Express 4.x installed** not Express 5.x
 
-#### 4. **Ignored Working Deployment Pipeline** ✅
-**Problem:** Despite having a working CI/CD pipeline, focused on wrong areas
-- GitHub Actions was deploying successfully
-- Infrastructure was provisioned correctly
-- Function App was running (evidenced by default page)
+### Priority 2: Clean TypeScript Dependencies  
+1. **Delete node_modules** in Azure via Kudu
+2. **Run npm install** to rebuild from clean package.json
+3. **Verify only Express + CORS installed**
 
-**Lesson:** When infrastructure is working, focus on application-level issues
+### Priority 3: Alternative Startup Configuration
+1. **Set WEBSITE_RUN_FROM_PACKAGE=0** to ensure file deployment
+2. **Configure startup command** directly in Azure Portal
+3. **Test with minimal server.js** (no build step)
+
+## 📊 Progress Tracking
+
+### Major Milestones Completed
+- [x] **Architecture Migration**: Azure Functions → App Service
+- [x] **Infrastructure Update**: Bicep templates converted
+- [x] **Code Cleanup**: Eliminated duplicate package.json files  
+- [x] **Deployment Package**: Clean Express-only deployment created
+- [x] **File Upload**: Confirmed deployment via Kudu File Manager
+- [x] **Express Compatibility**: Downgraded 5.x → 4.x for Node 14
+
+### Remaining Tasks
+- [ ] **Fix TypeScript Build Error**: Remove tsc dependency completely
+- [ ] **API Startup Success**: Get Express server running
+- [ ] **Health Check Working**: Confirm `/health` endpoint responds
+- [ ] **Full API Testing**: Test all endpoints with authentication
 
 ## 🔍 What Should Have Been Done
 
