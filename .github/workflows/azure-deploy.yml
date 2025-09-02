@@ -76,7 +76,16 @@ jobs:
       - name: Deploy Backend Function App (Zip Deployment)
         run: |
           cd ./api
-          zip -r function-app.zip . -x "node_modules/*" ".git/*" "*.md"
+          # Create deployment structure with compiled JS files in correct locations
+          mkdir -p deployment
+          cp host.json deployment/
+          cp package.json deployment/
+          # Copy compiled functions from dist to root of deployment
+          cp -r dist/src/* deployment/
+          # Create function-app.zip from the deployment folder
+          cd deployment
+          zip -r ../function-app.zip . 
+          cd ..
           az functionapp deployment source config-zip \
             --src function-app.zip \
             --name func-${{ env.AZURE_ENV_NAME }} \
