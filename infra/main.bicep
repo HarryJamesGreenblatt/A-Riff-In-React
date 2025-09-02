@@ -48,9 +48,6 @@ param appInsightsName string = 'appi-${environmentName}'
 @description('The Log Analytics workspace name')
 param logAnalyticsName string = 'log-${environmentName}'
 
-@description('The Storage Account name for the Function App')
-param storageAccountName string = 'st${replace(environmentName, '-', '')}'
-
 
 // Tags
 var tags = {
@@ -89,17 +86,6 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   properties: {
     reserved: true
   }
-}
-
-// Storage Account for Function App
-resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: storageAccountName
-  location: location
-  tags: tags
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
 }
 
 // Log Analytics Workspace for Application Insights
@@ -158,16 +144,20 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'VITE_POST_LOGOUT_URI'
           value: 'https://app-${environmentName}.azurewebsites.net'
         }
+        {
+          name: 'VITE_API_BASE_URL'
+          value: 'https://api-${environmentName}.azurewebsites.net'
+        }
       ]
     }
   }
 }
 
-// Backend Function App
-resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
-  name: 'func-${environmentName}'
+// Backend API App Service
+resource apiApp 'Microsoft.Web/sites@2022-09-01' = {
+  name: 'api-${environmentName}'
   location: location
-  kind: 'functionapp,linux'
+  kind: 'app,linux'
   tags: union(tags, { 'azd-service-name': 'api' })
   identity: {
     type: 'SystemAssigned'
@@ -179,20 +169,16 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       linuxFxVersion: 'NODE|20'
       appSettings: [
         {
-          name: 'AzureWebJobsStorage'
-          value: 'DefaultEndpointsProtocol=https,AccountName=${storageAccount.name},EndpointSuffix=${environment().suffixes.storage},AccountKey=${storageAccount.listKeys().keys[0].value}'
-        }
-        {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
           value: '1'
         }
         {
-          name: 'FUNCTIONS_EXTENSION_VERSION'
-          value: '~4'
+          name: 'PORT'
+          value: '8000'
         }
         {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'node'
+          name: 'NODE_ENV'
+          value: 'production'
         }
         {
           name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
@@ -211,7 +197,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   }
 }
 
-// Grant Function App access to Key Vault
+// Grant API App access to Key Vault
 resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2023-02-01' = {
   parent: keyVault
   name: 'add'
@@ -219,7 +205,7 @@ resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2023-02-
     accessPolicies: [
       {
         tenantId: subscription().tenantId
-        objectId: functionApp.identity.principalId
+        objectId: apiApp.identity.principalId
         permissions: {
           secrets: [
             'get'
@@ -318,7 +304,7 @@ resource sqlConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01
 
 // Output the web app URL
 output webAppUrl string = webApp.properties.defaultHostName
-output functionAppUrl string = functionApp.properties.defaultHostName
+output apiAppUrl string = apiApp.properties.defaultHostName
 output sqlServerFqdn string = sqlDatabaseModule.outputs.sqlServerFqdn
 output cosmosEndpoint string = cosmosAccount.properties.documentEndpoint
 output appInsightsConnectionString string = appInsights.properties.ConnectionString
