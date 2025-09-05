@@ -84,33 +84,26 @@ jobs:
           app-name: ${{ env.AZURE_ENV_NAME }}
           package: ./dist
       
-      # Backend deployment temporarily disabled - using manual deployment method
-      # - name: Build Backend API App
-      #   run: |
-      #     pushd ./api
-      #     npm ci
-      #     npm run build
-      #     popd
+      - name: Deploy Backend with Run-from-Package Pattern
+        run: |
+          echo "Building backend for run-from-package deployment..."
+          cd ./api/deployment
           
-      # - name: Deploy Backend API App Service
-      #   run: |
-      #     cd ./api
-      #     # Create deployment structure with compiled JS files
-      #     mkdir -p deployment
-      #     cp package*.json deployment/
-      #     # Copy compiled server from dist
-      #     cp -r dist/* deployment/
-      #     # Copy node_modules for runtime
-      #     cp -r node_modules deployment/
-      #     # Create api-app.zip from the deployment folder
-      #     cd deployment
-      #     zip -r ../api-app.zip . 
-      #     cd ..
-      #     az webapp deployment source config-zip \
-      #       --src api-app.zip \
-      #       --name api-${{ env.AZURE_ENV_NAME }} \
-      #       --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-      #       --verbose
+          # Install dependencies for deployment (production only)
+          npm ci --production
+          
+          # Create deployment zip with node_modules included (community best practice)
+          echo "Creating deployment package..."
+          zip -r ../backend-deployment.zip . -x "*.log" "*.tmp"
+          cd ..
+          
+          echo "Deploying to Azure App Service..."
+          az webapp deploy \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name api-${{ env.AZURE_ENV_NAME }} \
+            --src-path backend-deployment.zip \
+            --type zip \
+            --async false
 
       - name: Verify Entra External ID Configuration
         run: |
