@@ -90,7 +90,8 @@ jobs:
           cd ./api/deployment
           
           # Install dependencies for deployment (production only)
-          npm ci --production
+          # Using npm install instead of npm ci for better compatibility
+          npm install --production
           
           # Create deployment zip with node_modules included (community best practice)
           echo "Creating deployment package..."
