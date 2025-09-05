@@ -29,6 +29,20 @@ app.get('/', (req, res) => {
     });
 });
 
+// Import and use routes (only if dependencies are available)
+try {
+    const userRoutes = require('./routes/userRoutes');
+    const activityRoutes = require('./routes/activityRoutes');
+    
+    app.use('/api/users', userRoutes);
+    app.use('/api/activities', activityRoutes);
+    
+    console.log('Database routes loaded successfully');
+} catch (error) {
+    console.warn('Database routes not available:', error.message);
+    console.log('API running in basic mode - database features disabled');
+}
+
 // Start server
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
