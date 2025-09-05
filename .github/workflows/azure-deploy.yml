@@ -98,6 +98,18 @@ jobs:
           zip -r ../backend-deployment.zip . -x "*.log" "*.tmp"
           cd ..
           
+          echo "Setting WEBSITE_RUN_FROM_PACKAGE=1..."
+          az webapp config appsettings set \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name api-${{ env.AZURE_ENV_NAME }} \
+            --settings WEBSITE_RUN_FROM_PACKAGE=1
+          
+          echo "Setting startup command..."
+          az webapp config set \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --name api-${{ env.AZURE_ENV_NAME }} \
+            --startup-file "npm start"
+          
           echo "Deploying to Azure App Service..."
           az webapp deploy \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \

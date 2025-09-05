@@ -167,14 +167,11 @@ resource apiApp 'Microsoft.Web/sites@2022-09-01' = {
     httpsOnly: true
     siteConfig: {
       linuxFxVersion: 'NODE|20'
+      appCommandLine: 'npm start'
       appSettings: [
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
           value: '1'
-        }
-        {
-          name: 'PORT'
-          value: '8000'
         }
         {
           name: 'NODE_ENV'
