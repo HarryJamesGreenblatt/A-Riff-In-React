@@ -17,10 +17,16 @@ app.use(express.json());
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+    // Return health status regardless of database connectivity
+    // This ensures the health check always succeeds so the app doesn't get restarted unnecessarily
     res.status(200).json({ 
         status: 'OK', 
         timestamp: new Date().toISOString(),
-        environment: process.env.NODE_ENV || 'development'
+        environment: process.env.NODE_ENV || 'development',
+        services: {
+            sql: process.env.AZURE_SQL_CONNECTIONSTRING ? 'Configured' : 'Not Configured',
+            cosmos: process.env.COSMOS_ENDPOINT && process.env.COSMOS_KEY ? 'Configured' : 'Not Configured'
+        }
     });
 });
 

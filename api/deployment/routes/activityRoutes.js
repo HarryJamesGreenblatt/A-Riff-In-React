@@ -32,7 +32,7 @@ function isCosmosAvailable() {
 }
 
 // GET /api/activities
-router.get('/', async (req, res) => {
+router.get('/', function(req, res) {
     try {
         if (!isCosmosAvailable()) {
             return res.status(503).json({ 
@@ -41,9 +41,10 @@ router.get('/', async (req, res) => {
             });
         }
         
-        const { userId, limit = '50' } = req.query;
-        let query = 'SELECT * FROM c ORDER BY c.timestamp DESC';
-        const parameters = [];
+        var userId = req.query.userId;
+        var limit = req.query.limit || '50';
+        var query = 'SELECT * FROM c ORDER BY c.timestamp DESC';
+        var parameters = [];
         
         if (userId) {
             query = 'SELECT * FROM c WHERE c.userId = @userId ORDER BY c.timestamp DESC';
@@ -51,24 +52,27 @@ router.get('/', async (req, res) => {
         }
         
         if (limit) {
-            query += ` OFFSET 0 LIMIT ${parseInt(limit)}`;
+            query += ' OFFSET 0 LIMIT ' + parseInt(limit);
         }
         
-        const { resources } = await container.items.query({
-            query,
-            parameters
-        }).fetchAll();
-        
-        res.status(200).json(resources);
+        container.items.query({
+            query: query,
+            parameters: parameters
+        }).fetchAll().then(function(response) {
+            res.status(200).json(response.resources);
+        }).catch(function(err) {
+            console.error('Error fetching activities:', err);
+            res.status(500).json({ error: err.message });
+        });
     }
     catch (err) {
-        console.error('Error fetching activities:', err);
+        console.error('Error in activities route:', err);
         res.status(500).json({ error: err.message });
     }
 });
 
 // GET /api/activities/stream
-router.get('/stream', async (req, res) => {
+router.get('/stream', function(req, res) {
     try {
         if (!isCosmosAvailable()) {
             return res.status(503).json({ 
@@ -79,19 +83,22 @@ router.get('/stream', async (req, res) => {
         
         // For now, return recent activities
         // This could be enhanced with WebSocket support for real-time updates
-        const query = 'SELECT * FROM c ORDER BY c.timestamp DESC OFFSET 0 LIMIT 20';
-        const { resources } = await container.items.query(query).fetchAll();
-        
-        res.status(200).json(resources);
+        var query = 'SELECT * FROM c ORDER BY c.timestamp DESC OFFSET 0 LIMIT 20';
+        container.items.query(query).fetchAll().then(function(response) {
+            res.status(200).json(response.resources);
+        }).catch(function(err) {
+            console.error('Error fetching activity stream:', err);
+            res.status(500).json({ error: err.message });
+        });
     }
     catch (err) {
-        console.error('Error fetching activity stream:', err);
+        console.error('Error in activity stream route:', err);
         res.status(500).json({ error: err.message });
     }
 });
 
 // POST /api/activities
-router.post('/', async (req, res) => {
+router.post('/', function(req, res) {
     try {
         if (!isCosmosAvailable()) {
             return res.status(503).json({ 
@@ -100,25 +107,33 @@ router.post('/', async (req, res) => {
             });
         }
         
-        const { userId, type, data, metadata } = req.body;
+        var userId = req.body.userId;
+        var type = req.body.type;
+        var data = req.body.data;
+        var metadata = req.body.metadata;
+        
         if (!userId || !type) {
             return res.status(400).json({ message: 'userId and type are required' });
         }
         
-        const activity = {
-            id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-            userId,
-            type,
+        var activity = {
+            id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+            userId: userId,
+            type: type,
             data: data || {},
             timestamp: new Date().toISOString(),
             metadata: metadata || {}
         };
         
-        const { resource } = await container.items.create(activity);
-        res.status(201).json(resource);
+        container.items.create(activity).then(function(response) {
+            res.status(201).json(response.resource);
+        }).catch(function(err) {
+            console.error('Error creating activity:', err);
+            res.status(500).json({ error: err.message });
+        });
     }
     catch (err) {
-        console.error('Error creating activity:', err);
+        console.error('Error in activity creation route:', err);
         res.status(500).json({ error: err.message });
     }
 });
