@@ -4,6 +4,9 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 8080; // Use Azure's assigned port or fallback to 8080
 
+// Set port for iisnode compatibility
+app.set('port', port);
+
 // CORS configuration
 app.use(cors({
     origin: process.env.FRONTEND_URL || 'https://a-riff-in-react.azurewebsites.net',
@@ -52,7 +55,8 @@ try {
     console.log('API running in basic mode - database features disabled');
 }
 
-// Start server
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+// Start server - Remove callback for iisnode compatibility
+app.listen(port);
+console.log('Server listening on port ' + port);
+
+module.exports = app;
