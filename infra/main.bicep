@@ -84,7 +84,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
     tier: 'Basic'
   }
   properties: {
-    reserved: true
+    reserved: false  // Windows App Service Plan
   }
 }
 
@@ -157,7 +157,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
 resource apiApp 'Microsoft.Web/sites@2022-09-01' = {
   name: 'api-${environmentName}'
   location: location
-  kind: 'app,linux'
+  kind: 'app'
   tags: union(tags, { 'azd-service-name': 'api' })
   identity: {
     type: 'SystemAssigned'
@@ -166,7 +166,7 @@ resource apiApp 'Microsoft.Web/sites@2022-09-01' = {
     serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: {
-      linuxFxVersion: 'NODE|20'
+      nodeVersion: '20'
       appCommandLine: 'npm start'
       appSettings: [
         {
@@ -200,6 +200,10 @@ resource apiApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'
           value: 'false'
+        }
+        {
+          name: 'WEBSITES_PORT'
+          value: '8080'
         }
       ]
     }
