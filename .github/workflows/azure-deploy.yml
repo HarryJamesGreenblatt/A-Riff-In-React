@@ -88,15 +88,6 @@ jobs:
         run: |
           echo "Using pre-built Windows-compatible deployment package..."
           
-          echo "Configuring Azure App Service settings for Windows..."
-          az webapp config appsettings set \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --name api-${{ env.AZURE_ENV_NAME }} \
-            --settings \
-              WEBSITE_RUN_FROM_PACKAGE=1 \
-              WEBSITE_NODE_DEFAULT_VERSION=20.11.0 \
-              WEBSITES_ENABLE_APP_SERVICE_STORAGE=true
-          
           echo "Deploying pre-built package to Azure App Service..."
           az webapp deploy \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
