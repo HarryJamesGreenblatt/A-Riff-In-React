@@ -29,6 +29,12 @@ app.get('/', (req, res) => {
     });
 });
 
+// Diagnostic log to check environment variables
+console.log('--- DIAGNOSTIC: Checking Environment Variables ---');
+console.log(`FRONTEND_URL: ${process.env.FRONTEND_URL}`);
+console.log(`AZURE_SQL_CONNECTIONSTRING: ${process.env.AZURE_SQL_CONNECTIONSTRING ? 'Exists (hidden for security)' : 'NOT FOUND'}`);
+console.log('----------------------------------------------');
+
 // Import and use routes (only if dependencies are available)
 try {
     const userRoutes = require('./routes/userRoutes');
@@ -39,7 +45,10 @@ try {
     
     console.log('Database routes loaded successfully');
 } catch (error) {
-    console.warn('Database routes not available:', error.message);
+    console.error('--- CRITICAL: Failed to load database routes ---');
+    console.error('Error Message:', error.message);
+    console.error('Error Stack:', error.stack);
+    console.error('-------------------------------------------------');
     console.log('API running in basic mode - database features disabled');
 }
 
