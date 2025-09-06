@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const port = 8080; // Forcing port 8080 for diagnostics
+const port = process.env.PORT || 8080; // Use Azure's assigned port or fallback to 8080
 
 // CORS configuration
 app.use(cors({

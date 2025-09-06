@@ -56,7 +56,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version: '20.11.0'
           cache: 'npm'
       - name: Install Frontend dependencies
         run: npm ci
@@ -98,21 +98,14 @@ jobs:
           zip -r ../backend-deployment.zip . -x "*.log" "*.tmp"
           cd ..
           
-          echo "Configuring Azure App Service settings to prevent timeout issues..."
+          echo "Configuring Azure App Service settings for Windows..."
           az webapp config appsettings set \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --name api-${{ env.AZURE_ENV_NAME }} \
             --settings \
               WEBSITE_RUN_FROM_PACKAGE=1 \
-              WEBSITE_ENABLE_SYNC_UPDATE_SITE=false \
-              SCM_DO_BUILD_DURING_DEPLOYMENT=false \
-              WEBSITES_ENABLE_APP_SERVICE_STORAGE=false
-
-          echo "Setting startup command..."
-          az webapp config set \
-            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --name api-${{ env.AZURE_ENV_NAME }} \
-            --startup-file "npm start"
+              WEBSITE_NODE_DEFAULT_VERSION=20.11.0 \
+              WEBSITES_ENABLE_APP_SERVICE_STORAGE=true
           
           echo "Deploying to Azure App Service with async deployment to avoid timeout..."
           az webapp deploy \

@@ -125,7 +125,7 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
     serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: {
-      nodeVersion: '20'
+      nodeVersion: '20.11.0'
       appSettings: [
         {
           name: 'VITE_ENTRA_TENANT_ID'
@@ -137,11 +137,11 @@ resource webApp 'Microsoft.Web/sites@2022-09-01' = {
         }
         {
           name: 'VITE_REDIRECT_URI'
-          value: 'https://app-${environmentName}.azurewebsites.net'
+          value: 'https://${environmentName}.azurewebsites.net'
         }
         {
           name: 'VITE_POST_LOGOUT_URI'
-          value: 'https://app-${environmentName}.azurewebsites.net'
+          value: 'https://${environmentName}.azurewebsites.net'
         }
         {
           name: 'VITE_API_BASE_URL'
@@ -165,8 +165,7 @@ resource apiApp 'Microsoft.Web/sites@2022-09-01' = {
     serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: {
-      nodeVersion: '20'
-      appCommandLine: 'npm start'
+      nodeVersion: '20.11.0'
       appSettings: [
         {
           name: 'WEBSITE_RUN_FROM_PACKAGE'
