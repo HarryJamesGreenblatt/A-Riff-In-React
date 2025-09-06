@@ -189,6 +189,18 @@ resource apiApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'AZURE_SQL_CONNECTIONSTRING'
           value: '@Microsoft.KeyVault(SecretUri=${sqlConnectionStringSecret.properties.secretUri})'
         }
+        {
+          name: 'WEBSITE_ENABLE_SYNC_UPDATE_SITE'
+          value: 'false'
+        }
+        {
+          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
+          value: 'false'
+        }
+        {
+          name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'
+          value: 'false'
+        }
       ]
     }
   }
