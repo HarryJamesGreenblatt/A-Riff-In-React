@@ -1,17 +1,26 @@
 # Azure Deployment Guide
 
-**Status**: ✅ **FRONTEND DEPLOYED** | 🔄 **BACKEND PENDING REDEPLOYMENT**
+## Infrastructure Overview
+
+- **App Service Plan**: Windows-based (B1 tier)
+- **Frontend**: React SPA on Windows App Service  
+- **Backend API**: Node.js Express on Windows App Service
+- **Database**: Azure SQL Database (shared server pattern)
+- **Authentication**: Microsoft Entra External ID
+
+**Status**: ✅ **FULLY DEPLOYED AND OPERATIONAL** (as of September 6, 2025)
 
 This guide documents the deployment of **A Riff In React** to Azure, including the complete infrastructure setup with Microsoft Entra External ID authentication.
 
 ## 🎉 Current Deployment Status
 
-- ✅ **Azure Infrastructure**: Deployed via Bicep templates
+- ✅ **Azure Infrastructure**: Windows App Service Plan deployed via Bicep
 - ✅ **Web Application**: Live at https://a-riff-in-react.azurewebsites.net
+- ✅ **Backend API**: Live at https://api-a-riff-in-react.azurewebsites.net
 - ✅ **Authentication**: Microsoft Entra External ID **FULLY WORKING** ✅
 - ✅ **CI/CD Pipeline**: GitHub Actions workflow operational
-- 🔄 **Backend API**: App Service deployed but experiencing startup issues
-- ✅ **Frontend Authentication**: Complete and production-ready
+- ✅ **Database**: Azure SQL Database with user management
+- ✅ **Platform Migration**: Successfully migrated from Linux to Windows (Sept 2025)
 
 ## Authentication Status: ✅ FULLY WORKING
 
@@ -26,8 +35,9 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 
 | Resource | Name | Purpose | Status |
 |----------|------|---------|--------|
+| App Service Plan | `asp-a-riff-in-react` | Windows hosting plan | ✅ Active |
 | Web App | `a-riff-in-react` | React app hosting | ✅ Active |
-| App Service | `api-a-riff-in-react` | Node.js API hosting | 🔄 Deployment Issues |
+| API App | `api-a-riff-in-react` | Node.js API hosting | ✅ Active |
 | SQL Server | `sequitur-sql-server` (Shared) | Relational database server | ✅ Active |
 | SQL Database | `riff-react-db` | Application-specific database | ✅ Active |
 | Cosmos DB | `cosmos-a-riff-in-react` | NoSQL database | ✅ Active |
@@ -36,7 +46,15 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 
 # Azure Deployment Guide
 
-This guide explains how to deploy **A Riff In React** to Azure, following best practices for App Service, Azure SQL, Cosmos DB, Key Vault, and Application Insights, with a focus on the Microsoft Entra External ID authentication setup.
+# Azure Deployment Guide
+
+## Infrastructure Overview
+
+- **App Service Plan**: Windows-based (B1 tier)
+- **Frontend**: React SPA on Windows App Service  
+- **Backend API**: Node.js Express on Windows App Service
+- **Database**: Azure SQL Database (shared server pattern)
+- **Authentication**: Microsoft Entra External ID
 
 > _Deployment strategies and rationale are adapted from [A Fugue In Flask: azure_deployment.md](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask/blob/main/docs/azure_deployment.md)_
 

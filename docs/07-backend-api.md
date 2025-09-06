@@ -2,7 +2,13 @@
 
 ## Overview
 
-The backend API is implemented as a standard Express.js server running on Azure App Service. This approach provides a familiar development experience with the scalability and managed services of Azure.
+The backend API is implemented as a Node.js Express server running on **Windows Azure App Service**. This approach provides a familiar development experience with the scalability and managed services of Azure.
+
+## Deployment Status: ✅ **FULLY OPERATIONAL**
+- **Platform**: Windows App Service (migrated from Linux Sept 2025)
+- **Runtime**: Node.js 20.11.0  
+- **Server**: Express.js with IIS integration via web.config
+- **Database**: Azure SQL Database with graceful degradation
 
 ## Architecture
 

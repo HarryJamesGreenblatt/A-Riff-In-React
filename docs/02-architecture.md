@@ -1,14 +1,16 @@
 # Architecture
 
-This document describes the modular architecture of **A Riff In React**, a production-ready React template designed for hybrid Azure SQL + Cosmos DB applications.
+This document describes the modular architecture of **A Riff In React**, a production-ready React template designed for hybrid Azure SQL + Cosmos DB applications running on Windows Azure App Service.
 
 > _This architecture is inspired by the Application Factory Pattern and Blueprint Modularity described in [A Fugue In Flask](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask)._
 
 ## Overview
 
 - **Component-based structure**: All UI and logic are organized into reusable components and feature modules.
+- **Windows App Service**: Single Windows-based App Service Plan hosting both React frontend and Node.js API.
 - **Hybrid persistence**: Demonstrates integration with both Azure SQL Database (for structured data) and Cosmos DB (for flexible, real-time data).
-- **Azure-ready**: Designed for seamless deployment to Azure App Service.
+- **External Authentication**: Microsoft Entra External ID for customer identity management.
+- **Azure-ready**: Designed for seamless deployment to Azure App Service with IIS integration.
 
 ## Azure Infrastructure Architecture
 

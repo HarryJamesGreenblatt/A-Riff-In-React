@@ -2,22 +2,25 @@
 
 **Status**: ✅ **SUCCESSFULLY CONFIGURED AND RUNNING**
 
-This document covers the GitHub Actions workflow for **A Riff In React**, which successfully deploys the application and its infrastructure to Azure. The pipeline is optimized for cost-efficiency by deploying to a shared SQL Server.
+This document covers the GitHub Actions workflow for **A Riff In React**, which successfully deploys the application and its infrastructure to Azure. The pipeline includes Windows App Service deployment optimizations and shared SQL Server integration.
 
 ## 🎉 Current Status
 
 - ✅ **Workflow Status**: Fully operational and tested.
-- ✅ **Last Deployment**: Successful - August 30, 2025.
+- ✅ **Last Deployment**: Successful - September 6, 2025.
 - ✅ **Live Application**: https://a-riff-in-react.azurewebsites.net
+- ✅ **Live API**: https://api-a-riff-in-react.azurewebsites.net
 - ✅ **Authentication**: Microsoft Entra External ID integrated.
-- ✅ **Infrastructure**: Deploys to a shared SQL Server in a separate resource group.
+- ✅ **Infrastructure**: Windows App Service with shared SQL Server architecture.
+- ✅ **Platform**: Successfully migrated from Linux to Windows App Service.
 
 ## Active Workflow: `azure-deploy.yml`
 
-We use a **single, combined workflow** that handles both infrastructure and application deployment. This streamlined process was recently updated to handle the cross-resource-group deployment required by the shared database architecture.
+We use a **single, combined workflow** that handles both infrastructure and application deployment. The workflow includes Windows-specific optimizations for Node.js deployment.
 
 ### Workflow Features
-- **Infrastructure as Code**: Deploys Azure resources using Bicep.
+- **Infrastructure as Code**: Deploys Azure resources using Bicep templates.
+- **Windows App Service**: Optimized Node.js deployment with IIS configuration.
 - **Cross-Resource Group Deployment**: Correctly deploys the SQL database to the shared server's resource group.
 - **React Application Build**: Compiles the TypeScript application.
 - **Azure App Service Deployment**: Pushes the built application to the hosting environment.
