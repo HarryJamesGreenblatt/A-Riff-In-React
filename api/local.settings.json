@@ -1,17 +1,21 @@
 {
   "IsEncrypted": false,
   "Values": {
-    "AzureWebJobsStorage": "",
     "FUNCTIONS_WORKER_RUNTIME": "node",
-    "SQL_USER": "your_sql_user",
-    "SQL_PASSWORD": "your_sql_password",
-    "SQL_SERVER": "your_sql_server_name.database.windows.net",
-    "SQL_DATABASE": "your_sql_database_name",
-    "COSMOS_DB_ENDPOINT": "your_cosmos_db_endpoint",
-    "COSMOS_DB_KEY": "your_cosmos_db_key",
-    "COSMOS_DB_DATABASE_ID": "your_cosmos_db_database_id"
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "NODE_ENV": "development",
+    "PORT": "7071",
+    "SQL_SERVER": "localhost",
+    "SQL_DATABASE": "ARiffInReact",
+    "SQL_USER": "sa",
+    "SQL_PASSWORD": "YourLocalPassword",
+    "COSMOS_ENDPOINT": "https://localhost:8081",
+    "COSMOS_KEY": "YourLocalCosmosKey",
+    "COSMOS_DATABASE_ID": "ARiffInReact",
+    "COSMOS_CONTAINER_ID": "activities"
   },
   "Host": {
-    "CORS": "*"
+    "CORS": "*",
+    "LocalHttpPort": 7071
   }
 }

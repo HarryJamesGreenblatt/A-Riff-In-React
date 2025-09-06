@@ -1,0 +1,58 @@
+name: Build and Deploy API
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'api/**'
+      - '.github/workflows/api-deploy.yml'
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+        
+    - name: Install dependencies
+      run: |
+        cd api
+        npm ci
+        
+    - name: Build
+      run: |
+        cd api
+        npm run build
+        
+    - name: Run tests
+      run: |
+        cd api
+        npm test
+        
+    - name: Zip for deployment
+      run: |
+        cd api
+        mkdir -p ./dist/deployment
+        cp -r ./deployment/* ./dist/deployment/
+        cp web.config ./dist/
+        cp package.json ./dist/
+        cd dist
+        zip -r ../api-deployment.zip ./*
+        
+    - name: Login to Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'a-riff-in-react-api'
+        slot-name: 'production'
+        package: './api/api-deployment.zip'
