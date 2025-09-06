@@ -1,25 +1,25 @@
 # A Riff In React
 
-## 📢 Front Page News: Authentication Strategy Update
+## 📢 Current Status: API Deployment Package Fix
 
-**Date:** 2025-08-31
+**Date:** September 6, 2025
 
-**Latest Achievement:** ✅ **Microsoft Authentication Working + Strategy Clarification**
+**Issue Identified:** ✅ **API 500 Errors Caused by Deployment Package Mismatch**
 
-**Key Discovery:** Current setup uses regular Azure AD (Microsoft accounts only) but we need **external user registration**. Analysis shows Microsoft Entra External ID for Customers is the right solution.
+**Root Cause:** The deployed API was using an old Linux-era deployment package missing Windows-specific configuration files (`web.config`, `startup.cmd`) needed for the Windows App Service migration.
 
-**What's Working Now:**
-- ✅ Microsoft Entra ID authentication system working perfectly
-- ✅ Login/logout, token management, user profiles all functional
-- ✅ Technical foundation solid and production-ready
+**What's Working:**
+- ✅ Frontend: Live at https://a-riff-in-react.azurewebsites.net (200 OK)
+- ✅ Authentication: Microsoft Entra External ID fully functional  
+- ✅ Infrastructure: Windows App Service architecture deployed
+- ✅ CI/CD Pipeline: GitHub Actions operational
 
-**Next Step:** Transition to **Microsoft Entra External ID for Customers** to enable:
-- 🎯 External user registration (email/password, no Microsoft account required)  
-- 🔐 Social login options (Google, Facebook, etc.)
-- 💰 Cost-effective (FREE for our <1K user scale)
-- 🏗️ No infrastructure cleanup needed (parameters-based design)
+**Current Action:** 🔄 **Deployment Package Fix In Progress**
+- ✅ Updated `api-deployment.zip` with Windows-compatible files
+- ✅ Modified GitHub Actions workflow to use correct deployment package
+- ⏳ Deployment in progress, awaiting verification
 
-**Impact:** Clean transition with environment variable updates only
+**Expected Resolution:** API health endpoint should return 200 OK once deployment completes
 
 ---
 
