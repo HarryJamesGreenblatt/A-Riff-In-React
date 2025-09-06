@@ -43,8 +43,9 @@ try {
     const userRoutes = require('./routes/userRoutes');
     const activityRoutes = require('./routes/activityRoutes');
     
-    app.use('/api/users', userRoutes);
-    app.use('/api/activities', activityRoutes);
+    // Check if using default export (TypeScript/ES6 pattern) or CommonJS module.exports
+    app.use('/api/users', userRoutes.default || userRoutes);
+    app.use('/api/activities', activityRoutes.default || activityRoutes);
     
     console.log('Database routes loaded successfully');
 } catch (error) {

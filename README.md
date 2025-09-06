@@ -1,25 +1,26 @@
 # A Riff In React
 
-## 📢 Current Status: API Deployment Package Fix
+## 📢 Current Status: ✅ RESOLVED - API Deployment Issues
 
 **Date:** September 6, 2025
 
-**Issue Identified:** ✅ **API 500 Errors Caused by Deployment Package Mismatch**
+**Resolution:** ✅ **API 500 Errors Successfully Fixed**
 
-**Root Cause:** The deployed API was using an old Linux-era deployment package missing Windows-specific configuration files (`web.config`, `startup.cmd`) needed for the Windows App Service migration.
+**Root Causes Resolved:**
+1. **IISNode Incompatibility**: Express server configuration was incompatible with Azure App Service Windows iisnode
+2. **App Settings Override**: GitHub Actions was destructively overwriting Bicep-configured app settings (KeyVault refs, App Insights)
 
-**What's Working:**
-- ✅ Frontend: Live at https://a-riff-in-react.azurewebsites.net (200 OK)
-- ✅ Authentication: Microsoft Entra External ID fully functional  
-- ✅ Infrastructure: Windows App Service architecture deployed
-- ✅ CI/CD Pipeline: GitHub Actions operational
+**Solutions Implemented:**
+- ✅ **IISNode Compatibility**: Added `app.set('port', port)` and removed callback from `app.listen()`
+- ✅ **App Settings Preservation**: Removed destructive override in GitHub Actions, preserving Bicep configuration
+- ✅ **Enhanced web.config**: Proper iisnode configuration with WebSocket disabled and security settings
 
-**Current Action:** 🔄 **Deployment Package Fix In Progress**
-- ✅ Updated `api-deployment.zip` with Windows-compatible files
-- ✅ Modified GitHub Actions workflow to use correct deployment package
-- ⏳ Deployment in progress, awaiting verification
-
-**Expected Resolution:** API health endpoint should return 200 OK once deployment completes
+**Current Status - All Systems Operational:**
+- ✅ **Frontend**: Live at https://a-riff-in-react.azurewebsites.net (200 OK)
+- ✅ **API Backend**: Live at https://api-a-riff-in-react.azurewebsites.net (200 OK) 
+- ✅ **Authentication**: Microsoft Entra External ID fully functional  
+- ✅ **Infrastructure**: Windows App Service + proper iisnode configuration
+- ✅ **CI/CD Pipeline**: GitHub Actions with preserved Bicep settings
 
 ---
 
@@ -40,20 +41,19 @@ While the template includes example modules (such as user management and activit
 - ✅ **Project Vision**: General-purpose, Azure-ready template defined
 - ✅ **Basic React App Structure**: Vite + TypeScript + React 18 setup complete
 
-### 🚧 Phase 2: Core Features (90% COMPLETED ✅)
+### ✅ Phase 2: Core Features (95% COMPLETED ✅)
 - ✅ **UI framework integration**: Tailwind CSS + shadcn/ui-style components implemented
 - ✅ **State management setup**: Redux Toolkit + RTK Query implemented
-- 🔄 **Authentication system (MSAL)**: Microsoft authentication working, transitioning to external user support
+- ✅ **Authentication system (MSAL)**: Microsoft Entra External ID fully operational
 - ✅ **Database infrastructure**: Azure SQL + Cosmos DB infrastructure deployed
-- ✅ **Backend API**: Express on Azure Functions with user management endpoints (needs redeployment)
-- ✅ **Azure deployment**: Complete CI/CD pipeline with GitHub Actions  
-- ✅ **Production deployment**: Frontend live at https://a-riff-in-react.azurewebsites.net
+- ✅ **Backend API**: Express on Azure App Service Windows with proper iisnode configuration
+- ✅ **Azure deployment**: Complete CI/CD pipeline with GitHub Actions preserving Bicep settings
+- ✅ **Production deployment**: Frontend + API both live and operational
 - ✅ **TypeScript build fixes**: All compilation errors resolved
-- 🔄 **External user authentication**: Transitioning to Entra External ID for customer registration
-- 🔄 **Backend API deployment**: Azure Functions need to be redeployed/configured
+- ✅ **IISNode compatibility**: Express server properly configured for Azure App Service Windows
 - [ ] **Frontend-Backend Integration**: Connect authenticated app to working API endpoints
 
-> **Current Focus**: Implementing external user authentication (email/password registration) using Microsoft Entra External ID for Customers. Technical foundation is solid - this is a clean parameter-based transition with no infrastructure cleanup needed.
+>**Current Status**: All major infrastructure and deployment issues resolved! Both frontend and API are operational. Next focus is on frontend-backend integration to complete the template's core functionality.
 
 ### 📋 Phase 3: Example Extensions (READY)
 - [ ] Example: User management (Azure SQL)
@@ -71,10 +71,10 @@ While the template includes example modules (such as user management and activit
 - **UI Framework**: Tailwind CSS + shadcn/ui-style components ✅
 - **State Management**: Redux Toolkit + RTK Query ✅
 - **Authentication**: Microsoft Entra External ID (MSAL) ✅
-- **Backend API**: Node.js + Express on Azure Functions ✅
+- **Backend API**: Node.js + Express on Azure App Service ✅
 - **Databases**: Azure SQL Database + Cosmos DB ✅
 - **Infrastructure**: Azure Bicep templates ✅
-- **Hosting**: Azure App Service + Azure Functions ✅
+- **Hosting**: Azure App Service (Frontend + API) ✅
 - **CI/CD**: GitHub Actions ✅
 
 ## 🌐 Live Demo
