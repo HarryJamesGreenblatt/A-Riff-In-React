@@ -14,9 +14,6 @@ param externalTenantId string
 @description('The Microsoft Entra External ID Application (client) ID')
 param externalClientId string
 
-@description('The Azure App service plan name')
-param appServicePlanName string = 'asp-${environmentName}'
-
 @description('The Azure Key Vault name')
 param keyVaultName string = 'kv-${environmentName}'
 
@@ -74,9 +71,9 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = {
   }
 }
 
-// App Service Plan
+// Single App Service Plan for both Frontend and API (Windows)
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
-  name: appServicePlanName
+  name: 'asp-${environmentName}'
   location: location
   tags: tags
   sku: {
@@ -122,11 +119,13 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 resource webApp 'Microsoft.Web/sites@2022-09-01' = {
   name: environmentName
   location: location
+  kind: 'app'
   tags: union(tags, { 'azd-service-name': 'web' })
   properties: {
     serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: {
+      nodeVersion: '20'
       appSettings: [
         {
           name: 'VITE_ENTRA_TENANT_ID'
