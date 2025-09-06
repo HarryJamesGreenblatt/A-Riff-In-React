@@ -86,17 +86,7 @@ jobs:
       
       - name: Deploy Backend with Run-from-Package Pattern
         run: |
-          echo "Building backend for run-from-package deployment..."
-          cd ./api/deployment
-          
-          # Install dependencies for deployment (production only)
-          # Using npm install instead of npm ci for better compatibility
-          npm install --production
-          
-          # Create deployment zip with node_modules included (community best practice)
-          echo "Creating deployment package..."
-          zip -r ../backend-deployment.zip . -x "*.log" "*.tmp"
-          cd ..
+          echo "Using pre-built Windows-compatible deployment package..."
           
           echo "Configuring Azure App Service settings for Windows..."
           az webapp config appsettings set \
@@ -107,11 +97,11 @@ jobs:
               WEBSITE_NODE_DEFAULT_VERSION=20.11.0 \
               WEBSITES_ENABLE_APP_SERVICE_STORAGE=true
           
-          echo "Deploying to Azure App Service with async deployment to avoid timeout..."
+          echo "Deploying pre-built package to Azure App Service..."
           az webapp deploy \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --name api-${{ env.AZURE_ENV_NAME }} \
-            --src-path backend-deployment.zip \
+            --src-path api/api-deployment.zip \
             --type zip \
             --timeout 1800 \
             --async true
