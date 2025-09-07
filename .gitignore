@@ -33,5 +33,7 @@ dist-ssr
 .env
 .env*.local
 
-# Removed context exclusion to allow documentation to be committed
-# /context
+# Credentials and secrets
+azure-credentials.json
+
+/context
