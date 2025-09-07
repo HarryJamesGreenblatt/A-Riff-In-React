@@ -154,18 +154,20 @@ See the [CI/CD Setup Guide](./docs/ci-cd-setup.md) for detailed instructions.
 
 ## 📚 Documentation
 
-- [Project Overview](./docs/01-project-overview.md)
-- [Architecture](./docs/02-architecture.md)
-- [Development Setup](./docs/02-development-setup.md)
-- [UI Framework](./docs/03-ui-framework-setup.md)
-- [State Management](./docs/04-state-management.md)
-- [Authentication](./docs/05-authentication-msal.md)
-- [Backend API](./docs/07-backend-api.md)
-- [Azure Deployment](./docs/08-azure-deployment.md)
-- [CI/CD Pipeline](./docs/09-github-actions-ci-cd.md)
-- [Deployment Success](./docs/10-deployment-success.md)
-- [Local Development Guide](./docs/local-development.md)
-- [Production Deployment Guide](./docs/production-deployment.md)
+Complete documentation is available in the [docs folder](./docs/README.md) with a logical progression from setup to deployment:
+
+### Quick Navigation
+- **Getting Started**: [Project Overview](./docs/01-project-overview.md) → [Architecture](./docs/02-architecture.md) → [Development Setup](./docs/03-development-setup.md)
+- **Development**: [Local Development](./docs/04-local-development.md) → [UI Framework](./docs/05-ui-framework-setup.md) → [State Management](./docs/06-state-management.md)
+- **Authentication**: [MSAL Integration](./docs/07-authentication-msal.md)
+- **Backend**: [Backend API](./docs/08-backend-api.md)
+- **Deployment**: [Provider Registration](./docs/09-provider-registration.md) → [Azure Deployment](./docs/10-azure-deployment.md) → [CI/CD Pipeline](./docs/11-github-actions-ci-cd.md)
+
+### Phase-Based Documentation Structure
+1. **Understanding & Setup** (01-04): Project basics and local development
+2. **Frontend Implementation** (05-07): React, UI, state management, auth
+3. **Backend & Infrastructure** (08-11): API, Azure deployment, CI/CD
+4. **Operations & Reference** (12+): Success documentation and troubleshooting
 
 ---
 

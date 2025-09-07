@@ -115,9 +115,9 @@ The template is configured for seamless integration with the following Azure ser
 ## 🚀 Getting Started
 
 To learn how to set up and use this template:
-1. See the [Development Setup](./03-development-setup.md) guide for local environment configuration
-2. Explore the [UI Framework Setup](./05-ui-framework-setup.md) for UI component usage
-3. Refer to [Azure Deployment](./10-azure-deployment.md) for deployment instructions
+1. See the [Development Setup](./02-development-setup.md) guide for local environment configuration
+2. Explore the [UI Framework Setup](./03-ui-framework-setup.md) for UI component usage
+3. Refer to [Azure Deployment](./azure_deployment.md) for deployment instructions
 
 ## 🔄 From Flask to React: Architectural Parallels
 
