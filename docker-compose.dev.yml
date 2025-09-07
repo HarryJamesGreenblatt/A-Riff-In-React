@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  # Local API for development
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: development  # We'll add a dev target
+    ports:
+      - "3001:8080"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      # For local development, you can use your Azure resources
+      - SQL_SERVER=${SQL_SERVER}
+      - SQL_DATABASE=${SQL_DATABASE}
+      - COSMOS_ENDPOINT=${COSMOS_ENDPOINT}
+      - COSMOS_DATABASE_ID=${COSMOS_DATABASE_ID}
+    volumes:
+      - ./api/src:/app/src:ro
+    restart: unless-stopped
+
+  # Optional: Local database for complete isolation
+  # sql-server:
+  #   image: mcr.microsoft.com/mssql/server:2019-latest
+  #   environment:
+  #     - ACCEPT_EULA=Y
+  #     - SA_PASSWORD=YourStrongPassword123!
+  #   ports:
+  #     - "1433:1433"
+
+networks:
+  default:
+    name: a-riff-in-react-local

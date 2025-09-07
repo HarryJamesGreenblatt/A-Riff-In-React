@@ -37,13 +37,13 @@ param existingSqlDatabaseName string = 'riff-react-db'
 param existingCosmosDbAccountName string = 'cosmos-a-riff-in-react'
 
 // Variables for resource naming
-var containerAppEnvName = 'cae-${environmentName}'
+var containerAppEnvName = 'env-${environmentName}'
 var containerAppName = 'api-${environmentName}'
 var logAnalyticsName = 'log-${environmentName}'
-var applicationInsightsName = 'appi-${environmentName}'
-var keyVaultName = 'kv-${environmentName}'
-var staticWebAppName = 'swa-${environmentName}'
-var managedIdentityName = 'mi-${environmentName}'
+var applicationInsightsName = 'ai-${environmentName}'
+var keyVaultName = 'kv-${take(replace(environmentName, '-', ''), 20)}-${uniqueString(resourceGroup().id)}'
+var staticWebAppName = '${environmentName}'
+var managedIdentityName = 'id-${environmentName}'
 
 // Tags for all resources
 var tags = {
