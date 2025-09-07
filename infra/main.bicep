@@ -240,9 +240,8 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
 }
 
 // Update Key Vault access policy to include new managed identity
-resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
-  parent: keyVault
-  name: 'add'
+resource keyVaultPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
+  name: '${keyVault.name}/add'
   properties: {
     accessPolicies: [
       {
@@ -259,14 +258,77 @@ resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-
   }
 }
 
-// SQL Database access for managed identity
-module sqlRoleAssignment 'modules/sqlRoleAssignment.bicep' = {
-  name: 'sqlRoleAssignment'
-  scope: resourceGroup(existingSqlServerResourceGroup)
-  params: {
-    sqlServerName: existingSqlServerName
-    principalId: managedIdentity.properties.principalId
-    roleName: 'db_datareader'
+// SQL Database access for managed identity - use inline deployment script instead of module
+resource sqlRoleAssignmentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+  name: 'sql-role-assignment-script'
+  location: location
+  kind: 'AzureCLI'
+  properties: {
+    azCliVersion: '2.37.0'
+    retentionInterval: 'P1D'
+    timeout: 'PT30M'
+    cleanupPreference: 'OnSuccess'
+    environmentVariables: [
+      {
+        name: 'SQL_SERVER'
+        value: existingSqlServerName
+      }
+      {
+        name: 'SQL_SERVER_RG'
+        value: existingSqlServerResourceGroup
+      }
+      {
+        name: 'SQL_DATABASE'
+        value: existingSqlDatabaseName
+      }
+      {
+        name: 'PRINCIPAL_ID'
+        value: managedIdentity.properties.principalId
+      }
+      {
+        name: 'ROLE_NAME'
+        value: 'db_datareader'
+      }
+    ]
+    scriptContent: '''
+      #!/bin/bash
+      
+      # Log in with the managed identity
+      az login --identity
+      
+      # Get the SQL Server resource ID
+      RESOURCE_ID=$(az sql server show -n $SQL_SERVER -g $SQL_SERVER_RG --query id -o tsv)
+      
+      # Create an Azure AD-only authentication administrator if it doesn't exist
+      ADMIN_EXISTS=$(az sql server ad-admin show --server $SQL_SERVER --resource-group $SQL_SERVER_RG --query id --output tsv || echo "")
+      
+      if [ -z "$ADMIN_EXISTS" ]; then
+        # Get the current user's object ID
+        CURRENT_USER_ID=$(az ad signed-in-user show --query id -o tsv)
+        
+        # Set the current user as the AD admin
+        az sql server ad-admin create --server $SQL_SERVER --resource-group $SQL_SERVER_RG --display-name "AzureAD Admin" --object-id $CURRENT_USER_ID
+      fi
+      
+      # Execute SQL command to create the user and assign the role
+      # This uses the sqlcmd utility with Azure AD authentication
+      cat > script.sql << EOL
+      -- Create user from external provider if it doesn't exist
+      IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$PRINCIPAL_ID')
+      BEGIN
+          CREATE USER [${PRINCIPAL_ID}] FROM EXTERNAL PROVIDER;
+      END
+      
+      -- Add user to role
+      ALTER ROLE [$ROLE_NAME] ADD MEMBER [${PRINCIPAL_ID}];
+      GO
+      EOL
+      
+      # Use the Azure CLI to execute the SQL script
+      az sql db query --server $SQL_SERVER --resource-group $SQL_SERVER_RG --database $SQL_DATABASE --query-file script.sql
+      
+      echo "SQL role assignment completed"
+    '''
   }
 }
 
