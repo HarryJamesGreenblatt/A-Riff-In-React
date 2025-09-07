@@ -42,7 +42,7 @@ var containerAppName = 'api-${environmentName}'
 var logAnalyticsName = 'log-${environmentName}'
 var applicationInsightsName = 'ai-${environmentName}'
 var keyVaultName = 'kv-${take(replace(environmentName, '-', ''), 20)}-${uniqueString(resourceGroup().id)}'
-var staticWebAppName = '${environmentName}'
+var staticWebAppName = environmentName
 var managedIdentityName = 'id-${environmentName}'
 
 // Tags for all resources
@@ -143,7 +143,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
             weight: 100
           }
         ]
-        cors: {
+        corsPolicy: {
           allowedOrigins: ['*']
         }
       }
@@ -175,7 +175,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
           name: 'api'
           image: containerImage
           resources: {
-            cpu: '0.5'
+            cpu: json('0.5')
             memory: '1Gi'
           }
           env: [
