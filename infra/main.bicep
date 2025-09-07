@@ -8,7 +8,7 @@ param location string = resourceGroup().location
 param containerImage string = '${containerRegistry}/${environmentName}-api:latest'
 
 @description('Azure Container Registry URL')
-param containerRegistry string = 'ariffacr.azurecr.io'
+param containerRegistry string = 'ariffreactacr.azurecr.io'
 
 @description('Azure Container Registry username')
 param containerRegistryUsername string
@@ -53,10 +53,7 @@ var tags = {
 }
 
 // Reference to existing SQL Server
-resource existingSqlServer 'Microsoft.Sql/servers@2021-11-01' existing = {
-  name: existingSqlServerName
-  scope: resourceGroup(existingSqlServerResourceGroup)
-}
+var sqlServerFqdn = '${existingSqlServerName}.database.windows.net'
 
 // Note: Cosmos DB is mentioned in docs but not implemented in current infrastructure
 // We'll remove references to Cosmos DB for now to simplify deployment
@@ -87,9 +84,9 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   }
 }
 
-// Reference to existing Application Insights
+// Reference existing Application Insights
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
-  name: 'appi-a-riff-in-react'
+  name: 'appi-${environmentName}'
 }
 
 // Container Apps Environment
@@ -146,7 +143,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
       secrets: [
         {
           name: 'sql-connection-string'
-          value: 'Server=${existingSqlServer.properties.fullyQualifiedDomainName};Database=${existingSqlDatabaseName};Authentication=Active Directory Default;'
+          value: 'Server=${sqlServerFqdn};Database=${existingSqlDatabaseName};Authentication=Active Directory Default;'
         }
         {
           name: 'ai-connection-string'
@@ -178,7 +175,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
             }
             {
               name: 'SQL_SERVER'
-              value: existingSqlServer.properties.fullyQualifiedDomainName
+              value: sqlServerFqdn
             }
             {
               name: 'SQL_DATABASE'
@@ -217,38 +214,21 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
   }
 }
 
-// Static Web App for frontend
-resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
+// Reference existing Static Web App
+resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' existing = {
   name: staticWebAppName
-  location: location
-  tags: tags
-  sku: {
-    name: 'Free'
-    tier: 'Free'
-  }
-  properties: {
-    provider: 'GitHub'
-    repositoryUrl: 'https://github.com/HarryJamesGreenblatt/A-Riff-In-React'
-    branch: 'fresh-start'
-    buildProperties: {
-      appLocation: '/'
-      apiLocation: ''
-      outputLocation: 'dist'
-    }
-  }
 }
 
-// Create or update Key Vault if it doesn't exist
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
+// Reference existing Key Vault
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
   name: 'kv-${environmentName}'
-  location: location
-  tags: tags
+}
+
+// Update Key Vault access policy for the managed identity
+resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
+  name: 'add'
+  parent: keyVault
   properties: {
-    tenantId: subscription().tenantId
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
     accessPolicies: [
       {
         tenantId: subscription().tenantId
@@ -261,19 +241,12 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
         }
       }
     ]
-    enableRbacAuthorization: false
-    enableSoftDelete: true
-    softDeleteRetentionInDays: 90
-    enabledForDeployment: false
-    enabledForDiskEncryption: false
-    enabledForTemplateDeployment: false
-    publicNetworkAccess: 'Enabled'
   }
 }
 
 // SQL Database access for managed identity - use inline deployment script instead of module
 resource sqlRoleAssignmentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
-  name: 'sql-role-assignment-script'
+  name: 'sql-role-assignment-script-${uniqueString(resourceGroup().id)}'
   location: location
   kind: 'AzureCLI'
   properties: {
