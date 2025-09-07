@@ -82,6 +82,48 @@ resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' = {
   }
 }
 
+// Create Cosmos DB database
+resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-08-15' = {
+  parent: cosmosDb
+  name: 'ARiffInReact'
+  properties: {
+    resource: {
+      id: 'ARiffInReact'
+    }
+  }
+}
+
+// Create Cosmos DB container
+resource cosmosContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-08-15' = {
+  parent: cosmosDatabase
+  name: 'activities'
+  properties: {
+    resource: {
+      id: 'activities'
+      partitionKey: {
+        paths: [
+          '/userId'
+        ]
+        kind: 'Hash'
+      }
+      indexingPolicy: {
+        indexingMode: 'consistent'
+        automatic: true
+        includedPaths: [
+          {
+            path: '/*'
+          }
+        ]
+        excludedPaths: [
+          {
+            path: '/"_etag"/?'
+          }
+        ]
+      }
+    }
+  }
+}
+
 // Create a user-assigned managed identity for the Container App
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
   name: managedIdentityName
