@@ -3,33 +3,44 @@
 
 ## 🎉 Project Successfully Deployed!
 
-**Live Frontend**: https://gentle-stone-08653e81e.1.azurestaticapps.net  
-**Live API**: https://api-a-riff-in-react.westus.azurecontainerapps.io  
+**Live Frontend**: https://gentle-stone-08653e81e.1.azurestaticapps.net (Basic template deployed)
+**Live API**: https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API)
 **Deployment Date**: September 6, 2025  
-**Status**: ✅ Full-Stack Application Operational
+**Status**: ✅ Infrastructure Deployed | 🔧 Frontend-API Integration Pending
 
 ## What Was Accomplished
 
-### ✅ Complete End-to-End Implementation
-- **Azure Container Apps** backend fully operational with managed identity
-- **Azure Static Web Apps** frontend with global CDN distribution
-- **User authentication** with Microsoft Entra External ID working perfectly
-- **Database integration** with Azure SQL Database and Cosmos DB
+### ✅ Infrastructure Successfully Deployed
+- **Azure Container Apps** backend API fully operational with managed identity
+- **Azure Static Web Apps** frontend serving basic React template
+- **Database integration** ready with Cosmos DB provisioned
 - **Platform migration** from Windows App Service to Container Apps successfully completed
-- **CI/CD pipeline** optimized for containerized deployment
-- **SPA Routing** configured correctly with staticwebapp.config.json
+- **CI/CD pipeline** working perfectly for containerized deployment
+- **GitHub Actions** deployment token issue resolved
+
+### 🔧 Integration Status
+- **Frontend**: Basic React template deployed (needs API integration)
+- **API**: Full REST API operational at Container App endpoint
+- **Database**: Cosmos DB ready for use
+- **Authentication**: Not yet integrated
+- **Cost Optimization**: Orphaned App Service resources need cleanup
 
 ### 🏗️ Infrastructure Deployed
 ```
 Resource Group: riffinreact-rg
-├── Container Apps Environment: env-a-riff-in-react
-├── Container App: api-a-riff-in-react (Node.js API)
-├── Static Web App: a-riff-in-react (React Frontend)
-├── User-Assigned Managed Identity: id-a-riff-in-react
-├── SQL Server: sequitur-sql-server (Shared)
-├── SQL Database: riff-react-db
-├── Cosmos DB: cosmos-a-riff-in-react
-└── Log Analytics: log-a-riff-in-react
+├── Container Apps Environment: env-a-riff-in-react ✅
+├── Container App: ca-api-a-riff-in-react ✅ (Node.js API)
+├── Static Web App: swa-a-riff-in-react ✅ (React Frontend)
+├── User-Assigned Managed Identity: id-a-riff-in-react ✅
+├── Cosmos DB: cosmos-a-riff-in-react ✅
+├── Container Registry: ariffreactacr ✅
+├── Application Insights: appi-a-riff-in-react ✅
+├── Log Analytics: log-a-riff-in-react ✅
+├── Key Vault: kv-a-riff-in-react ✅
+└── ORPHANED (for cleanup):
+    ├── App Service Plan: asp-a-riff-in-react ⚠️💰
+    ├── App Service: a-riff-in-react ⚠️
+    └── App Service API: api-a-riff-in-react ⚠️
 ```
 
 ### 🔧 CI/CD Pipeline

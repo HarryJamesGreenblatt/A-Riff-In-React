@@ -18,12 +18,13 @@
 - ✅ **Static Web Apps**: Frontend migrated to Static Web Apps with global CDN
 - ✅ **Dual CI/CD Workflows**: Separate pipelines for API and frontend
 
-**Current Status - All Systems Operational:**
-- ✅ **Frontend**: Live at https://purple-tree-0e7c5c91e.4.azurestaticapps.net (200 OK)
-- ✅ **API Backend**: Live at https://api-a-riff-in-react.westus.azurecontainerapps.io (200 OK) 
-- ✅ **Authentication**: Microsoft Entra External ID fully functional  
-- ✅ **Infrastructure**: Container Apps + Static Web Apps with managed identity
-- ✅ **CI/CD Pipeline**: GitHub Actions with container build and deployment
+**Current Status - Systems Operational with Integration Pending:**
+- ✅ **Frontend**: Live at https://gentle-stone-08653e81e.1.azurestaticapps.net (Basic template deployed)
+- ✅ **API Backend**: Live at https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API ready)
+- 🔧 **Frontend-API Integration**: Not yet connected - React app needs API integration
+- ✅ **Database**: Cosmos DB provisioned and ready
+- ✅ **Infrastructure**: Container Apps Environment, Registry, Monitoring active
+- ⚠️ **Cost Optimization**: Orphaned App Service resources accumulating costs (cleanup needed)
 
 ---
 
@@ -54,9 +55,9 @@ While the template includes example modules (such as user management and activit
 - ✅ **Production deployment**: Frontend + API both live and operational
 - ✅ **Containerization**: Docker multi-stage builds for consistent deployment
 - ✅ **Platform Migration**: Successfully moved from App Service to Container Apps
-- [ ] **Frontend-Backend Integration**: Connect authenticated app to working API endpoints
+- [ ] **Frontend-Backend Integration**: Connect React app to Container App API (CURRENT PRIORITY)
 
->**Current Status**: All major infrastructure and deployment issues resolved! Both frontend and API are operational. Next focus is on frontend-backend integration to complete the template's core functionality.
+>**Current Status**: Infrastructure migration to Container Apps complete! Both frontend and API are deployed and operational. **Next critical step**: Integrate React frontend with the Container App API and clean up orphaned App Service resources to reduce costs.
 
 ### 📋 Phase 3: Example Extensions (READY)
 - [ ] Example: User management (Azure SQL)
@@ -82,8 +83,8 @@ While the template includes example modules (such as user management and activit
 
 ## 🌐 Live Demo
 
-**Frontend URL**: https://purple-tree-0e7c5c91e.4.azurestaticapps.net
-**API URL**: https://api-a-riff-in-react.westus.azurecontainerapps.io
+**Frontend URL**: https://gentle-stone-08653e81e.1.azurestaticapps.net (Basic template - API integration pending)
+**API URL**: https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API operational)
 
 ## Architecture
 
