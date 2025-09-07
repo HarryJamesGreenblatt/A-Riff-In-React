@@ -1,0 +1,82 @@
+name: Deploy Frontend to Static Web App
+
+on:
+  push:
+    branches: [fresh-start]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'vite.config.ts'
+      - 'package.json'
+      - '.github/workflows/frontend-deploy.yml'
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: riffinreact-rg
+  ENVIRONMENT_NAME: a-riff-in-react
+  NODE_VERSION: '18'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build frontend
+        run: npm run build
+        env:
+          # Get API URL from Azure Container App
+          VITE_API_URL: $(az containerapp show -n api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)
+          VITE_EXTERNAL_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
+          VITE_EXTERNAL_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
+      
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Get Static Web App deployment token
+        id: get_swa_token
+        run: |
+          # Get the Static Web App name from environment variables
+          STATIC_WEB_APP_NAME="swa-${{ env.ENVIRONMENT_NAME }}"
+          
+          # Get the deployment token
+          DEPLOYMENT_TOKEN=$(az staticwebapp secrets list --name $STATIC_WEB_APP_NAME --query "properties.apiKey" -o tsv)
+          
+          # Set the token as an output
+          echo "::add-mask::$DEPLOYMENT_TOKEN"
+          echo "token=$DEPLOYMENT_TOKEN" >> $GITHUB_OUTPUT
+      
+      - name: Deploy to Static Web App
+        id: deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.get_swa_token.outputs.token }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/"
+          api_location: ""
+          output_location: "dist"
+          production_branch: "fresh-start"
+      
+      - name: Verify deployment
+        run: |
+          echo "Static Web App URL: https://$(az staticwebapp show --name swa-${{ env.ENVIRONMENT_NAME }} --query defaultHostname -o tsv)"
+          echo "Deployment complete!"
+      
+      - name: Logout from Azure
+        run: az logout
+        if: always()

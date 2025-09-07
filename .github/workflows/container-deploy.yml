@@ -36,12 +36,30 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
+      - name: Set repository owner lowercase
+        run: echo "REPO_OWNER_LOWERCASE=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: './api/package-lock.json'
+      
+      - name: Install API dependencies
+        working-directory: ./api
+        run: npm ci
+        
+      - name: Build API
+        working-directory: ./api
+        run: npm run build
+      
       - name: Build and push API image
         uses: docker/build-push-action@v5
         with:
           context: ./api
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/${{ env.ENVIRONMENT_NAME }}-api:latest
+          tags: ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/${{ env.ENVIRONMENT_NAME }}-api:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
@@ -53,13 +71,14 @@ jobs:
       - name: Deploy Azure Infrastructure
         uses: azure/arm-deploy@v1
         with:
+          scope: resourcegroup
           resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
           template: ./infra/main.bicep
           parameters: >
             environmentName=${{ env.ENVIRONMENT_NAME }}
             location=${{ env.LOCATION }}
-            containerImage=ghcr.io/${{ github.repository_owner }}/${{ env.ENVIRONMENT_NAME }}-api:latest
-            containerRegistry=${{ github.repository_owner }}
+            containerImage=ghcr.io/${{ env.REPO_OWNER_LOWERCASE }}/${{ env.ENVIRONMENT_NAME }}-api:latest
+            containerRegistry=${{ env.REPO_OWNER_LOWERCASE }}
             externalTenantId=${{ secrets.EXTERNAL_TENANT_ID }}
             externalClientId=${{ secrets.EXTERNAL_CLIENT_ID }}
             existingSqlServerName=${{ env.EXISTING_SQL_SERVER_NAME }}

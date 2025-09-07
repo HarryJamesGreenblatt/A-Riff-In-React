@@ -36,4 +36,6 @@ dist-ssr
 # Credentials and secrets
 azure-credentials.json
 
-/context
+# Context directory and all subdirectories
+/context/
+/context/**
