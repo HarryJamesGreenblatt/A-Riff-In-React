@@ -1,8 +1,9 @@
+````markdown
 # Deployment Success Summary
 
 ## 🎉 Project Successfully Deployed!
 
-**Live Frontend**: https://a-riff-in-react.{random}.azurestaticapps.net (improved naming - will take effect on next deployment)  
+**Live Frontend**: https://gentle-stone-08653e81e.1.azurestaticapps.net  
 **Live API**: https://api-a-riff-in-react.westus.azurecontainerapps.io  
 **Deployment Date**: September 6, 2025  
 **Status**: ✅ Full-Stack Application Operational
@@ -16,6 +17,7 @@
 - **Database integration** with Azure SQL Database and Cosmos DB
 - **Platform migration** from Windows App Service to Container Apps successfully completed
 - **CI/CD pipeline** optimized for containerized deployment
+- **SPA Routing** configured correctly with staticwebapp.config.json
 
 ### 🏗️ Infrastructure Deployed
 ```
@@ -57,9 +59,8 @@ Resource Group: riffinreact-rg
 - **Result**: 15-30% monthly cost reduction compared to App Service
 
 ### Domain Naming
-- **API**: `api-a-riff-in-react.westus.azurecontainerapps.io` ✅ (already clean)
-- **Frontend**: `a-riff-in-react.{random}.azurestaticapps.net` 🎯 (improved naming ready for next deployment)
-- **Current Frontend**: `purple-tree-0e7c5c91e.4.azurestaticapps.net` (will be replaced)
+- **API**: `api-a-riff-in-react.westus.azurecontainerapps.io` ✅
+- **Frontend**: `gentle-stone-08653e81e.1.azurestaticapps.net` ✅
 
 ## Lessons Learned
 
@@ -86,6 +87,12 @@ Resource Group: riffinreact-rg
 - Workflow triggers based on file paths reduce unnecessary deployments
 - Verification steps confirm successful deployment
 - Container image caching speeds up build times
+
+### Static Web Apps Configuration
+- SPA routing requires proper `staticwebapp.config.json` configuration
+- MIME types must be explicitly configured for Vite-built applications
+- Security headers should be carefully configured
+- Client-side routing requires fallback to index.html
 
 ## Next Steps
 
@@ -120,8 +127,8 @@ Resource Group: riffinreact-rg
 # Frontend Environment Variables
 VITE_ENTRA_CLIENT_ID: 8e217770-697f-497e-b30b-27b214e87db1
 VITE_ENTRA_TENANT_ID: 813307d1-6d39-4c75-8a38-2e34128203bc
-VITE_REDIRECT_URI: https://purple-tree-0e7c5c91e.4.azurestaticapps.net
-VITE_POST_LOGOUT_URI: https://purple-tree-0e7c5c91e.4.azurestaticapps.net
+VITE_REDIRECT_URI: https://gentle-stone-08653e81e.1.azurestaticapps.net
+VITE_POST_LOGOUT_URI: https://gentle-stone-08653e81e.1.azurestaticapps.net
 VITE_API_URL: https://api-a-riff-in-react.westus.azurecontainerapps.io
 
 # Container App Environment Variables
@@ -145,12 +152,14 @@ MANAGED_IDENTITY_CLIENT_ID: [auto-configured]
 2. **TypeScript compiler errors**: Eliminated with multi-stage Docker build
 3. **Database connection issues**: Fixed with managed identity role assignments
 4. **CORS configuration**: Addressed in Container App settings
+5. **MIME type errors**: Fixed with staticwebapp.config.json
 
 ### Working Solutions
 - **Container restart**: Use `az containerapp revision restart` for quick recovery
 - **Connection troubleshooting**: Check Container App logs with `az containerapp logs show`
 - **Database access issues**: Verify role assignments for managed identity
 - **Deployment verification**: Use built-in health endpoint tests in workflow
+- **SPA routing issues**: Ensure staticwebapp.config.json is properly configured
 
 ---
 
@@ -159,3 +168,5 @@ MANAGED_IDENTITY_CLIENT_ID: [auto-configured]
 **Last Updated**: September 6, 2025
 
 **Quick Start**: Frontend-Backend integration is the immediate priority. See `docs/07-backend-api.md` for API details.
+
+````

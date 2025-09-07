@@ -1,3 +1,4 @@
+````markdown
 # Azure Deployment Guide
 
 ## Infrastructure Overview
@@ -5,40 +6,7 @@
 - **Container Apps**: Express API as a containerized application
 - **Static Web Apps**: React SPA with global CDN distribution
 - **Database**: Azure SQL Database (shared server pattern) + Cosmos DB
-- **Authentication**: Microsoft Ent## 4. Monitor and Maintain
-
-### API Monitoring
-
-To check the Container App logs:
-
-```bash
-# View Container App logs
-az containerapp logs show -n api-$ENV_NAME -g $RESOURCE_GROUP
-```
-
-### Checking API Status
-
-```bash
-# Get the Container App URL
-API_URL=$(az containerapp show -n api-$ENV_NAME -g $RESOURCE_GROUP --query properties.configuration.ingress.fqdn -o tsv)
-
-# Test the health endpoint
-curl https://$API_URL/health
-```
-
-### Frontend Monitoring
-
-```bash
-# Get the Static Web App URL
-FRONTEND_URL=$(az staticwebapp show -n $ENV_NAME -g $RESOURCE_GROUP --query "defaultHostname" -o tsv)
-
-# Open in browser
-echo "https://$FRONTEND_URL"
-```
-
----
-
-> _For detailed deployment steps and troubleshooting, see the Flask template's [azure_deployment.md](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask/blob/main/docs/azure_deployment.md)_rnal ID
+- **Authentication**: Microsoft Entra External ID
 - **Container Registry**: GitHub Container Registry (ghcr.io)
 
 **Status**: ✅ **FULLY DEPLOYED AND OPERATIONAL** (as of September 6, 2025)
@@ -48,7 +16,7 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 ## 🎉 Current Deployment Status
 
 - ✅ **Azure Infrastructure**: Container Apps environment deployed via Bicep
-- ✅ **Web Application**: Live at https://purple-tree-0e7c5c91e.4.azurestaticapps.net
+- ✅ **Web Application**: Live at https://gentle-stone-08653e81e.1.azurestaticapps.net
 - ✅ **Backend API**: Live at https://api-a-riff-in-react.westus.azurecontainerapps.io
 - ✅ **Authentication**: Microsoft Entra External ID **FULLY WORKING** ✅
 - ✅ **CI/CD Pipeline**: GitHub Actions workflows operational
@@ -78,20 +46,6 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 | User-Assigned Managed Identity | `id-a-riff-in-react` | Secure database access | ✅ Active |
 | Log Analytics | `log-a-riff-in-react` | Monitoring | ✅ Active |
 
-# Azure Deployment Guide
-
-# Azure Deployment Guide
-
-## Infrastructure Overview
-
-- **App Service Plan**: Windows-based (B1 tier)
-- **Frontend**: React SPA on Windows App Service  
-- **Backend API**: Node.js Express on Windows App Service
-- **Database**: Azure SQL Database (shared server pattern)
-- **Authentication**: Microsoft Entra External ID
-
-> _Deployment strategies and rationale are adapted from [A Fugue In Flask: azure_deployment.md](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask/blob/main/docs/azure_deployment.md)_
-
 ## Prerequisites
 - Azure account
 - Azure CLI installed
@@ -101,14 +55,14 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 
 To enable external user authentication with Microsoft Entra External ID, you can set up app registration either through the Azure portal or programmatically:
 
-## Manual Setup (Azure Portal)
+### Manual Setup (Azure Portal)
 
 1. **Register Your App in Microsoft Entra**
    - In the Azure Portal, go to **Azure Active Directory** > **App registrations** > **New registration**
    - Configure redirect URIs and authentication settings
    - Note the Application (client) ID and Directory (tenant) ID
 
-## Programmatic Setup
+### Programmatic Setup
 
 1. **Register Your App in Microsoft Entra**
    ```bash
@@ -119,7 +73,7 @@ To enable external user authentication with Microsoft Entra External ID, you can
    az ad app create \
      --display-name "A-Riff-In-React-Entra" \
      --sign-in-audience "AzureADandPersonalMicrosoftAccount" \
-     --web-redirect-uris "http://localhost:5173" "https://your-production-url"
+     --web-redirect-uris "http://localhost:5173" "https://gentle-stone-08653e81e.1.azurestaticapps.net"
    
    # Get the application ID (client ID)
    az ad app list --display-name "A-Riff-In-React-Entra" --query "[].appId" -o tsv
@@ -214,53 +168,6 @@ az deployment group create \
   existingCosmosDbAccountName=$EXISTING_COSMOS_DB_NAME
 ```
 
-### Using Terraform (Alternative)
-
-If you prefer Terraform, you can create equivalent infrastructure:
-
-1. Create a `main.tf` file in the `infra` folder:
-
-```hcl
-provider "azurerm" {
-  features {}
-}
-
-resource "azurerm_resource_group" "rg" {
-  name     = "rg-${var.environment_name}"
-  location = var.location
-}
-
-resource "azurerm_key_vault" "kv" {
-  name                = "kv-${var.environment_name}"
-  location            = azurerm_resource_group.rg.location
-  resource_group_name = azurerm_resource_group.rg.name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  sku_name            = "standard"
-}
-
-# Add B2C secrets
-resource "azurerm_key_vault_secret" "b2c_client_id" {
-  name         = "B2C-CLIENT-ID"
-  value        = var.b2c_client_id
-  key_vault_id = azurerm_key_vault.kv.id
-}
-
-# Continue with App Service, SQL, Cosmos DB etc.
-```
-
-2. Deploy with Terraform:
-
-```bash
-cd infra
-terraform init
-terraform apply -var="environment_name=$ENV_NAME" \
-  -var="location=$LOCATION" \
-  -var="b2c_tenant_name=$B2C_TENANT_NAME" \
-  -var="b2c_client_id=$B2C_CLIENT_ID" \
-  -var="b2c_signin_policy=$B2C_SIGNIN_POLICY" \
-  -var="sql_admin_password=$SQL_ADMIN_PASSWORD"
-```
-
 ### Configure GitHub Secrets for CI/CD
 
 The CI/CD pipeline requires a Service Principal with sufficient permissions to deploy resources. Since the deployment targets two different resource groups (`riffinreact-rg` and the shared `db-rg`), the Service Principal must have the **Contributor** role assigned at the **Subscription** scope.
@@ -304,6 +211,38 @@ Ensure your application can use both local development settings and deployed set
 2. **Update `src/config/authConfig.ts` to use Entra configuration**
    Update your configuration to use the Entra settings as shown in the `05-authentication-msal.md` documentation.
 
+3. **Create a `staticwebapp.config.json` file**
+   ```json
+   {
+     "navigationFallback": {
+       "rewrite": "/index.html",
+       "exclude": ["/images/*.{png,jpg,gif}", "/css/*", "/assets/*"]
+     },
+     "routes": [
+       {
+         "route": "/*",
+         "rewrite": "/index.html"
+       }
+     ],
+     "mimeTypes": {
+       ".js": "application/javascript",
+       ".mjs": "application/javascript",
+       ".css": "text/css",
+       ".html": "text/html",
+       ".json": "application/json",
+       ".svg": "image/svg+xml"
+     },
+     "globalHeaders": {
+       "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' *.azurecontainerapps.io *.microsoftonline.com *.microsoft.com",
+       "X-Content-Type-Options": "nosniff"
+     }
+   }
+   ```
+   This configuration file is essential for:
+   - Proper SPA routing (falling back to index.html for client-side routes)
+   - Setting correct MIME types for JavaScript modules
+   - Configuring security headers
+
 ## 4. Deploy the App
 The project includes two GitHub Actions workflows for CI/CD:
 
@@ -322,13 +261,40 @@ These workflows are triggered on pushes to the `fresh-start` branch. They perfor
     *   Builds the React application with production environment variables
     *   Deploys the built assets to Azure Static Web Apps
 
-See `docs/ci-cd-setup.md` for detailed pipeline setup instructions.
+See `docs/09-github-actions-ci-cd.md` for detailed pipeline setup instructions.
 
+## 5. Monitor and Maintain
 
-## 4. Monitor and Maintain
-- Use Application Insights for telemetry
-- Regularly update dependencies and review security
+### API Monitoring
+
+To check the Container App logs:
+
+```bash
+# View Container App logs
+az containerapp logs show -n api-$ENV_NAME -g $RESOURCE_GROUP
+```
+
+### Checking API Status
+
+```bash
+# Get the Container App URL
+API_URL=$(az containerapp show -n api-$ENV_NAME -g $RESOURCE_GROUP --query properties.configuration.ingress.fqdn -o tsv)
+
+# Test the health endpoint
+curl https://$API_URL/health
+```
+
+### Frontend Monitoring
+
+```bash
+# Get the Static Web App URL
+FRONTEND_URL=$(az staticwebapp show -n $ENV_NAME -g $RESOURCE_GROUP --query "defaultHostname" -o tsv)
+
+# Open in browser
+echo "https://$FRONTEND_URL"
+```
 
 ---
 
-> _For detailed deployment steps and troubleshooting, see the Flask template’s [azure_deployment.md](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask/blob/main/docs/azure_deployment.md)_
+> _For detailed deployment steps and troubleshooting, see the Flask template's [azure_deployment.md](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask/blob/main/docs/azure_deployment.md)_
+````

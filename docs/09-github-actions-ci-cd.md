@@ -1,3 +1,4 @@
+````markdown
 # GitHub Actions: Azure CI/CD Pipeline
 
 **Status**: ✅ **SUCCESSFULLY CONFIGURED AND RUNNING**
@@ -9,7 +10,7 @@ This document covers the GitHub Actions workflows for **A Riff In React**, which
 - ✅ **Workflow Status**: Fully operational and tested.
 - ✅ **Last Deployment**: Successful - September 6, 2025.
 - ✅ **Live API**: https://api-a-riff-in-react.westus.azurecontainerapps.io
-- ✅ **Live Frontend**: https://purple-tree-0e7c5c91e.4.azurestaticapps.net
+- ✅ **Live Frontend**: https://gentle-stone-08653e81e.1.azurestaticapps.net
 - ✅ **Authentication**: Microsoft Entra External ID integrated.
 - ✅ **Infrastructure**: Container Apps with managed identity for database access.
 - ✅ **Platform**: Successfully migrated from Windows App Service to Container Apps.
@@ -28,6 +29,7 @@ We use **two separate workflows** that handle different parts of the application
 - **Cross-Resource Group Deployment**: Correctly sets up role assignments for database access
 - **Separate Deployment Paths**: API and frontend deploy independently based on changed files
 - **Health Verification**: Automated health checks to verify successful deployment
+- **SPA Configuration**: Includes staticwebapp.config.json for proper routing and MIME types
 
 ## Required GitHub Secrets
 
@@ -117,15 +119,87 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # Checkout, build, and deploy frontend
-      # See the full workflow file for details
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+        env:
+          VITE_API_URL: ${{ env.API_URL }}
+          VITE_EXTERNAL_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
+          VITE_EXTERNAL_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
+      
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Deploy to Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "build"
+          skip_app_build: true
+          api_location: "" # No API folder as we're using Container Apps
+          output_location: ""
 ```
 
 Key features:
 - Sets up Node.js environment
-- Builds React app with appropriate environment variables
+- Builds React app with appropriate environment variables (using Vite prefixes)
 - Deploys to Azure Static Web Apps
 - Configures API URL to point to Container App
+- Uses staticwebapp.config.json (at the root of the project) for SPA routing and MIME types
+
+## Important Configuration Files
+
+### `staticwebapp.config.json`
+
+This file is essential for proper SPA functioning:
+
+```json
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/images/*.{png,jpg,gif}", "/css/*", "/assets/*"]
+  },
+  "routes": [
+    {
+      "route": "/*",
+      "rewrite": "/index.html"
+    }
+  ],
+  "mimeTypes": {
+    ".js": "application/javascript",
+    ".mjs": "application/javascript",
+    ".css": "text/css",
+    ".html": "text/html",
+    ".json": "application/json",
+    ".svg": "image/svg+xml"
+  },
+  "globalHeaders": {
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' *.azurecontainerapps.io *.microsoftonline.com *.microsoft.com",
+    "X-Content-Type-Options": "nosniff"
+  }
+}
+```
+
+This configuration:
+- Ensures SPA routes work by redirecting to index.html
+- Sets correct MIME types for JavaScript modules
+- Configures security headers
+- Is automatically deployed as part of the Static Web App workflow
 
 ## Workflow Integration
 
@@ -149,5 +223,9 @@ If deployments fail:
 3. Check Azure Container Apps logs for runtime errors
 4. Verify managed identity has appropriate role assignments
 5. Test API health endpoint directly
+6. For Static Web App routing issues, check staticwebapp.config.json configuration
+7. For MIME type errors, ensure the mimeTypes section in staticwebapp.config.json is correctly configured
 
 This setup ensures a robust, secure, and modern deployment pipeline for the containerized application.
+
+````
