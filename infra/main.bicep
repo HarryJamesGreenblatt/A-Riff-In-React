@@ -56,9 +56,30 @@ resource existingSqlServer 'Microsoft.Sql/servers@2021-11-01' existing = {
   scope: resourceGroup(existingSqlServerResourceGroup)
 }
 
-// Reference to existing Cosmos DB
-resource existingCosmosDb 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' existing = {
+// Create a new Cosmos DB account since it doesn't exist yet
+resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' = {
   name: existingCosmosDbAccountName
+  location: location
+  tags: tags
+  kind: 'GlobalDocumentDB'
+  properties: {
+    databaseAccountOfferType: 'Standard'
+    consistencyPolicy: {
+      defaultConsistencyLevel: 'Session'
+    }
+    locations: [
+      {
+        locationName: location
+        failoverPriority: 0
+        isZoneRedundant: false
+      }
+    ]
+    capabilities: [
+      {
+        name: 'EnableServerless'
+      }
+    ]
+  }
 }
 
 // Create a user-assigned managed identity for the Container App
@@ -87,9 +108,18 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   }
 }
 
-// Reference to existing Application Insights
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
-  name: 'appi-a-riff-in-react'
+// Create Application Insights if it doesn't exist
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: 'appi-${environmentName}'
+  location: location
+  tags: tags
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalytics.id
+    publicNetworkAccessForIngestion: 'Enabled'
+    publicNetworkAccessForQuery: 'Enabled'
+  }
 }
 
 // Container Apps Environment
@@ -186,7 +216,7 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
             }
             {
               name: 'COSMOS_ENDPOINT'
-              value: existingCosmosDb.properties.documentEndpoint
+              value: cosmosDb.properties.documentEndpoint
             }
             {
               name: 'COSMOS_DATABASE_ID'
@@ -229,20 +259,38 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
   }
 }
 
-// Reference to existing Static Web App
-resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' existing = {
+// Static Web App for frontend
+resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
   name: staticWebAppName
-}
-
-// Reference to existing Key Vault
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
-  name: 'kv-a-riff-in-react'
-}
-
-// Update Key Vault access policy to include new managed identity
-resource keyVaultPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
-  name: '${keyVault.name}/add'
+  location: location
+  tags: tags
+  sku: {
+    name: 'Free'
+    tier: 'Free'
+  }
   properties: {
+    provider: 'GitHub'
+    repositoryUrl: 'https://github.com/HarryJamesGreenblatt/A-Riff-In-React'
+    branch: 'fresh-start'
+    buildProperties: {
+      appLocation: '/'
+      apiLocation: ''
+      outputLocation: 'dist'
+    }
+  }
+}
+
+// Create or update Key Vault if it doesn't exist
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
+  name: 'kv-${environmentName}'
+  location: location
+  tags: tags
+  properties: {
+    tenantId: subscription().tenantId
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
     accessPolicies: [
       {
         tenantId: subscription().tenantId
@@ -255,6 +303,13 @@ resource keyVaultPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = 
         }
       }
     ]
+    enableRbacAuthorization: false
+    enableSoftDelete: true
+    softDeleteRetentionInDays: 90
+    enabledForDeployment: false
+    enabledForDiskEncryption: false
+    enabledForTemplateDeployment: false
+    publicNetworkAccess: 'Enabled'
   }
 }
 
@@ -332,14 +387,18 @@ resource sqlRoleAssignmentScript 'Microsoft.Resources/deploymentScripts@2020-10-
   }
 }
 
-// Cosmos DB access for managed identity
-module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
-  name: 'cosmosRoleAssignment'
-  params: {
-    cosmosDbAccountName: existingCosmosDbAccountName
+// Create a role assignment for the managed identity to access Cosmos DB
+resource cosmosRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2022-08-15' = {
+  parent: cosmosDb
+  name: guid(cosmosDb.id, managedIdentity.id, 'Cosmos DB Data Contributor')
+  properties: {
     principalId: managedIdentity.properties.principalId
-    roleDefinitionId: 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8' // Cosmos DB Data Contributor
+    roleDefinitionId: '00000000-0000-0000-0000-000000000002' // Cosmos DB Data Contributor
+    scope: cosmosDb.id
   }
+  dependsOn: [
+    cosmosContainer
+  ]
 }
 
 // Outputs
