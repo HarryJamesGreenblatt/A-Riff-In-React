@@ -35,10 +35,23 @@ jobs:
         run: npm ci
       
       - name: Build frontend
-        run: npm run build
+        run: |
+          # Try to get API URL from Container App first (new architecture)
+          CONTAINER_APP_URL=$(az containerapp show -n ca-api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv 2>/dev/null || echo "")
+          
+          # If Container App URL is empty, fall back to App Service (old architecture)
+          if [ -z "$CONTAINER_APP_URL" ]; then
+            echo "Container App not found, falling back to App Service..."
+            API_URL=$(az webapp show -n api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query defaultHostName -o tsv)
+          else
+            API_URL=$CONTAINER_APP_URL
+          fi
+          
+          echo "Using API URL: https://$API_URL"
+          
+          # Build with the API URL
+          VITE_API_URL=https://$API_URL npm run build
         env:
-          # Get API URL from Azure Container App
-          VITE_API_URL: $(az containerapp show -n api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)
           VITE_EXTERNAL_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
           VITE_EXTERNAL_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
       
@@ -46,6 +59,27 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Create Static Web App if it doesn't exist
+        id: create_swa
+        run: |
+          # Get the Static Web App name from environment variables
+          STATIC_WEB_APP_NAME="swa-${{ env.ENVIRONMENT_NAME }}"
+          
+          # Check if Static Web App exists
+          if ! az staticwebapp show --name $STATIC_WEB_APP_NAME --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "Creating Static Web App $STATIC_WEB_APP_NAME..."
+            az staticwebapp create \
+              --name $STATIC_WEB_APP_NAME \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --location "westus2" \
+              --sku Free \
+              --tags "application=A-Riff-In-React" "environment=${{ env.ENVIRONMENT_NAME }}" "azd_env_name=${{ env.ENVIRONMENT_NAME }}"
+            
+            echo "Static Web App created successfully!"
+          else
+            echo "Static Web App $STATIC_WEB_APP_NAME already exists"
+          fi
       
       - name: Get Static Web App deployment token
         id: get_swa_token
@@ -74,8 +108,17 @@ jobs:
       
       - name: Verify deployment
         run: |
-          echo "Static Web App URL: https://$(az staticwebapp show --name swa-${{ env.ENVIRONMENT_NAME }} --query defaultHostname -o tsv)"
-          echo "Deployment complete!"
+          STATIC_WEB_APP_NAME="swa-${{ env.ENVIRONMENT_NAME }}"
+          SWA_URL=$(az staticwebapp show --name $STATIC_WEB_APP_NAME --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query defaultHostname -o tsv)
+          
+          echo "✅ Deployment successful!"
+          echo "🌐 Static Web App URL: https://$SWA_URL"
+          
+          # Also output the Container App URL for reference
+          CONTAINER_APP_URL=$(az containerapp show -n ca-api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv 2>/dev/null || echo "Not found")
+          echo "🔌 API Container App URL: https://$CONTAINER_APP_URL"
+          
+          echo "Now available at: https://$SWA_URL"
       
       - name: Logout from Azure
         run: az logout
