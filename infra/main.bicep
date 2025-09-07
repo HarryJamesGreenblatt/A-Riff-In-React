@@ -5,10 +5,10 @@ param environmentName string = 'a-riff-in-react'
 param location string = resourceGroup().location
 
 @description('The container image to deploy')
-param containerImage string = 'ghcr.io/${containerRegistry}/${environmentName}-api:latest'
+param containerImage string = '${containerRegistry}.azurecr.io/${environmentName}-api:latest'
 
-@description('GitHub container registry name (without ghcr.io/)')
-param containerRegistry string = 'HarryJamesGreenblatt'
+@description('Azure Container Registry name')
+param containerRegistry string = 'ariffacr'
 
 @description('The Microsoft Entra External ID tenant ID')
 param externalTenantId string
