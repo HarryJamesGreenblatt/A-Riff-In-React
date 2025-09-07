@@ -97,6 +97,7 @@ jobs:
           scope: resourcegroup
           resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
           template: ./infra/main.bicep
+          failOnStdErr: false
           parameters: >
             environmentName=${{ env.ENVIRONMENT_NAME }}
             location=${{ env.LOCATION }}
