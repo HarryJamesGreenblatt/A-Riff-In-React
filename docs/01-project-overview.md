@@ -32,12 +32,12 @@ The architecture of A Riff In React follows these key principles:
 
 ```
 a-riff-in-react/
-├── api/                    # Backend API (Node.js, Express on Azure App Service)
-│   ├── deployment/         # Clean deployment package
-│   │   ├── server.js       # Express server entry point
-│   │   ├── package.json    # Production dependencies
+├── api/                    # Backend API (Container Apps)
+│   ├── src/                # TypeScript source code
+│   │   ├── index.ts        # Express server entry point
 │   │   ├── routes/         # Express route definitions
 │   │   └── services/       # Database connection services
+│   ├── Dockerfile          # Multi-stage Docker build
 │   └── schema.sql          # Database schema
 ├── src/                    # Frontend (React)
 │   ├── components/         # Reusable UI components
@@ -66,6 +66,12 @@ a-riff-in-react/
 │   ├── App.tsx             # Main app component
 │   └── main.tsx            # Entry point
 ├── infra/                  # Azure deployment configuration (Bicep)
+│   ├── main.bicep          # Main deployment template
+│   └── modules/            # Bicep modules for database role assignments
+├── .github/workflows/      # GitHub Actions CI/CD pipelines
+│   ├── container-deploy.yml # API container deployment workflow
+│   └── static-web-deploy.yml # Frontend deployment workflow
+├── docker-compose.yml      # Local development configuration
 ├── docs/                   # Documentation
 └── public/                 # Static assets
 ```
@@ -99,19 +105,19 @@ Cosmos DB is ideal for:
 
 The template is configured for seamless integration with the following Azure services:
 
-- **Azure App Service**: For hosting both the React application and Node.js API
+- **Azure Container Apps**: For hosting the containerized Node.js API
+- **Azure Static Web Apps**: For hosting the React application with global CDN
 - **Azure SQL Database**: For structured, relational data
 - **Azure Cosmos DB**: For document-based and real-time data
-- **Azure Key Vault**: For secure storage of secrets and configuration
-- **Azure Application Insights**: For monitoring and analytics
+- **User-Assigned Managed Identity**: For secure database access without credentials
 - **Microsoft Authentication Library (MSAL)**: For Azure AD authentication
 
 ## 🚀 Getting Started
 
 To learn how to set up and use this template:
-1. See the [Development Setup](./02-development-setup.md) guide for local environment configuration
-2. Explore the [UI Framework Setup](./03-ui-framework-setup.md) for UI component usage
-3. Refer to [Azure Deployment](./azure_deployment.md) for deployment instructions
+1. See the [Development Setup](./03-development-setup.md) guide for local environment configuration
+2. Explore the [UI Framework Setup](./05-ui-framework-setup.md) for UI component usage
+3. Refer to [Azure Deployment](./10-azure-deployment.md) for deployment instructions
 
 ## 🔄 From Flask to React: Architectural Parallels
 

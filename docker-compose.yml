@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+      target: build  # Use the build stage for development
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+      - PORT=8080
+      # Database connection settings (use placeholders for local development)
+      - SQL_SERVER=localhost
+      - SQL_DATABASE=ARiffInReact
+      - SQL_USER=sa
+      - SQL_PASSWORD=YourLocalPassword
+      - COSMOS_ENDPOINT=https://localhost:8081
+      - COSMOS_KEY=YourLocalCosmosKey
+      - COSMOS_DATABASE_ID=ARiffInReact
+      - COSMOS_CONTAINER_ID=activities
+    volumes:
+      - ./api/src:/app/src  # For hot reloading in development
+    command: npm run dev

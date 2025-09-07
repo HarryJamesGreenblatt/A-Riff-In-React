@@ -33,4 +33,9 @@ dist-ssr
 .env
 .env*.local
 
-/context
+# Credentials and secrets
+azure-credentials.json
+
+# Context directory and all subdirectories
+/context/
+/context/**

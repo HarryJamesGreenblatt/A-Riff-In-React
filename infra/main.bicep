@@ -1,92 +1,71 @@
-// main.bicep - Main Bicep template for A Riff In React
-targetScope = 'resourceGroup'
+@description('The environment name. This will be used as a prefix for all resources.')
+param environmentName string = 'a-riff-in-react'
 
-// Parameters
-@description('The environment name')
-param environmentName string
+@description('The Azure region for all resources.')
+param location string = resourceGroup().location
 
-@description('The location for all resources')
-param location string = 'westus'
+@description('The container image to deploy')
+param containerImage string = '${containerRegistry}/${environmentName}-api:latest'
 
-@description('The Microsoft Entra tenant ID for External ID')
+@description('Azure Container Registry URL')
+param containerRegistry string = 'ariffreactacr.azurecr.io'
+
+@description('Azure Container Registry username')
+param containerRegistryUsername string
+
+@description('Azure Container Registry password')
+@secure()
+param containerRegistryPassword string
+
+@description('The Microsoft Entra External ID tenant ID')
 param externalTenantId string
 
-@description('The Microsoft Entra External ID Application (client) ID')
+@description('The Microsoft Entra External ID client ID')
 param externalClientId string
 
-@description('The Azure Key Vault name')
-param keyVaultName string = 'kv-${environmentName}'
+// Existing resources to reference
+@description('The name of the existing SQL Server')
+param existingSqlServerName string = 'sequitur-sql-server'
 
-@description('The name of the shared SQL Server to use')
-param sharedSqlServerName string = 'sequitur-sql-server'
+@description('The resource group of the existing SQL Server')
+param existingSqlServerResourceGroup string = 'db-rg'
 
-@description('The name of the resource group containing the shared SQL Server')
-param sharedSqlServerResourceGroupName string = 'db-rg'
+@description('The name of the existing SQL Database')
+param existingSqlDatabaseName string = 'riff-react-db'
 
-@description('The SQL Database name')
-param sqlDatabaseName string = 'riff-react-db'
+// Note: Cosmos DB is mentioned in docs but not implemented in current infrastructure
+// This parameter is commented out as it's not currently used
+// @description('The name of the existing Cosmos DB account')
+// param existingCosmosDbAccountName string = 'cosmos-a-riff-in-react'
 
-@description('The SQL Server administrator login')
-param sqlAdminLogin string = 'sqladmin'
+// Variables for resource naming
+var containerAppEnvName = 'env-${environmentName}'
+var containerAppName = 'ca-api-${environmentName}' // Changed prefix to prevent conflicts with existing App Service
+var logAnalyticsName = 'log-${environmentName}'
+var managedIdentityName = 'id-${environmentName}'
 
-@description('The SQL Server administrator password')
-@secure()
-param sqlAdminPassword string
-
-@description('The Cosmos DB account name')
-param cosmosAccountName string = 'cosmos-${environmentName}'
-
-@description('The Cosmos DB database name')
-param cosmosDatabaseName string = 'cosmosdb-${environmentName}'
-
-@description('The Application Insights name')
-param appInsightsName string = 'appi-${environmentName}'
-
-@description('The Log Analytics workspace name')
-param logAnalyticsName string = 'log-${environmentName}'
-
-
-// Tags
+// Tags for all resources
 var tags = {
-  environment: environmentName
   application: 'A-Riff-In-React'
+  environment: environmentName
   azd_env_name: environmentName
 }
 
-// Key Vault to store secrets
-resource keyVault 'Microsoft.KeyVault/vaults@2023-02-01' = {
-  name: keyVaultName
+// Reference to existing SQL Server
+var sqlServerFqdn = '${existingSqlServerName}.database.windows.net'
+
+// Note: Cosmos DB is mentioned in docs but not implemented in current infrastructure
+// We'll remove references to Cosmos DB for now to simplify deployment
+
+// Create a user-assigned managed identity for the Container App
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: managedIdentityName
   location: location
   tags: tags
-  properties: {
-    enabledForDeployment: true
-    enabledForTemplateDeployment: true
-    enabledForDiskEncryption: true
-    tenantId: subscription().tenantId
-    accessPolicies: []
-    sku: {
-      name: 'standard'
-      family: 'A'
-    }
-  }
 }
 
-// Single App Service Plan for both Frontend and API (Windows)
-resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
-  name: 'asp-${environmentName}'
-  location: location
-  tags: tags
-  sku: {
-    name: 'B1'
-    tier: 'Basic'
-  }
-  properties: {
-    reserved: false  // Windows App Service Plan
-  }
-}
-
-// Log Analytics Workspace for Application Insights
-resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+// Log Analytics workspace for container app logs
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   name: logAnalyticsName
   location: location
   tags: tags
@@ -98,224 +77,176 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10
     features: {
       enableLogAccessUsingOnlyResourcePermissions: true
     }
+    workspaceCapping: {
+      dailyQuotaGb: 1
+    }
   }
 }
 
-// Application Insights for monitoring
-resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: appInsightsName
+// Reference existing Application Insights
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+  name: 'appi-${environmentName}'
+}
+
+// Container Apps Environment
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2022-10-01' = {
+  name: containerAppEnvName
   location: location
   tags: tags
-  kind: 'web'
   properties: {
-    Application_Type: 'web'
-    WorkspaceResourceId: logAnalyticsWorkspace.id
-    publicNetworkAccessForIngestion: 'Enabled'
-    publicNetworkAccessForQuery: 'Enabled'
-  }
-}
-
-// Frontend Web App
-resource webApp 'Microsoft.Web/sites@2022-09-01' = {
-  name: environmentName
-  location: location
-  kind: 'app'
-  tags: union(tags, { 'azd-service-name': 'web' })
-  properties: {
-    serverFarmId: appServicePlan.id
-    httpsOnly: true
-    siteConfig: {
-      nodeVersion: '20.11.0'
-      appSettings: [
-        {
-          name: 'VITE_ENTRA_TENANT_ID'
-          value: externalTenantId
-        }
-        {
-          name: 'VITE_ENTRA_CLIENT_ID'
-          value: externalClientId
-        }
-        {
-          name: 'VITE_REDIRECT_URI'
-          value: 'https://${environmentName}.azurewebsites.net'
-        }
-        {
-          name: 'VITE_POST_LOGOUT_URI'
-          value: 'https://${environmentName}.azurewebsites.net'
-        }
-        {
-          name: 'VITE_API_BASE_URL'
-          value: 'https://api-${environmentName}.azurewebsites.net'
-        }
-      ]
+    appLogsConfiguration: {
+      destination: 'log-analytics'
+      logAnalyticsConfiguration: {
+        customerId: logAnalytics.properties.customerId
+        sharedKey: logAnalytics.listKeys().primarySharedKey
+      }
     }
   }
 }
 
-// Backend API App Service
-resource apiApp 'Microsoft.Web/sites@2022-09-01' = {
-  name: 'api-${environmentName}'
+// Container App for API
+resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
+  name: containerAppName
   location: location
-  kind: 'app'
-  tags: union(tags, { 'azd-service-name': 'api' })
+  tags: tags
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${managedIdentity.id}': {}
+    }
   }
   properties: {
-    serverFarmId: appServicePlan.id
-    httpsOnly: true
-    siteConfig: {
-      nodeVersion: '20.11.0'
-      appSettings: [
+    managedEnvironmentId: containerAppEnvironment.id
+    configuration: {
+      ingress: {
+        external: true
+        targetPort: 8080
+        allowInsecure: false
+        traffic: [
+          {
+            latestRevision: true
+            weight: 100
+          }
+        ]
+        corsPolicy: {
+          allowedOrigins: ['*']
+        }
+      }
+      registries: [
         {
-          name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: '1'
+          server: containerRegistry
+          username: containerRegistryUsername
+          passwordSecretRef: 'acr-password'
+        }
+      ]
+      secrets: [
+        {
+          name: 'sql-connection-string'
+          value: 'Server=${sqlServerFqdn};Database=${existingSqlDatabaseName};Authentication=Active Directory Default;'
         }
         {
-          name: 'NODE_ENV'
-          value: 'production'
+          name: 'ai-connection-string'
+          value: applicationInsights.properties.ConnectionString
         }
         {
-          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: appInsights.properties.InstrumentationKey
-        }
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: appInsights.properties.ConnectionString
-        }
-        {
-          name: 'AZURE_SQL_CONNECTIONSTRING'
-          value: '@Microsoft.KeyVault(SecretUri=${sqlConnectionStringSecret.properties.secretUri})'
-        }
-        {
-          name: 'WEBSITE_ENABLE_SYNC_UPDATE_SITE'
-          value: 'false'
-        }
-        {
-          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-          value: 'false'
-        }
-        {
-          name: 'WEBSITES_ENABLE_APP_SERVICE_STORAGE'
-          value: 'false'
-        }
-        {
-          name: 'WEBSITES_PORT'
-          value: '8080'
+          name: 'acr-password'
+          value: containerRegistryPassword
         }
       ]
     }
-  }
-}
-
-// Grant API App access to Key Vault
-resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2023-02-01' = {
-  parent: keyVault
-  name: 'add'
-  properties: {
-    accessPolicies: [
-      {
-        tenantId: subscription().tenantId
-        objectId: apiApp.identity.principalId
-        permissions: {
-          secrets: [
-            'get'
+    template: {
+      containers: [
+        {
+          name: 'api'
+          image: containerImage
+          resources: {
+            cpu: json('0.5')
+            memory: '1Gi'
+          }
+          env: [
+            {
+              name: 'NODE_ENV'
+              value: 'production'
+            }
+            {
+              name: 'PORT'
+              value: '8080'
+            }
+            {
+              name: 'SQL_SERVER'
+              value: sqlServerFqdn
+            }
+            {
+              name: 'SQL_DATABASE'
+              value: existingSqlDatabaseName
+            }
+            {
+              name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+              secretRef: 'ai-connection-string'
+            }
+            {
+              name: 'EXTERNAL_TENANT_ID'
+              value: externalTenantId
+            }
+            {
+              name: 'EXTERNAL_CLIENT_ID'
+              value: externalClientId
+            }
           ]
         }
-      }
-    ]
-  }
-}
-
-
-// Deploy SQL Database to shared server using module
-module sqlDatabaseModule 'modules/sqlDatabase.bicep' = {
-  name: 'sql-database-deployment'
-  scope: resourceGroup(sharedSqlServerResourceGroupName)
-  params: {
-    sqlServerName: sharedSqlServerName
-    sqlDatabaseName: sqlDatabaseName
-    location: location
-    tags: tags
-  }
-}
-
-// Cosmos DB Account for flexible data
-resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2023-04-15' = {
-  name: cosmosAccountName
-  location: location
-  tags: tags
-  kind: 'GlobalDocumentDB'
-  properties: {
-    databaseAccountOfferType: 'Standard'
-    enableAutomaticFailover: false
-    consistencyPolicy: {
-      defaultConsistencyLevel: 'Session'
-    }
-    locations: [
-      {
-        locationName: location
-        failoverPriority: 0
-        isZoneRedundant: false
-      }
-    ]
-    capabilities: [
-      {
-        name: 'EnableServerless' // Use serverless for cost optimization
-      }
-    ]
-  }
-}
-
-// Cosmos DB Database
-resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2023-04-15' = {
-  parent: cosmosAccount
-  name: cosmosDatabaseName
-  properties: {
-    resource: {
-      id: cosmosDatabaseName
-    }
-  }
-}
-
-// Cosmos DB Container for activity logs
-resource activityContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2023-04-15' = {
-  parent: cosmosDatabase
-  name: 'activity-logs'
-  properties: {
-    resource: {
-      id: 'activity-logs'
-      partitionKey: {
-        paths: [
-          '/userId'
-        ]
-        kind: 'Hash'
-      }
-      indexingPolicy: {
-        indexingMode: 'consistent'
-        includedPaths: [
+      ]
+      scale: {
+        minReplicas: 0
+        maxReplicas: 10
+        rules: [
           {
-            path: '/*'
+            name: 'http-scaling-rule'
+            http: {
+              metadata: {
+                concurrentRequests: '10'
+              }
+            }
           }
         ]
       }
-      defaultTtl: 2592000 // 30 days in seconds
     }
   }
 }
 
-// Add database connection strings to Key Vault
-resource sqlConnectionStringSecret 'Microsoft.KeyVault/vaults/secrets@2023-02-01' = {
-  parent: keyVault
-  name: 'AZURE-SQL-CONNECTIONSTRING'
-  properties: {
-    value: 'Server=tcp:${sqlDatabaseModule.outputs.sqlServerFqdn},1433;Initial Catalog=${sqlDatabaseName};Persist Security Info=False;User ID=${sqlAdminLogin};Password=${sqlAdminPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-  }
-}
+// Reference existing App Service (not Static Web App)
+@description('The name of the existing web app')
+param webAppName string = 'a-riff-in-react'
 
-// Output the web app URL
-output webAppUrl string = webApp.properties.defaultHostName
-output apiAppUrl string = apiApp.properties.defaultHostName
-output sqlServerFqdn string = sqlDatabaseModule.outputs.sqlServerFqdn
-output cosmosEndpoint string = cosmosAccount.properties.documentEndpoint
-output appInsightsConnectionString string = appInsights.properties.ConnectionString
+// Reference existing Key Vault
+@description('The name of the existing key vault')
+param keyVaultName string = 'kv-a-riff-in-react'
+
+// Update Key Vault access policy - done manually
+output keyVaultAccessInstructions string = '''
+To manually grant the managed identity access to Key Vault:
+1. Navigate to the Key Vault: ${keyVaultName} in the Azure Portal
+2. Go to "Access policies"
+3. Add a new access policy with the following details:
+   - Principal: ${managedIdentity.properties.principalId}
+   - Secret permissions: Get, List
+'''
+
+// SQL Database access - simplified approach without deployment script
+// We'll just output instructions for manual role assignment since
+// the identity doesn't have sufficient permissions to execute the script
+output sqlRoleAssignmentInstructions string = '''
+To manually assign the necessary SQL permissions:
+1. Use the Azure Portal to navigate to the SQL Server: ${existingSqlServerName} in resource group ${existingSqlServerResourceGroup}
+2. Go to "Azure Active Directory" and ensure the server has an Azure AD admin configured
+3. Connect to the database ${existingSqlDatabaseName} using that admin
+4. Execute the following T-SQL:
+   CREATE USER [${managedIdentity.properties.principalId}] FROM EXTERNAL PROVIDER;
+   ALTER ROLE db_datareader ADD MEMBER [${managedIdentity.properties.principalId}];
+'''
+
+// Remove Cosmos DB role assignment since we're not creating Cosmos DB yet
+
+// Outputs
+output containerAppUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
+output webAppUrl string = 'https://${webAppName}.azurewebsites.net'
+output managedIdentityId string = managedIdentity.id

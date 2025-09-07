@@ -1,22 +1,45 @@
--- Create Users table
-CREATE TABLE Users (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    name NVARCHAR(255) NOT NULL,
-    email NVARCHAR(255) NOT NULL UNIQUE,
-    role NVARCHAR(50) DEFAULT 'user',
-    createdAt DATETIME2 DEFAULT GETUTCDATE(),
-    updatedAt DATETIME2 DEFAULT GETUTCDATE()
-);
+-- Create the database if it doesn't exist
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'ARiffInReact')
+BEGIN
+    CREATE DATABASE ARiffInReact;
+END
 GO
 
--- Create a trigger to update the updatedAt field on row update
-CREATE TRIGGER trg_Users_Update
-ON Users
-AFTER UPDATE
-AS
+USE ARiffInReact;
+GO
+
+-- Create Users table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Users')
 BEGIN
-    UPDATE Users
-    SET updatedAt = GETUTCDATE()
-    WHERE id IN (SELECT id FROM inserted);
-END;
+    CREATE TABLE Users (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        name NVARCHAR(100) NOT NULL,
+        email NVARCHAR(255) NOT NULL UNIQUE,
+        createdAt DATETIME NOT NULL DEFAULT GETDATE(),
+        updatedAt DATETIME NOT NULL DEFAULT GETDATE()
+    );
+END
+GO
+
+-- Create UserPreferences table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'UserPreferences')
+BEGIN
+    CREATE TABLE UserPreferences (
+        id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
+        userId UNIQUEIDENTIFIER NOT NULL,
+        preferenceName NVARCHAR(100) NOT NULL,
+        preferenceValue NVARCHAR(MAX),
+        createdAt DATETIME NOT NULL DEFAULT GETDATE(),
+        updatedAt DATETIME NOT NULL DEFAULT GETDATE(),
+        CONSTRAINT FK_UserPreferences_Users FOREIGN KEY (userId)
+            REFERENCES Users(id) ON DELETE CASCADE
+    );
+END
+GO
+
+-- Create index on Users.email
+IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Users_Email')
+BEGIN
+    CREATE UNIQUE INDEX IX_Users_Email ON Users(email);
+END
 GO

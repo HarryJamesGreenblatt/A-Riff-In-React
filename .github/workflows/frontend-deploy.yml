@@ -1,0 +1,129 @@
+name: Deploy Frontend to Static Web App
+
+on:
+  push:
+    branches: [main, fresh-start]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'vite.config.ts'
+      - 'package.json'
+      - '.github/workflows/frontend-deploy.yml'
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: riffinreact-rg
+  ENVIRONMENT_NAME: a-riff-in-react
+  NODE_VERSION: '18'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Get API URL
+        id: get_api_url
+        run: |
+          # Try to get API URL from Container App first (new architecture)
+          CONTAINER_APP_URL=$(az containerapp show -n ca-api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv 2>/dev/null || echo "")
+          
+          # If Container App URL is empty, fall back to App Service (old architecture)
+          if [ -z "$CONTAINER_APP_URL" ]; then
+            echo "Container App not found, falling back to App Service..."
+            API_URL=$(az webapp show -n api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query defaultHostName -o tsv)
+          else
+            API_URL=$CONTAINER_APP_URL
+          fi
+          
+          echo "Using API URL: https://$API_URL"
+          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+      
+      - name: Build frontend
+        run: npm run build
+        env:
+          VITE_API_URL: https://${{ steps.get_api_url.outputs.api_url }}
+          VITE_EXTERNAL_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
+          VITE_EXTERNAL_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
+      
+      - name: Create Static Web App if it doesn't exist
+        id: create_swa
+        run: |
+          # Get the Static Web App name from environment variables
+          STATIC_WEB_APP_NAME="swa-${{ env.ENVIRONMENT_NAME }}"
+          
+          # Check if Static Web App exists
+          if ! az staticwebapp show --name $STATIC_WEB_APP_NAME --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "Creating Static Web App $STATIC_WEB_APP_NAME..."
+            az staticwebapp create \
+              --name $STATIC_WEB_APP_NAME \
+              --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+              --location "westus2" \
+              --sku Free \
+              --tags "application=A-Riff-In-React" "environment=${{ env.ENVIRONMENT_NAME }}" "azd_env_name=${{ env.ENVIRONMENT_NAME }}"
+            
+            echo "Static Web App created successfully!"
+          else
+            echo "Static Web App $STATIC_WEB_APP_NAME already exists"
+          fi
+      
+      - name: Get Static Web App deployment token
+        id: get_swa_token
+        run: |
+          # Get the Static Web App name from environment variables
+          STATIC_WEB_APP_NAME="swa-${{ env.ENVIRONMENT_NAME }}"
+          
+          # Get the deployment token
+          DEPLOYMENT_TOKEN=$(az staticwebapp secrets list --name $STATIC_WEB_APP_NAME --query "properties.apiKey" -o tsv)
+          
+          # Set the token as an output
+          echo "::add-mask::$DEPLOYMENT_TOKEN"
+          echo "token=$DEPLOYMENT_TOKEN" >> $GITHUB_OUTPUT
+      
+      - name: Deploy to Static Web App
+        id: deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ steps.get_swa_token.outputs.token }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/"
+          api_location: ""
+          output_location: "build"
+          skip_app_build: true
+          production_branch: "fresh-start"
+      
+      - name: Verify deployment
+        run: |
+          STATIC_WEB_APP_NAME="swa-${{ env.ENVIRONMENT_NAME }}"
+          SWA_URL=$(az staticwebapp show --name $STATIC_WEB_APP_NAME --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --query defaultHostname -o tsv)
+          
+          echo "✅ Deployment successful!"
+          echo "🌐 Static Web App URL: https://$SWA_URL"
+          
+          # Also output the Container App URL for reference
+          CONTAINER_APP_URL=$(az containerapp show -n ca-api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv 2>/dev/null || echo "Not found")
+          echo "🔌 API Container App URL: https://$CONTAINER_APP_URL"
+          
+          echo "Now available at: https://$SWA_URL"
+      
+      - name: Logout from Azure
+        run: az logout
+        if: always()

@@ -1,26 +1,30 @@
 # A Riff In React
 
-## 📢 Current Status: ✅ RESOLVED - API Deployment Issues
+## 📢 Current Status: ✅ RESOLVED - Platform Migration Complete
 
 **Date:** September 6, 2025
 
-**Resolution:** ✅ **API 500 Errors Successfully Fixed**
+**Resolution:** ✅ **API Deployment Successfully Migrated to Container Apps**
 
-**Root Causes Resolved:**
-1. **IISNode Incompatibility**: Express server configuration was incompatible with Azure App Service Windows iisnode
-2. **App Settings Override**: GitHub Actions was destructively overwriting Bicep-configured app settings (KeyVault refs, App Insights)
+**Root Causes Addressed:**
+1. **Platform Compatibility**: Previous Windows App Service with IISNode caused TypeScript compilation issues
+2. **Environment-Specific Configuration**: Deployment environment inconsistencies led to runtime failures
+3. **Database Authentication**: Connection string approach was less secure and difficult to manage
 
 **Solutions Implemented:**
-- ✅ **IISNode Compatibility**: Added `app.set('port', port)` and removed callback from `app.listen()`
-- ✅ **App Settings Preservation**: Removed destructive override in GitHub Actions, preserving Bicep configuration
-- ✅ **Enhanced web.config**: Proper iisnode configuration with WebSocket disabled and security settings
+- ✅ **Containerized Approach**: API migrated to Docker containers with multi-stage builds
+- ✅ **Azure Container Apps**: Deployment platform changed to Container Apps for better scalability
+- ✅ **Managed Identity**: Secure, credential-free database access implemented
+- ✅ **Static Web Apps**: Frontend migrated to Static Web Apps with global CDN
+- ✅ **Dual CI/CD Workflows**: Separate pipelines for API and frontend
 
-**Current Status - All Systems Operational:**
-- ✅ **Frontend**: Live at https://a-riff-in-react.azurewebsites.net (200 OK)
-- ✅ **API Backend**: Live at https://api-a-riff-in-react.azurewebsites.net (200 OK) 
-- ✅ **Authentication**: Microsoft Entra External ID fully functional  
-- ✅ **Infrastructure**: Windows App Service + proper iisnode configuration
-- ✅ **CI/CD Pipeline**: GitHub Actions with preserved Bicep settings
+**Current Status - Systems Operational with Integration Pending:**
+- ✅ **Frontend**: Live at https://gentle-stone-08653e81e.1.azurestaticapps.net (Basic template deployed)
+- ✅ **API Backend**: Live at https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API ready)
+- 🔧 **Frontend-API Integration**: Not yet connected - React app needs API integration
+- ✅ **Database**: Cosmos DB provisioned and ready
+- ✅ **Infrastructure**: Container Apps Environment, Registry, Monitoring active
+- ⚠️ **Cost Optimization**: Orphaned App Service resources accumulating costs (cleanup needed)
 
 ---
 
@@ -46,14 +50,14 @@ While the template includes example modules (such as user management and activit
 - ✅ **State management setup**: Redux Toolkit + RTK Query implemented
 - ✅ **Authentication system (MSAL)**: Microsoft Entra External ID fully operational
 - ✅ **Database infrastructure**: Azure SQL + Cosmos DB infrastructure deployed
-- ✅ **Backend API**: Express on Azure App Service Windows with proper iisnode configuration
-- ✅ **Azure deployment**: Complete CI/CD pipeline with GitHub Actions preserving Bicep settings
+- ✅ **Backend API**: Express containerized on Azure Container Apps
+- ✅ **Azure deployment**: Dual CI/CD pipelines with GitHub Actions
 - ✅ **Production deployment**: Frontend + API both live and operational
-- ✅ **TypeScript build fixes**: All compilation errors resolved
-- ✅ **IISNode compatibility**: Express server properly configured for Azure App Service Windows
-- [ ] **Frontend-Backend Integration**: Connect authenticated app to working API endpoints
+- ✅ **Containerization**: Docker multi-stage builds for consistent deployment
+- ✅ **Platform Migration**: Successfully moved from App Service to Container Apps
+- [ ] **Frontend-Backend Integration**: Connect React app to Container App API (CURRENT PRIORITY)
 
->**Current Status**: All major infrastructure and deployment issues resolved! Both frontend and API are operational. Next focus is on frontend-backend integration to complete the template's core functionality.
+>**Current Status**: Infrastructure migration to Container Apps complete! Both frontend and API are deployed and operational. **Next critical step**: Integrate React frontend with the Container App API and clean up orphaned App Service resources to reduce costs.
 
 ### 📋 Phase 3: Example Extensions (READY)
 - [ ] Example: User management (Azure SQL)
@@ -71,35 +75,99 @@ While the template includes example modules (such as user management and activit
 - **UI Framework**: Tailwind CSS + shadcn/ui-style components ✅
 - **State Management**: Redux Toolkit + RTK Query ✅
 - **Authentication**: Microsoft Entra External ID (MSAL) ✅
-- **Backend API**: Node.js + Express on Azure App Service ✅
+- **Backend API**: Node.js + Express in Docker container ✅
 - **Databases**: Azure SQL Database + Cosmos DB ✅
 - **Infrastructure**: Azure Bicep templates ✅
-- **Hosting**: Azure App Service (Frontend + API) ✅
-- **CI/CD**: GitHub Actions ✅
+- **Hosting**: Azure Container Apps + Static Web Apps ✅
+- **CI/CD**: GitHub Actions with container registry ✅
 
 ## 🌐 Live Demo
 
-**Production URL**: https://a-riff-in-react.azurewebsites.net
+**Frontend URL**: https://gentle-stone-08653e81e.1.azurestaticapps.net (Basic template - API integration pending)
+**API URL**: https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API operational)
 
-## 🚀 Quick Start
+## Architecture
 
-```bash
-# Install dependencies
-npm install
+This project follows modern cloud-native architecture:
 
-# Start development server
-npm run dev
+- **Frontend**: React SPA hosted on Azure Static Web Apps
+- **API**: Express.js containerized API hosted on Azure Container Apps
+- **Data Storage**: 
+  - Azure SQL Database for structured data (users, projects)
+  - Azure Cosmos DB for activity logs and real-time data
+- **Authentication**: Microsoft Entra External ID
 
-# Build for production
-npm run build
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18 LTS or higher
+- Docker Desktop
+- Visual Studio Code
+- Git
+
+### Development
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   cd api && npm install
+   ```
+3. Start the development servers:
+   ```bash
+   # Start the React development server
+   npm run start
+   
+   # In another terminal, start the API using Docker
+   docker-compose up
+   ```
+
+## Deployment
+
+This project uses GitHub Actions for CI/CD:
+
+- **Container Deploy Workflow**: Builds and deploys the API to Azure Container Apps
+- **Static Web Deploy Workflow**: Builds and deploys the frontend to Azure Static Web Apps
+
+See the [CI/CD Setup Guide](./docs/ci-cd-setup.md) for detailed instructions.
+
+## Project Structure
+
+```
+/
+├── src/                      # Frontend React code
+├── api/                      # Backend Express API 
+│   ├── src/                  # API source code
+│   │   ├── routes/           # API endpoints
+│   │   ├── services/         # Database services
+│   │   └── models/           # Data models
+│   └── Dockerfile            # Multi-stage build for API container
+├── infra/                    # Infrastructure as Code (Bicep)
+│   ├── main.bicep            # Main deployment template
+│   └── modules/              # Modular Bicep components
+├── .github/workflows/        # CI/CD pipeline
+│   ├── container-deploy.yml  # API deployment workflow
+│   └── static-web-deploy.yml # Frontend deployment workflow
+└── docker-compose.yml        # Local development setup
 ```
 
 ## 📚 Documentation
 
-- [Project Overview](./docs/01-project-overview.md) - Vision and architecture
-- [Development Setup](./docs/02-development-setup.md) - Getting started guide
-- [UI Framework Setup](./docs/03-ui-framework-setup.md) - Tailwind CSS and shadcn/ui integration
-- [Full Documentation](./docs/README.md) - Complete documentation index
+Complete documentation is available in the [docs folder](./docs/README.md) with a logical progression from setup to deployment:
+
+### Quick Navigation
+- **Getting Started**: [Project Overview](./docs/01-project-overview.md) → [Architecture](./docs/02-architecture.md) → [Development Setup](./docs/03-development-setup.md)
+- **Development**: [Local Development](./docs/04-local-development.md) → [UI Framework](./docs/05-ui-framework-setup.md) → [State Management](./docs/06-state-management.md)
+- **Authentication**: [MSAL Integration](./docs/07-authentication-msal.md)
+- **Backend**: [Backend API](./docs/08-backend-api.md)
+- **Deployment**: [Provider Registration](./docs/09-provider-registration.md) → [Azure Deployment](./docs/10-azure-deployment.md) → [CI/CD Pipeline](./docs/11-github-actions-ci-cd.md)
+
+### Phase-Based Documentation Structure
+1. **Understanding & Setup** (01-04): Project basics and local development
+2. **Frontend Implementation** (05-07): React, UI, state management, auth
+3. **Backend & Infrastructure** (08-11): API, Azure deployment, CI/CD
+4. **Operations & Reference** (12+): Success documentation and troubleshooting
 
 ---
 
@@ -108,3 +176,7 @@ npm run build
 ---
 
 > _For architectural, deployment, and documentation patterns, see [A Fugue In Flask](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask) for reference and rationale._
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
