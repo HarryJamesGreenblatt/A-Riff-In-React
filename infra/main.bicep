@@ -33,8 +33,10 @@ param existingSqlServerResourceGroup string = 'db-rg'
 @description('The name of the existing SQL Database')
 param existingSqlDatabaseName string = 'riff-react-db'
 
-@description('The name of the existing Cosmos DB account')
-param existingCosmosDbAccountName string = 'cosmos-a-riff-in-react'
+// Note: Cosmos DB is mentioned in docs but not implemented in current infrastructure
+// This parameter is commented out as it's not currently used
+// @description('The name of the existing Cosmos DB account')
+// param existingCosmosDbAccountName string = 'cosmos-a-riff-in-react'
 
 // Variables for resource naming
 var containerAppEnvName = 'env-${environmentName}'
@@ -181,19 +183,6 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
             {
               name: 'SQL_DATABASE'
               value: existingSqlDatabaseName
-            }
-            // Placeholder for Cosmos DB (not implemented yet)
-            {
-              name: 'COSMOS_ENDPOINT'
-              value: 'placeholder'
-            }
-            {
-              name: 'COSMOS_DATABASE_ID'
-              value: 'placeholder'
-            }
-            {
-              name: 'COSMOS_CONTAINER_ID'
-              value: 'placeholder'
             }
             {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'

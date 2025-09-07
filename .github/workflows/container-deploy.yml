@@ -16,7 +16,6 @@ env:
   EXISTING_SQL_SERVER_RG: db-rg
   EXISTING_SQL_SERVER_NAME: sequitur-sql-server
   EXISTING_SQL_DATABASE_NAME: riff-react-db
-  EXISTING_COSMOS_DB_NAME: cosmos-a-riff-in-react
   ACR_NAME: ariffreactacr
 
 jobs:
@@ -110,7 +109,6 @@ jobs:
             existingSqlServerName=${{ env.EXISTING_SQL_SERVER_NAME }}
             existingSqlServerResourceGroup=${{ env.EXISTING_SQL_SERVER_RG }}
             existingSqlDatabaseName=${{ env.EXISTING_SQL_DATABASE_NAME }}
-            existingCosmosDbAccountName=${{ env.EXISTING_COSMOS_DB_NAME }}
       
       - name: Verify Deployment
         run: |
