@@ -34,9 +34,9 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          REACT_APP_API_URL: ${{ env.API_URL }}
-          REACT_APP_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
-          REACT_APP_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
+          VITE_API_URL: ${{ env.API_URL }}
+          VITE_EXTERNAL_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
+          VITE_EXTERNAL_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
       
       - name: Login to Azure
         uses: azure/login@v1
