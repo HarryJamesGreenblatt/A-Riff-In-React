@@ -44,22 +44,6 @@ jobs:
             echo "Resource group ${{ env.AZURE_RESOURCE_GROUP }} already exists"
           fi
       
-      - name: Register resource providers
-        run: |
-          echo "Registering Microsoft.ContainerRegistry provider..."
-          az provider register --namespace Microsoft.ContainerRegistry
-          
-          echo "Waiting for registration to complete..."
-          az provider show -n Microsoft.ContainerRegistry --query "registrationState" -o tsv
-          
-          # Wait for provider to be registered
-          while [ "$(az provider show -n Microsoft.ContainerRegistry --query "registrationState" -o tsv)" != "Registered" ]; do
-            echo "Waiting for Microsoft.ContainerRegistry provider to be registered..."
-            sleep 10
-          done
-          
-          echo "Microsoft.ContainerRegistry provider is now registered."
-      
       - name: Create Azure Container Registry if it doesn't exist
         run: |
           if ! az acr show --name ${{ env.ACR_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
