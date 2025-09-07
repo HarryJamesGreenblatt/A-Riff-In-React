@@ -56,73 +56,8 @@ resource existingSqlServer 'Microsoft.Sql/servers@2021-11-01' existing = {
   scope: resourceGroup(existingSqlServerResourceGroup)
 }
 
-// Create a new Cosmos DB account since it doesn't exist yet
-resource cosmosDb 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' = {
-  name: existingCosmosDbAccountName
-  location: location
-  tags: tags
-  kind: 'GlobalDocumentDB'
-  properties: {
-    databaseAccountOfferType: 'Standard'
-    consistencyPolicy: {
-      defaultConsistencyLevel: 'Session'
-    }
-    locations: [
-      {
-        locationName: location
-        failoverPriority: 0
-        isZoneRedundant: false
-      }
-    ]
-    capabilities: [
-      {
-        name: 'EnableServerless'
-      }
-    ]
-  }
-}
-
-// Create Cosmos DB database
-resource cosmosDatabase 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-08-15' = {
-  parent: cosmosDb
-  name: 'ARiffInReact'
-  properties: {
-    resource: {
-      id: 'ARiffInReact'
-    }
-  }
-}
-
-// Create Cosmos DB container
-resource cosmosContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-08-15' = {
-  parent: cosmosDatabase
-  name: 'activities'
-  properties: {
-    resource: {
-      id: 'activities'
-      partitionKey: {
-        paths: [
-          '/userId'
-        ]
-        kind: 'Hash'
-      }
-      indexingPolicy: {
-        indexingMode: 'consistent'
-        automatic: true
-        includedPaths: [
-          {
-            path: '/*'
-          }
-        ]
-        excludedPaths: [
-          {
-            path: '/"_etag"/?'
-          }
-        ]
-      }
-    }
-  }
-}
+// Note: Cosmos DB is mentioned in docs but not implemented in current infrastructure
+// We'll remove references to Cosmos DB for now to simplify deployment
 
 // Create a user-assigned managed identity for the Container App
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
@@ -150,18 +85,9 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   }
 }
 
-// Create Application Insights if it doesn't exist
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: 'appi-${environmentName}'
-  location: location
-  tags: tags
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    WorkspaceResourceId: logAnalytics.id
-    publicNetworkAccessForIngestion: 'Enabled'
-    publicNetworkAccessForQuery: 'Enabled'
-  }
+// Reference to existing Application Insights
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+  name: 'appi-a-riff-in-react'
 }
 
 // Container Apps Environment
@@ -256,17 +182,18 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
               name: 'SQL_DATABASE'
               value: existingSqlDatabaseName
             }
+            // Placeholder for Cosmos DB (not implemented yet)
             {
               name: 'COSMOS_ENDPOINT'
-              value: cosmosDb.properties.documentEndpoint
+              value: 'placeholder'
             }
             {
               name: 'COSMOS_DATABASE_ID'
-              value: 'ARiffInReact'
+              value: 'placeholder'
             }
             {
               name: 'COSMOS_CONTAINER_ID'
-              value: 'activities'
+              value: 'placeholder'
             }
             {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -429,19 +356,7 @@ resource sqlRoleAssignmentScript 'Microsoft.Resources/deploymentScripts@2020-10-
   }
 }
 
-// Create a role assignment for the managed identity to access Cosmos DB
-resource cosmosRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2022-08-15' = {
-  parent: cosmosDb
-  name: guid(cosmosDb.id, managedIdentity.id, 'Cosmos DB Data Contributor')
-  properties: {
-    principalId: managedIdentity.properties.principalId
-    roleDefinitionId: '00000000-0000-0000-0000-000000000002' // Cosmos DB Data Contributor
-    scope: cosmosDb.id
-  }
-  dependsOn: [
-    cosmosContainer
-  ]
-}
+// Remove Cosmos DB role assignment since we're not creating Cosmos DB yet
 
 // Outputs
 output containerAppUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
