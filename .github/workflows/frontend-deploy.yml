@@ -25,6 +25,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -34,7 +39,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      - name: Build frontend
+      - name: Get API URL
+        id: get_api_url
         run: |
           # Try to get API URL from Container App first (new architecture)
           CONTAINER_APP_URL=$(az containerapp show -n ca-api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv 2>/dev/null || echo "")
@@ -48,17 +54,14 @@ jobs:
           fi
           
           echo "Using API URL: https://$API_URL"
-          
-          # Build with the API URL
-          VITE_API_URL=https://$API_URL npm run build
+          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+      
+      - name: Build frontend
+        run: npm run build
         env:
+          VITE_API_URL: https://${{ steps.get_api_url.outputs.api_url }}
           VITE_EXTERNAL_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
           VITE_EXTERNAL_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
-      
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
       
       - name: Create Static Web App if it doesn't exist
         id: create_swa
