@@ -1,0 +1,92 @@
+name: Deploy API to Container Apps
+
+on:
+  push:
+    branches: [fresh-start]
+    paths:
+      - 'api/**'
+      - '.github/workflows/container-deploy.yml'
+      - 'infra/**'
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: riffinreact-rg
+  LOCATION: westus
+  ENVIRONMENT_NAME: a-riff-in-react
+  EXISTING_SQL_SERVER_RG: db-rg
+  EXISTING_SQL_SERVER_NAME: sequitur-sql-server
+  EXISTING_SQL_DATABASE_NAME: riff-react-db
+  EXISTING_COSMOS_DB_NAME: cosmos-a-riff-in-react
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/${{ env.ENVIRONMENT_NAME }}-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Deploy Azure Infrastructure
+        uses: azure/arm-deploy@v1
+        with:
+          resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP }}
+          template: ./infra/main.bicep
+          parameters: >
+            environmentName=${{ env.ENVIRONMENT_NAME }}
+            location=${{ env.LOCATION }}
+            containerImage=ghcr.io/${{ github.repository_owner }}/${{ env.ENVIRONMENT_NAME }}-api:latest
+            containerRegistry=${{ github.repository_owner }}
+            externalTenantId=${{ secrets.EXTERNAL_TENANT_ID }}
+            externalClientId=${{ secrets.EXTERNAL_CLIENT_ID }}
+            existingSqlServerName=${{ env.EXISTING_SQL_SERVER_NAME }}
+            existingSqlServerResourceGroup=${{ env.EXISTING_SQL_SERVER_RG }}
+            existingSqlDatabaseName=${{ env.EXISTING_SQL_DATABASE_NAME }}
+            existingCosmosDbAccountName=${{ env.EXISTING_COSMOS_DB_NAME }}
+      
+      - name: Verify Deployment
+        run: |
+          echo "Container App URL: $(az containerapp show -n api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)"
+          echo "Testing health endpoint..."
+          HEALTH_URL="https://$(az containerapp show -n api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)/health"
+          for i in {1..5}; do
+            echo "Attempt $i..."
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL || echo "Failed")
+            if [ "$STATUS" == "200" ]; then
+              echo "✅ Health check passed!"
+              break
+            else
+              echo "❌ Health check failed with status: $STATUS"
+              if [ $i -lt 5 ]; then
+                echo "Waiting 30 seconds before retry..."
+                sleep 30
+              fi
+            fi
+          done
+      
+      - name: Logout from Azure
+        run: az logout
+        if: always()

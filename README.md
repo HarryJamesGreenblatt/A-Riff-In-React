@@ -21,10 +21,10 @@ This project follows modern cloud-native architecture:
 
 ### Prerequisites
 
-- Node.js 20 LTS
-- Azure Developer CLI (azd)
+- Node.js 18 LTS or higher
 - Docker Desktop
 - Visual Studio Code
+- Git
 
 ### Development
 
@@ -37,26 +37,20 @@ This project follows modern cloud-native architecture:
 3. Start the development servers:
    ```
    # Start the React development server
-   npm run dev
+   npm run start
    
-   # In another terminal, start the API server
-   cd api && npm run dev
+   # In another terminal, start the API using Docker
+   docker-compose up
    ```
 
 ## Deployment
 
-This project uses Azure Developer CLI (azd) for deployment:
+This project uses GitHub Actions for CI/CD:
 
-```bash
-# Provision and deploy
-azd up
+- **Container Deploy Workflow**: Builds and deploys the API to Azure Container Apps
+- **Static Web Deploy Workflow**: Builds and deploys the frontend to Azure Static Web Apps
 
-# Just provision resources
-azd provision
-
-# Just deploy code
-azd deploy
-```
+See the [CI/CD Setup Guide](./docs/ci-cd-setup.md) for detailed instructions.
 
 ## Project Structure
 
@@ -68,10 +62,30 @@ azd deploy
 │   │   ├── routes/           # API endpoints
 │   │   ├── services/         # Database services
 │   │   └── models/           # Data models
+│   └── Dockerfile            # Multi-stage build for API container
 ├── infra/                    # Infrastructure as Code (Bicep)
+│   ├── main.bicep            # Main deployment template
 │   └── modules/              # Modular Bicep components
-└── .github/workflows/        # CI/CD pipeline
+├── .github/workflows/        # CI/CD pipeline
+│   ├── container-deploy.yml  # API deployment workflow
+│   └── static-web-deploy.yml # Frontend deployment workflow
+└── docker-compose.yml        # Local development setup
 ```
+
+## Documentation
+
+- [Project Overview](./docs/01-project-overview.md)
+- [Architecture](./docs/02-architecture.md)
+- [Development Setup](./docs/02-development-setup.md)
+- [UI Framework](./docs/03-ui-framework-setup.md)
+- [State Management](./docs/04-state-management.md)
+- [Authentication](./docs/05-authentication-msal.md)
+- [Backend API](./docs/07-backend-api.md)
+- [Azure Deployment](./docs/08-azure-deployment.md)
+- [CI/CD Pipeline](./docs/09-github-actions-ci-cd.md)
+- [Deployment Success](./docs/10-deployment-success.md)
+- [Local Development Guide](./docs/local-development.md)
+- [Production Deployment Guide](./docs/production-deployment.md)
 
 ## License
 

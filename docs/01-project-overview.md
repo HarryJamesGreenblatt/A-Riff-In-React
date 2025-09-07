@@ -27,18 +27,17 @@ The architecture of A Riff In React follows these key principles:
 2. **Separation of Concerns**: Clear boundaries between UI components, state management, and services
 3. **Azure-Ready Configuration**: Integration points for Azure services pre-configured
 4. **Hybrid Database Strategy**: Clear patterns for using both relational and document databases
-5. **Containerization**: Platform-agnostic deployment using Docker containers
 
 ### Project Structure
 
 ```
 a-riff-in-react/
-├── api/                    # Backend API (Express with TypeScript in Docker container)
-│   ├── src/                # API source code
-│   │   ├── index.ts        # Entry point
+├── api/                    # Backend API (Container Apps)
+│   ├── src/                # TypeScript source code
+│   │   ├── index.ts        # Express server entry point
 │   │   ├── routes/         # Express route definitions
 │   │   └── services/       # Database connection services
-│   ├── Dockerfile          # Multi-stage build for containerization
+│   ├── Dockerfile          # Multi-stage Docker build
 │   └── schema.sql          # Database schema
 ├── src/                    # Frontend (React)
 │   ├── components/         # Reusable UI components
@@ -66,14 +65,15 @@ a-riff-in-react/
 │   ├── utils/              # Utility functions
 │   ├── App.tsx             # Main app component
 │   └── main.tsx            # Entry point
-├── infra/                  # Infrastructure as Code (Bicep)
+├── infra/                  # Azure deployment configuration (Bicep)
 │   ├── main.bicep          # Main deployment template
-│   └── modules/            # Modular Bicep components
-├── .github/workflows/      # CI/CD pipeline configuration
-│   ├── container-deploy.yml # API deployment workflow
+│   └── modules/            # Bicep modules for database role assignments
+├── .github/workflows/      # GitHub Actions CI/CD pipelines
+│   ├── container-deploy.yml # API container deployment workflow
 │   └── static-web-deploy.yml # Frontend deployment workflow
+├── docker-compose.yml      # Local development configuration
 ├── docs/                   # Documentation
-└── docker-compose.yml      # Local development setup
+└── public/                 # Static assets
 ```
 
 ## 🔄 Hybrid Database Approach
@@ -105,20 +105,19 @@ Cosmos DB is ideal for:
 
 The template is configured for seamless integration with the following Azure services:
 
-- **Azure Static Web Apps**: For hosting the React application
-- **Azure Container Apps**: For hosting the containerized API
+- **Azure Container Apps**: For hosting the containerized Node.js API
+- **Azure Static Web Apps**: For hosting the React application with global CDN
 - **Azure SQL Database**: For structured, relational data
 - **Azure Cosmos DB**: For document-based and real-time data
-- **Azure Key Vault**: For secure storage of secrets and configuration
-- **Azure Application Insights**: For monitoring and analytics
+- **User-Assigned Managed Identity**: For secure database access without credentials
 - **Microsoft Authentication Library (MSAL)**: For Azure AD authentication
 
 ## 🚀 Getting Started
 
 To learn how to set up and use this template:
-1. See the [Local Development Guide](../local-development.md) for local environment configuration
+1. See the [Development Setup](./02-development-setup.md) guide for local environment configuration
 2. Explore the [UI Framework Setup](./03-ui-framework-setup.md) for UI component usage
-3. Refer to [Production Deployment Guide](../production-deployment.md) for deployment instructions
+3. Refer to [Azure Deployment](./azure_deployment.md) for deployment instructions
 
 ## 🔄 From Flask to React: Architectural Parallels
 

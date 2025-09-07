@@ -1,0 +1,59 @@
+name: Deploy Frontend to Static Web Apps
+
+on:
+  push:
+    branches: [fresh-start]
+    paths-ignore:
+      - 'api/**'
+      - '.github/workflows/container-deploy.yml'
+      - 'infra/**'
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: riffinreact-rg
+  AZURE_STATIC_WEB_APP_NAME: a-riff-in-react
+  API_URL: https://api-a-riff-in-react.westus.azurecontainerapps.io
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+        env:
+          REACT_APP_API_URL: ${{ env.API_URL }}
+          REACT_APP_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
+          REACT_APP_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
+      
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Deploy to Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "build"
+          skip_app_build: true
+          api_location: "" # No API folder as we're using Container Apps
+          output_location: ""
+      
+      - name: Logout from Azure
+        run: az logout
+        if: always()

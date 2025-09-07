@@ -1,0 +1,43 @@
+# Node modules and dependencies
+node_modules
+npm-debug.log
+
+# Build artifacts
+dist
+coverage
+.nyc_output
+
+# Git and version control
+.git
+.gitignore
+
+# Environment files
+.env
+.env.*
+*.env
+local.settings.json
+
+# Development tools
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Test files
+test
+__tests__
+*.spec.ts
+*.test.ts
+
+# Documentation
+docs
+README.md
+CHANGELOG.md
+LICENSE
+
+# Miscellaneous
+.DS_Store
+Thumbs.db

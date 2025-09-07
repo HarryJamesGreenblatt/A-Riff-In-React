@@ -7,11 +7,10 @@ This document describes the modular architecture of **A Riff In React**, a produ
 ## Overview
 
 - **Component-based structure**: All UI and logic are organized into reusable components and feature modules.
-- **Container Apps**: Containerized Express API with TypeScript running on Azure Container Apps.
-- **Static Web Apps**: React frontend hosted on Azure Static Web Apps.
+- **Containerized Architecture**: Express API deployed as a container on Azure Container Apps with React frontend on Static Web Apps.
 - **Hybrid persistence**: Demonstrates integration with both Azure SQL Database (for structured data) and Cosmos DB (for flexible, real-time data).
 - **External Authentication**: Microsoft Entra External ID for customer identity management.
-- **Azure-ready**: Designed for seamless deployment with CI/CD via GitHub Actions.
+- **Azure-ready**: Designed for seamless deployment to Azure with modern containerized approach.
 
 ## Azure Infrastructure Architecture
 
@@ -21,7 +20,7 @@ A core principle of the "Scaffolding" series of templates (`A Fugue in Flask`, `
 
 - **Shared SQL Server**: Instead of provisioning a new, costly Azure SQL Server for each project, all templates are designed to deploy their databases to a single, pre-existing shared server (e.g., `sequitur-sql-server` in the `db-rg` resource group).
 - **Dedicated Databases**: Each project provisions its own dedicated database (e.g., `riff-react-db`) on the shared server. This provides complete data and schema isolation between applications.
-- **Cross-Resource Group Deployment**: The database is deployed to the shared server's resource group using a dedicated Bicep module (`infra/modules/sqlRoleAssignment.bicep`), which is the best practice for deploying role assignments for a parent resource (the server) located in a different resource group.
+- **Cross-Resource Group Deployment**: The database is deployed to the shared server's resource group using a dedicated Bicep module (`infra/modules/sqlRoleAssignment.bicep`), which is the best practice for deploying child resources (the database) to a parent resource (the server) located in a different resource group.
 
 This pattern provides the best of both worlds:
 1.  **Cost Efficiency**: Avoids the high cost of running multiple SQL server instances.
@@ -30,34 +29,29 @@ This pattern provides the best of both worlds:
 
 ## Backend Architecture: Express on Azure Container Apps
 
-The backend uses a standard Express.js server containerized with Docker and deployed to Azure Container Apps, providing a platform-agnostic, scalable, and managed hosting environment.
+The backend uses a standard Express.js server containerized with Docker and deployed to Azure Container Apps, providing a platform-agnostic development experience with the managed services and scalability of Azure.
 
 ### How It Works
 
-1.  **Express Server (`api/src/index.ts`)**: A standard Express application with middleware (CORS, body-parser), routes, and application logic compiled from TypeScript.
-2.  **Docker Containerization**: The Express server is packaged in a Docker container with a multi-stage build process that optimizes for production.
-3.  **Azure Container Apps Hosting**: The containerized Express server runs in Azure Container Apps, providing automatic scaling, load balancing, and managed infrastructure.
-4.  **Managed Identity**: The container uses Azure Managed Identity to securely access Azure SQL Database and Cosmos DB without storing credentials.
+1.  **Express Server (`api/src/index.ts`)**: A standard Express application with middleware (CORS, body-parser), routes, and application logic. This is the complete API server.
+2.  **Docker Containerization**: The Express server is packaged in a multi-stage Docker build that compiles TypeScript and creates a production-ready container.
+3.  **Azure Container Apps Hosting**: The containerized Express server runs on Azure Container Apps, providing automatic scaling, load balancing, and managed infrastructure.
+4.  **Managed Identity Authentication**: The API uses managed identity for secure, credential-free access to Azure SQL Database and Cosmos DB.
 
 ### Advantages of this Pattern
 
--   **Platform Independence**: Containerization eliminates platform-specific issues (like IISNode compatibility)
--   **Consistent Environments**: Same container runs locally and in production
--   **Simplified Scaling**: Container Apps handles scaling and orchestration
--   **Better Security**: Managed Identity eliminates need for stored credentials
--   **Cost Effective**: Pay only for the resources you use with consumption-based pricing
--   **Local Development**: Easy local testing with Docker Compose
+-   **Familiar Development**: Standard Express.js development patterns with full middleware support
+-   **Containerized Deployment**: Platform-agnostic deployment that eliminates environment-specific issues
+-   **Full Express Features**: Complete access to Express ecosystem and patterns
+-   **Azure Benefits**: Managed infrastructure, automatic scaling, integrated monitoring
+-   **Cost Effective**: Predictable pricing with containerized hosting
+-   **Local Development**: Docker Compose for consistent development and testing workflows
 
-## Frontend Architecture: React on Static Web Apps
+### Current Status
 
-The frontend is a React application hosted on Azure Static Web Apps, providing a modern, scalable hosting solution with built-in CDN capabilities.
+**✅ Deployment Success**: The API is running successfully on Azure Container Apps with proper managed identity configuration for database access.
 
-### How It Works
-
-1.  **React Application**: Standard React application built with modern tools and patterns
-2.  **Static Web Apps Hosting**: Optimized for static site hosting with dynamic API routing
-3.  **CI/CD Integration**: Built-in GitHub Actions integration for automated deployments
-4.  **Global CDN**: Automatic content delivery network for improved performance
+**Resolution Complete**: Containerized deployment eliminates the TypeScript and platform compatibility issues that occurred with Windows App Service.
 
 ## State Management
 
@@ -91,21 +85,28 @@ Store
 ## Folder Structure
 
 ```
-/
-├── src/                        # Frontend React code
-├── api/                        # Backend Express API 
-│   ├── src/                    # API source code
-│   │   ├── routes/             # API endpoints
-│   │   ├── services/           # Database services
-│   │   └── models/             # Data models
-│   └── Dockerfile              # Multi-stage build for API container
-├── infra/                      # Infrastructure as Code (Bicep)
-│   ├── main.bicep              # Main deployment template
-│   └── modules/                # Modular Bicep components
-├── .github/workflows/          # CI/CD pipeline
-│   ├── container-deploy.yml    # API deployment workflow
-│   └── static-web-deploy.yml   # Frontend deployment workflow
-└── docker-compose.yml          # Local development setup
+src/
+  components/      # Reusable UI components
+  features/        # Feature modules (e.g., user, activity)
+    users/         # User feature
+      slice.ts     # Redux slice with reducers and actions
+    activity/      # Activity feature  
+      slice.ts     # Redux slice with reducers and actions
+  store/           # Redux store configuration
+    index.ts       # Store setup
+    api.ts         # RTK Query API configuration
+    hooks.ts       # Typed Redux hooks
+  context/         # React context providers (if needed)
+  routes/          # App routing
+  ...
+
+api/
+  src/             # API source code
+    index.ts       # Express server entry point
+    routes/        # API route definitions
+    services/      # Database service implementations
+    models/        # TypeScript interfaces
+  Dockerfile       # Multi-stage Docker build for API
 ```
 
 ## Modularity
