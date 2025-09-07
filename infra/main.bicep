@@ -5,10 +5,17 @@ param environmentName string = 'a-riff-in-react'
 param location string = resourceGroup().location
 
 @description('The container image to deploy')
-param containerImage string = '${containerRegistry}.azurecr.io/${environmentName}-api:latest'
+param containerImage string = '${containerRegistry}/${environmentName}-api:latest'
 
-@description('Azure Container Registry name')
-param containerRegistry string = 'ariffacr'
+@description('Azure Container Registry URL')
+param containerRegistry string = 'ariffacr.azurecr.io'
+
+@description('Azure Container Registry username')
+param containerRegistryUsername string
+
+@description('Azure Container Registry password')
+@secure()
+param containerRegistryPassword string
 
 @description('The Microsoft Entra External ID tenant ID')
 param externalTenantId string
@@ -140,6 +147,13 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
           allowedOrigins: ['*']
         }
       }
+      registries: [
+        {
+          server: containerRegistry
+          username: containerRegistryUsername
+          passwordSecretRef: 'acr-password'
+        }
+      ]
       secrets: [
         {
           name: 'sql-connection-string'
@@ -148,6 +162,10 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
         {
           name: 'ai-connection-string'
           value: applicationInsights.properties.ConnectionString
+        }
+        {
+          name: 'acr-password'
+          value: containerRegistryPassword
         }
       ]
     }

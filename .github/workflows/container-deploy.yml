@@ -17,6 +17,7 @@ env:
   EXISTING_SQL_SERVER_NAME: sequitur-sql-server
   EXISTING_SQL_DATABASE_NAME: riff-react-db
   EXISTING_COSMOS_DB_NAME: cosmos-a-riff-in-react
+  ACR_NAME: ariffacr
 
 jobs:
   build-and-deploy:
@@ -34,20 +35,27 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
+      - name: Create resource group if it doesn't exist
+        run: |
+          if ! az group show --name ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+            echo "Creating resource group ${{ env.AZURE_RESOURCE_GROUP }}..."
+            az group create --name ${{ env.AZURE_RESOURCE_GROUP }} --location ${{ env.LOCATION }}
+          else
+            echo "Resource group ${{ env.AZURE_RESOURCE_GROUP }} already exists"
+          fi
+      
       - name: Create Azure Container Registry if it doesn't exist
         run: |
-          ACR_NAME="ariffacr"
-          if ! az acr show --name $ACR_NAME --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
+          if ! az acr show --name ${{ env.ACR_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} &> /dev/null; then
             echo "Creating Azure Container Registry..."
-            az acr create --name $ACR_NAME --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --sku Basic --admin-enabled true
+            az acr create --name ${{ env.ACR_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --sku Basic --admin-enabled true
           else
             echo "Azure Container Registry already exists"
           fi
-          echo "ACR_NAME=$ACR_NAME" >> $GITHUB_ENV
           
           # Get ACR credentials
-          ACR_USERNAME=$(az acr credential show --name $ACR_NAME --query username -o tsv)
-          ACR_PASSWORD=$(az acr credential show --name $ACR_NAME --query passwords[0].value -o tsv)
+          ACR_USERNAME=$(az acr credential show --name ${{ env.ACR_NAME }} --query username -o tsv)
+          ACR_PASSWORD=$(az acr credential show --name ${{ env.ACR_NAME }} --query passwords[0].value -o tsv)
           
           echo "ACR_USERNAME=$ACR_USERNAME" >> $GITHUB_ENV
           echo "::add-mask::$ACR_PASSWORD"
@@ -84,11 +92,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
-      - name: Login to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
       - name: Deploy Azure Infrastructure
         uses: azure/arm-deploy@v1
         with:
@@ -99,7 +102,9 @@ jobs:
             environmentName=${{ env.ENVIRONMENT_NAME }}
             location=${{ env.LOCATION }}
             containerImage=${{ env.ACR_NAME }}.azurecr.io/a-riff-in-react-api:latest
-            containerRegistry=${{ env.ACR_NAME }}
+            containerRegistry=${{ env.ACR_NAME }}.azurecr.io
+            containerRegistryUsername=${{ env.ACR_USERNAME }}
+            containerRegistryPassword=${{ env.ACR_PASSWORD }}
             externalTenantId=${{ secrets.EXTERNAL_TENANT_ID }}
             externalClientId=${{ secrets.EXTERNAL_CLIENT_ID }}
             existingSqlServerName=${{ env.EXISTING_SQL_SERVER_NAME }}
@@ -109,13 +114,6 @@ jobs:
       
       - name: Verify Deployment
         run: |
-          # Get the ACR admin credentials for the Container App
-          ACR_USERNAME=$(az acr credential show --name ${{ env.ACR_NAME }} --query username -o tsv)
-          ACR_PASSWORD=$(az acr credential show --name ${{ env.ACR_NAME }} --query passwords[0].value -o tsv)
-          
-          # Update the Container App to use the ACR credentials
-          az containerapp registry set --name api-${{ env.ENVIRONMENT_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --server ${{ env.ACR_NAME }}.azurecr.io --username $ACR_USERNAME --password $ACR_PASSWORD
-          
           echo "Container App URL: $(az containerapp show -n api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)"
           echo "Testing health endpoint..."
           HEALTH_URL="https://$(az containerapp show -n api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)/health"
