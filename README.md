@@ -1,10 +1,89 @@
 # A Riff In React
 
-A modern React application demonstrating hybrid database architecture with Azure SQL Database and Cosmos DB.
+## 📢 Current Status: ✅ RESOLVED - Platform Migration Complete
 
-## Project Overview
+**Date:** September 6, 2025
 
-A Riff In React is a web application designed for music collaboration, allowing users to share musical riffs, collaborate on compositions, and build musical projects together. The application demonstrates modern web development practices with React, Azure, and Microsoft Entra External ID.
+**Resolution:** ✅ **API Deployment Successfully Migrated to Container Apps**
+
+**Root Causes Addressed:**
+1. **Platform Compatibility**: Previous Windows App Service with IISNode caused TypeScript compilation issues
+2. **Environment-Specific Configuration**: Deployment environment inconsistencies led to runtime failures
+3. **Database Authentication**: Connection string approach was less secure and difficult to manage
+
+**Solutions Implemented:**
+- ✅ **Containerized Approach**: API migrated to Docker containers with multi-stage builds
+- ✅ **Azure Container Apps**: Deployment platform changed to Container Apps for better scalability
+- ✅ **Managed Identity**: Secure, credential-free database access implemented
+- ✅ **Static Web Apps**: Frontend migrated to Static Web Apps with global CDN
+- ✅ **Dual CI/CD Workflows**: Separate pipelines for API and frontend
+
+**Current Status - All Systems Operational:**
+- ✅ **Frontend**: Live at https://purple-tree-0e7c5c91e.4.azurestaticapps.net (200 OK)
+- ✅ **API Backend**: Live at https://api-a-riff-in-react.westus.azurecontainerapps.io (200 OK) 
+- ✅ **Authentication**: Microsoft Entra External ID fully functional  
+- ✅ **Infrastructure**: Container Apps + Static Web Apps with managed identity
+- ✅ **CI/CD Pipeline**: GitHub Actions with container build and deployment
+
+---
+
+A modern, production-ready React application template demonstrating hybrid Azure SQL Database + Cosmos DB architecture.
+
+## 🎯 Project Vision
+
+**A Riff In React** is a general-purpose, production-ready React template that demonstrates best practices for modular architecture, Azure deployment, and polyglot persistence using both Azure SQL Database and Cosmos DB. This template is designed to be reusable for a variety of business scenarios, providing a solid foundation for scalable, maintainable, and Azure-ready web applications.
+
+> _This template's modular structure and deployment patterns are inspired by the Application Factory Pattern and Blueprint Modularity described in [A Fugue In Flask](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask)._
+
+While the template includes example modules (such as user management and activity logs) to illustrate hybrid database patterns, it is not tied to any specific domain. Example scenarios, such as a running club management app, are provided in the documentation to demonstrate how to extend the template for real-world use cases.
+
+## 📈 Development Progress
+
+### ✅ Phase 1: Foundation (COMPLETED)
+- ✅ **Documentation Framework**: Comprehensive docs structure established
+- ✅ **Project Vision**: General-purpose, Azure-ready template defined
+- ✅ **Basic React App Structure**: Vite + TypeScript + React 18 setup complete
+
+### ✅ Phase 2: Core Features (95% COMPLETED ✅)
+- ✅ **UI framework integration**: Tailwind CSS + shadcn/ui-style components implemented
+- ✅ **State management setup**: Redux Toolkit + RTK Query implemented
+- ✅ **Authentication system (MSAL)**: Microsoft Entra External ID fully operational
+- ✅ **Database infrastructure**: Azure SQL + Cosmos DB infrastructure deployed
+- ✅ **Backend API**: Express containerized on Azure Container Apps
+- ✅ **Azure deployment**: Dual CI/CD pipelines with GitHub Actions
+- ✅ **Production deployment**: Frontend + API both live and operational
+- ✅ **Containerization**: Docker multi-stage builds for consistent deployment
+- ✅ **Platform Migration**: Successfully moved from App Service to Container Apps
+- [ ] **Frontend-Backend Integration**: Connect authenticated app to working API endpoints
+
+>**Current Status**: All major infrastructure and deployment issues resolved! Both frontend and API are operational. Next focus is on frontend-backend integration to complete the template's core functionality.
+
+### 📋 Phase 3: Example Extensions (READY)
+- [ ] Example: User management (Azure SQL)
+- [ ] Example: Activity log (Cosmos DB)
+- [ ] Example: Real-time updates
+- [ ] Example: Analytics dashboard
+
+### 🚀 Phase 4: Advanced Features (PLANNED)
+- [ ] Mobile responsiveness
+- [ ] Performance optimization
+
+## 🛠️ Technology Stack
+
+- **Frontend**: React 18 + TypeScript + Vite ✅
+- **UI Framework**: Tailwind CSS + shadcn/ui-style components ✅
+- **State Management**: Redux Toolkit + RTK Query ✅
+- **Authentication**: Microsoft Entra External ID (MSAL) ✅
+- **Backend API**: Node.js + Express in Docker container ✅
+- **Databases**: Azure SQL Database + Cosmos DB ✅
+- **Infrastructure**: Azure Bicep templates ✅
+- **Hosting**: Azure Container Apps + Static Web Apps ✅
+- **CI/CD**: GitHub Actions with container registry ✅
+
+## 🌐 Live Demo
+
+**Frontend URL**: https://purple-tree-0e7c5c91e.4.azurestaticapps.net
+**API URL**: https://api-a-riff-in-react.westus.azurecontainerapps.io
 
 ## Architecture
 
@@ -17,7 +96,7 @@ This project follows modern cloud-native architecture:
   - Azure Cosmos DB for activity logs and real-time data
 - **Authentication**: Microsoft Entra External ID
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
@@ -30,12 +109,12 @@ This project follows modern cloud-native architecture:
 
 1. Clone the repository
 2. Install dependencies:
-   ```
+   ```bash
    npm install
    cd api && npm install
    ```
 3. Start the development servers:
-   ```
+   ```bash
    # Start the React development server
    npm run start
    
@@ -72,7 +151,7 @@ See the [CI/CD Setup Guide](./docs/ci-cd-setup.md) for detailed instructions.
 └── docker-compose.yml        # Local development setup
 ```
 
-## Documentation
+## 📚 Documentation
 
 - [Project Overview](./docs/01-project-overview.md)
 - [Architecture](./docs/02-architecture.md)
@@ -86,6 +165,14 @@ See the [CI/CD Setup Guide](./docs/ci-cd-setup.md) for detailed instructions.
 - [Deployment Success](./docs/10-deployment-success.md)
 - [Local Development Guide](./docs/local-development.md)
 - [Production Deployment Guide](./docs/production-deployment.md)
+
+---
+
+**Development Methodology**: Feature-by-feature, commit-by-commit collaborative approach
+
+---
+
+> _For architectural, deployment, and documentation patterns, see [A Fugue In Flask](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask) for reference and rationale._
 
 ## License
 
