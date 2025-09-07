@@ -31,6 +31,8 @@
     "start": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "azure:register-providers": "pwsh -ExecutionPolicy Bypass -File ./scripts/register-providers.ps1",
+    "azure:deploy": "npm run azure:register-providers && az deployment group create --resource-group riffinreact-rg --template-file ./infra/main.bicep"
   }
 }

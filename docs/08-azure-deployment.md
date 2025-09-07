@@ -47,6 +47,15 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 | Log Analytics | `log-a-riff-in-react` | Monitoring | ✅ Active |
 
 ## Prerequisites
+
+- Azure account with subscription
+- Azure CLI installed
+- Resource group created
+- **Azure Resource Providers registered** (see [Provider Registration Guide](./provider-registration.md))
+
+> ⚠️ **Important**: Before deploying, ensure all required Azure Resource Providers are registered in your subscription. You can use our automated script: `.\scripts\register-providers.ps1` (Windows) or `./scripts/register-providers.sh` (Linux/macOS).
+
+## Prerequisites
 - Azure account
 - Azure CLI installed
 - Resource group created
