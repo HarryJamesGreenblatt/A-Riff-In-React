@@ -61,9 +61,11 @@ npm run dev
 - Auth: Redirect to localhost
 
 ### Production
-- Frontend: `https://a-riff-in-react.{random}.azurestaticapps.net`
+- Frontend: `https://a-riff-in-react.{random}.azurestaticapps.net` (improved naming)
 - API: `https://api-a-riff-in-react.westus.azurecontainerapps.io`
 - Auth: Redirect to production URL
+
+*Note: Frontend URL will get improved naming on next deployment*
 
 ## Testing Strategy
 

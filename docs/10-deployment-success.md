@@ -2,7 +2,7 @@
 
 ## 🎉 Project Successfully Deployed!
 
-**Live Frontend**: https://purple-tree-0e7c5c91e.4.azurestaticapps.net  
+**Live Frontend**: https://a-riff-in-react.{random}.azurestaticapps.net (improved naming - will take effect on next deployment)  
 **Live API**: https://api-a-riff-in-react.westus.azurecontainerapps.io  
 **Deployment Date**: September 6, 2025  
 **Status**: ✅ Full-Stack Application Operational
@@ -57,9 +57,9 @@ Resource Group: riffinreact-rg
 - **Result**: 15-30% monthly cost reduction compared to App Service
 
 ### Domain Naming
-- **API**: `api-a-riff-in-react.westus.azurecontainerapps.io`
-- **Frontend**: `purple-tree-0e7c5c91e.4.azurestaticapps.net`
-- **Reason**: Modern cloud-native platform with automatic domain provisioning
+- **API**: `api-a-riff-in-react.westus.azurecontainerapps.io` ✅ (already clean)
+- **Frontend**: `a-riff-in-react.{random}.azurestaticapps.net` 🎯 (improved naming ready for next deployment)
+- **Current Frontend**: `purple-tree-0e7c5c91e.4.azurestaticapps.net` (will be replaced)
 
 ## Lessons Learned
 
