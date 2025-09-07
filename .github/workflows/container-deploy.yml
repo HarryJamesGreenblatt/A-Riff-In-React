@@ -2,7 +2,7 @@ name: Deploy API to Container Apps
 
 on:
   push:
-    branches: [fresh-start]
+    branches: [main, fresh-start]
     paths:
       - 'api/**'
       - '.github/workflows/container-deploy.yml'

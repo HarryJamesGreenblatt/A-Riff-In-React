@@ -61,7 +61,7 @@ name: Deploy API to Container Apps
 
 on:
   push:
-    branches: [fresh-start]
+    branches: [main, fresh-start]
     paths:
       - 'api/**'
       - '.github/workflows/container-deploy.yml'
@@ -102,7 +102,7 @@ name: Deploy Frontend to Static Web Apps
 
 on:
   push:
-    branches: [fresh-start]
+    branches: [main, fresh-start]
     paths-ignore:
       - 'api/**'
       - '.github/workflows/container-deploy.yml'
@@ -213,7 +213,7 @@ The two workflows work together but are triggered independently:
 1. Create the `.github/workflows` directory
 2. Add both workflow files as shown above
 3. Configure all required GitHub secrets
-4. Push to the `fresh-start` branch to trigger the initial deployment
+4. Push to the `main` or `fresh-start` branch to trigger the initial deployment
 
 ## Troubleshooting
 

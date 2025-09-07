@@ -245,8 +245,9 @@ For API debugging, you can:
 ### Current (can be improved later):
 ```
 main -> production
+main -> production
 fresh-start -> development/staging
-feature-branches -> merge to fresh-start
+feature-branches -> merge to fresh-start -> then to main
 ```
 
 ### Professional (future):

@@ -2,7 +2,7 @@ name: Deploy Frontend to Static Web App
 
 on:
   push:
-    branches: [fresh-start]
+    branches: [main, fresh-start]
     paths:
       - 'src/**'
       - 'public/**'

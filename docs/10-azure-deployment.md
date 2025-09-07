@@ -258,7 +258,7 @@ The project includes two GitHub Actions workflows for CI/CD:
 *   **`container-deploy.yml`**: Builds and deploys the API container to Azure Container Apps
 *   **`static-web-deploy.yml`**: Builds and deploys the React frontend to Azure Static Web Apps
 
-These workflows are triggered on pushes to the `fresh-start` branch. They perform the following steps:
+These workflows are triggered on pushes to the `main` or `fresh-start` branches. They perform the following steps:
 
 1.  **Container Deploy Workflow**:
     *   Builds the Docker image for the API

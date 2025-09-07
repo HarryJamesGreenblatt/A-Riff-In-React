@@ -46,7 +46,7 @@ Resource Group: riffinreact-rg
 ### 🔧 CI/CD Pipeline
 - **Multiple GitHub Actions workflows** fully operational
 - **Container image building and pushing** to GitHub Container Registry
-- **Automated deployments** on every push to fresh-start branch
+- **Automated deployments** on every push to main or fresh-start branch
 - **Infrastructure as Code** with Azure Bicep templates
 - **Proper secret management** with GitHub Secrets
 
