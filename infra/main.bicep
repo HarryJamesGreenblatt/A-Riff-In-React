@@ -38,10 +38,10 @@ param existingCosmosDbAccountName string = 'cosmos-a-riff-in-react'
 
 // Variables for resource naming
 var containerAppEnvName = 'env-${environmentName}'
-var containerAppName = 'api-${environmentName}'
+var containerAppName = 'ca-api-${environmentName}' // Changed prefix to prevent conflicts with existing App Service
 var logAnalyticsName = 'log-${environmentName}'
-var applicationInsightsName = 'ai-${environmentName}'
-var keyVaultName = 'kv-${take(replace(environmentName, '-', ''), 20)}-${uniqueString(resourceGroup().id)}'
+var applicationInsightsName = 'appi-${environmentName}' // Match existing naming
+var keyVaultName = 'kv-${environmentName}' // Match existing naming
 var staticWebAppName = environmentName
 var managedIdentityName = 'id-${environmentName}'
 
@@ -89,18 +89,9 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   }
 }
 
-// Application Insights for monitoring
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: applicationInsightsName
-  location: location
-  tags: tags
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    WorkspaceResourceId: logAnalytics.id
-    publicNetworkAccessForIngestion: 'Enabled'
-    publicNetworkAccessForQuery: 'Enabled'
-  }
+// Reference to existing Application Insights
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+  name: 'appi-a-riff-in-react'
 }
 
 // Container Apps Environment
@@ -240,38 +231,20 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
   }
 }
 
-// Static Web App for frontend
-resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
+// Reference to existing Static Web App
+resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' existing = {
   name: staticWebAppName
-  location: location
-  tags: tags
-  sku: {
-    name: 'Free'
-    tier: 'Free'
-  }
-  properties: {
-    provider: 'GitHub'
-    repositoryUrl: 'https://github.com/HarryJamesGreenblatt/A-Riff-In-React'
-    branch: 'fresh-start'
-    buildProperties: {
-      appLocation: '/'
-      apiLocation: ''
-      outputLocation: 'dist'
-    }
-  }
 }
 
-// Key Vault for secrets
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
-  name: keyVaultName
-  location: location
-  tags: tags
+// Reference to existing Key Vault
+resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
+  name: 'kv-a-riff-in-react'
+}
+
+// Update Key Vault access policy to include new managed identity
+resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
+  name: '${keyVault.name}/add'
   properties: {
-    tenantId: subscription().tenantId
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
     accessPolicies: [
       {
         tenantId: subscription().tenantId
@@ -284,22 +257,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
         }
       }
     ]
-    enableRbacAuthorization: false
-    enableSoftDelete: true
-    softDeleteRetentionInDays: 90
-    enabledForDeployment: false
-    enabledForDiskEncryption: false
-    enabledForTemplateDeployment: false
-    publicNetworkAccess: 'Enabled'
-  }
-}
-
-// Key Vault secrets
-resource keyVaultSecretExternal 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  parent: keyVault
-  name: 'EXTERNAL-CLIENT-ID'
-  properties: {
-    value: externalClientId
   }
 }
 

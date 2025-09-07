@@ -7,9 +7,9 @@ param principalId string
 @description('The role to assign to the managed identity')
 param roleName string
 
-resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' existing = {
-  name: sqlServerName
-}
+// We need this reference for the name but don't use the resource directly
+// This is intentional and required for the script to work
+var sqlServerNameVar = sqlServerName
 
 // Use deploymentScript to execute T-SQL to grant database role to the managed identity
 // This is necessary because Bicep doesn't directly support SQL role assignments

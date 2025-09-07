@@ -114,9 +114,9 @@ jobs:
       
       - name: Verify Deployment
         run: |
-          echo "Container App URL: $(az containerapp show -n api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)"
+          echo "Container App URL: $(az containerapp show -n ca-api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)"
           echo "Testing health endpoint..."
-          HEALTH_URL="https://$(az containerapp show -n api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)/health"
+          HEALTH_URL="https://$(az containerapp show -n ca-api-${{ env.ENVIRONMENT_NAME }} -g ${{ env.AZURE_RESOURCE_GROUP }} --query properties.configuration.ingress.fqdn -o tsv)/health"
           for i in {1..5}; do
             echo "Attempt $i..."
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" $HEALTH_URL || echo "Failed")
