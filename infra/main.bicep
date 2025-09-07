@@ -40,8 +40,6 @@ param existingCosmosDbAccountName string = 'cosmos-a-riff-in-react'
 var containerAppEnvName = 'env-${environmentName}'
 var containerAppName = 'ca-api-${environmentName}' // Changed prefix to prevent conflicts with existing App Service
 var logAnalyticsName = 'log-${environmentName}'
-var applicationInsightsName = 'appi-${environmentName}' // Match existing naming
-var keyVaultName = 'kv-${environmentName}' // Match existing naming
 var staticWebAppName = environmentName
 var managedIdentityName = 'id-${environmentName}'
 
@@ -243,7 +241,8 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
 
 // Update Key Vault access policy to include new managed identity
 resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
-  name: '${keyVault.name}/add'
+  parent: keyVault
+  name: 'add'
   properties: {
     accessPolicies: [
       {
