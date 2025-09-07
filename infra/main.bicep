@@ -42,7 +42,6 @@ param existingSqlDatabaseName string = 'riff-react-db'
 var containerAppEnvName = 'env-${environmentName}'
 var containerAppName = 'ca-api-${environmentName}' // Changed prefix to prevent conflicts with existing App Service
 var logAnalyticsName = 'log-${environmentName}'
-var staticWebAppName = environmentName
 var managedIdentityName = 'id-${environmentName}'
 
 // Tags for all resources
@@ -215,34 +214,22 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
 }
 
 // Reference existing App Service (not Static Web App)
-resource webApp 'Microsoft.Web/sites@2022-09-01' existing = {
-  name: staticWebAppName
-}
+@description('The name of the existing web app')
+param webAppName string = 'a-riff-in-react'
 
 // Reference existing Key Vault
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
-  name: 'kv-${environmentName}'
-}
+@description('The name of the existing key vault')
+param keyVaultName string = 'kv-a-riff-in-react'
 
-// Update Key Vault access policy for the managed identity
-resource keyVaultAccessPolicy 'Microsoft.KeyVault/vaults/accessPolicies@2022-07-01' = {
-  name: 'add'
-  parent: keyVault
-  properties: {
-    accessPolicies: [
-      {
-        tenantId: subscription().tenantId
-        objectId: managedIdentity.properties.principalId
-        permissions: {
-          secrets: [
-            'get'
-            'list'
-          ]
-        }
-      }
-    ]
-  }
-}
+// Update Key Vault access policy - done manually
+output keyVaultAccessInstructions string = '''
+To manually grant the managed identity access to Key Vault:
+1. Navigate to the Key Vault: ${keyVaultName} in the Azure Portal
+2. Go to "Access policies"
+3. Add a new access policy with the following details:
+   - Principal: ${managedIdentity.properties.principalId}
+   - Secret permissions: Get, List
+'''
 
 // SQL Database access - simplified approach without deployment script
 // We'll just output instructions for manual role assignment since
@@ -261,5 +248,5 @@ To manually assign the necessary SQL permissions:
 
 // Outputs
 output containerAppUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
-output webAppUrl string = 'https://${webApp.properties.defaultHostName}'
+output webAppUrl string = 'https://${webAppName}.azurewebsites.net'
 output managedIdentityId string = managedIdentity.id
