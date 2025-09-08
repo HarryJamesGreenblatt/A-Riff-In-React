@@ -104,7 +104,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ steps.get_swa_token.outputs.token }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "/"
+          app_location: "build"
           api_location: ""
           output_location: "build"
           skip_app_build: true

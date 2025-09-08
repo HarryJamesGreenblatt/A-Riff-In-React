@@ -36,6 +36,9 @@ dist-ssr
 # Credentials and secrets
 azure-credentials.json
 
+# Production build output
+build/
+
 # Context directory and all subdirectories
 /context/
 /context/**
