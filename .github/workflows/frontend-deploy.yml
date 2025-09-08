@@ -108,7 +108,7 @@ jobs:
           api_location: ""
           output_location: "build"
           skip_app_build: true
-          production_branch: "fresh-start"
+          production_branch: "main"
       
       - name: Verify deployment
         run: |
