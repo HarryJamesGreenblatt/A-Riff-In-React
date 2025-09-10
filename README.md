@@ -83,7 +83,7 @@ While the template includes example modules (such as user management and activit
 
 ## 🌐 Live Demo
    
-**Frontend URL**: https://a-riff-in-react.harryjamesgreenblatt.com (Basic template - API integration pending, custom domain with SSL)
+**Frontend URL**: https://a-riff-in-react.harryjamesgreenblatt.com (Basic template - API integration pending, custom domain with SSL)   
 **API URL**: https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API operational)
 
 ## Architecture
