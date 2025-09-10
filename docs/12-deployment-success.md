@@ -3,7 +3,7 @@
 
 ## 🎉 Project Successfully Deployed!
 
-**Live Frontend**: https://gentle-stone-08653e81e.1.azurestaticapps.net (Basic template deployed)
+**Live Frontend**: https://a-riff-in-react.harryjamesgreenblatt.com (Basic template deployed, custom domain with SSL)
 **Live API**: https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API)
 **Deployment Date**: September 6, 2025  
 **Status**: ✅ Infrastructure Deployed | 🔧 Frontend-API Integration Pending

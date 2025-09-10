@@ -16,7 +16,7 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 ## 🎉 Current Deployment Status
 
 - ✅ **Azure Infrastructure**: Container Apps environment deployed via Bicep
-- ✅ **Web Application**: Live at https://gentle-stone-08653e81e.1.azurestaticapps.net
+✅ **Web Application**: Live at https://a-riff-in-react.harryjamesgreenblatt.com (custom domain, SSL enabled)
 - ✅ **Backend API**: Live at https://api-a-riff-in-react.westus.azurecontainerapps.io
 - ✅ **Authentication**: Microsoft Entra External ID **FULLY WORKING** ✅
 - ✅ **CI/CD Pipeline**: GitHub Actions workflows operational

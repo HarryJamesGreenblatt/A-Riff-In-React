@@ -19,7 +19,7 @@
 - ✅ **Dual CI/CD Workflows**: Separate pipelines for API and frontend
 
 **Current Status - Systems Operational with Integration Pending:**
-- ✅ **Frontend**: Live at https://gentle-stone-08653e81e.1.azurestaticapps.net (Basic template deployed)
+✅ **Frontend**: Live at https://a-riff-in-react.harryjamesgreenblatt.com (Basic template deployed, custom domain with SSL)
 - ✅ **API Backend**: Live at https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API ready)
 - 🔧 **Frontend-API Integration**: Not yet connected - React app needs API integration
 - ✅ **Database**: Cosmos DB provisioned and ready
@@ -83,7 +83,7 @@ While the template includes example modules (such as user management and activit
 
 ## 🌐 Live Demo
 
-**Frontend URL**: https://gentle-stone-08653e81e.1.azurestaticapps.net (Basic template - API integration pending)
+**Frontend URL**: https://a-riff-in-react.harryjamesgreenblatt.com (Basic template - API integration pending, custom domain with SSL)
 **API URL**: https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API operational)
 
 ## Architecture

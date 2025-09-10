@@ -219,7 +219,7 @@ For API debugging, you can:
 - Auth: Redirect to localhost
 
 ### Production
-- Frontend: `https://gentle-stone-08653e81e.1.azurestaticapps.net`
+- Frontend: `https://a-riff-in-react.harryjamesgreenblatt.com` (custom domain, SSL enabled)
 - API: `https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io`
 - Auth: Redirect to production URL
 
