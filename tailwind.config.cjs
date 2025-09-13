@@ -8,4 +8,5 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  // DaisyUI theme removed for vanilla CSS migration
 }
