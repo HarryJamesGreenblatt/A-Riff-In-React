@@ -13,7 +13,9 @@ const Homepage: React.FC = () => {
         <div className="feature-section">
           <div className="feature-panel">
             <h1 id="home-hero" className="hero-title">
-              <span className="project-title" data-text={"A Riff In React"}>A Riff In React</span> <span className="hero-title-separator">—</span> a pragmatic, extendable React starter
+              <span className="project-title" data-text={"A Riff In React"}>A Riff In React</span> 
+              <br/> 
+              <span className="subtitle">a pragmatic, extendable React starter</span>
             </h1>
             <p className="hero-desc">
               A focused starter template demonstrating modern React patterns, secure Azure integration, and a pragmatic folder structure you can extend for real projects.

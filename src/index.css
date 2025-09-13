@@ -139,6 +139,10 @@ header > div:first-child {
 .hero-title-separator {
   color: lightslategrey !important; 
 }
+.subtitle{
+  font-size: 1.5rem;
+  color: #f472b6 !important;
+}
 
 
 .button-group {
