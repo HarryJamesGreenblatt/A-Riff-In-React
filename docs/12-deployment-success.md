@@ -3,8 +3,8 @@
 
 ## 🎉 Project Successfully Deployed!
 
-**Live Frontend**: https://a-riff-in-react.harryjamesgreenblatt.com (Basic template deployed, custom domain with SSL)
-**Live API**: https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API)
+**Live Frontend**: `<YOUR_FRONTEND_URL>` (Basic template deployed, custom domain with SSL)
+**Live API**: `<YOUR_API_URL>` (Full REST API)
 **Deployment Date**: September 6, 2025  
 **Status**: ✅ Infrastructure Deployed | 🔧 Frontend-API Integration Pending
 
@@ -117,7 +117,7 @@ Resource Group: riffinreact-rg
 3. **Test Authentication Flow** with actual API calls
 4. **Implement Error Handling** for network/auth failures
 
-**Available API**: `https://api-a-riff-in-react.westus.azurecontainerapps.io/api/users`
+**Available API**: `<YOUR_API_URL>/api/users`
 
 ### Development Priorities
 1. **Frontend-Backend Integration** (IMMEDIATE)
@@ -136,11 +136,11 @@ Resource Group: riffinreact-rg
 ### Environment Variables (Production)
 ```
 # Frontend Environment Variables
-VITE_ENTRA_CLIENT_ID: 8e217770-697f-497e-b30b-27b214e87db1
-VITE_ENTRA_TENANT_ID: 813307d1-6d39-4c75-8a38-2e34128203bc
-VITE_REDIRECT_URI: https://gentle-stone-08653e81e.1.azurestaticapps.net
-VITE_POST_LOGOUT_URI: https://gentle-stone-08653e81e.1.azurestaticapps.net
-VITE_API_URL: https://api-a-riff-in-react.westus.azurecontainerapps.io
+VITE_ENTRA_CLIENT_ID: <YOUR_ENTRA_CLIENT_ID>
+VITE_ENTRA_TENANT_ID: <YOUR_ENTRA_TENANT_ID>
+VITE_REDIRECT_URI: <YOUR_FRONTEND_URL>
+VITE_POST_LOGOUT_URI: <YOUR_FRONTEND_URL>
+VITE_API_BASE_URL: <YOUR_API_URL>
 
 # Container App Environment Variables
 SQL_SERVER_ENDPOINT: sequitur-sql-server.database.windows.net

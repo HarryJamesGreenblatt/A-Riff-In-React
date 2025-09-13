@@ -100,11 +100,11 @@ Create a `.env` file in the project root:
 
 ```bash
 # Working configuration as of August 31, 2025
-VITE_ENTRA_CLIENT_ID="8e217770-697f-497e-b30b-27b214e87db1"
-VITE_ENTRA_TENANT_ID="813307d1-6d39-4c75-8a38-2e34128203bc"
+VITE_ENTRA_CLIENT_ID="<YOUR_ENTRA_CLIENT_ID>"
+VITE_ENTRA_TENANT_ID="<YOUR_ENTRA_TENANT_ID>"
 VITE_REDIRECT_URI="http://localhost:5173"
 VITE_POST_LOGOUT_URI="http://localhost:5173"
-VITE_API_BASE_URL="https://a-riff-in-react.azurewebsites.net/api"
+VITE_API_BASE_URL="<YOUR_API_BASE_URL>"
 VITE_API_SCOPE="api://a-riff-in-react/access_as_user"
 ```
 
@@ -245,8 +245,8 @@ The `src/config/authConfig.ts` is already configured to use Microsoft Entra Exte
 ### Known Working Configuration
 
 **Azure AD App Registration:**
-- Client ID: `8e217770-697f-497e-b30b-27b214e87db1`
-- Tenant ID: `813307d1-6d39-4c75-8a38-2e34128203bc`
+- Client ID: `<YOUR_ENTRA_CLIENT_ID>`
+- Tenant ID: `<YOUR_ENTRA_TENANT_ID>`
 - Redirect URIs: `http://localhost:5173`, `https://a-riff-in-react.azurewebsites.net`
 - Platform: Single Page Application (SPA)
 

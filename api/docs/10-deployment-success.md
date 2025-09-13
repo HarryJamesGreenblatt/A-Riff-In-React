@@ -105,8 +105,8 @@ Resource Group: riffinreact-rg
 
 ### Environment Variables (Production)
 ```
-VITE_ENTRA_CLIENT_ID: 8e217770-697f-497e-b30b-27b214e87db1
-VITE_ENTRA_TENANT_ID: 813307d1-6d39-4c75-8a38-2e34128203bc
+VITE_ENTRA_CLIENT_ID: <YOUR_ENTRA_CLIENT_ID>
+VITE_ENTRA_TENANT_ID: <YOUR_ENTRA_TENANT_ID>
 VITE_REDIRECT_URI: https://a-riff-in-react.azurewebsites.net
 VITE_POST_LOGOUT_URI: https://a-riff-in-react.azurewebsites.net
 ```

@@ -25,8 +25,8 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 ## Authentication Status: ✅ FULLY WORKING
 
 **Microsoft Entra External ID Integration:**
-- Client ID: `8e217770-697f-497e-b30b-27b214e87db1`
-- Tenant ID: `813307d1-6d39-4c75-8a38-2e34128203bc`
+- Client ID: `<YOUR_ENTRA_CLIENT_ID>`
+- Tenant ID: `<YOUR_ENTRA_TENANT_ID>`
 - Redirect URIs: Configured for both localhost and production
 - Token Flow: Working perfectly with redirect-based authentication
 - User Profiles: Successfully extracted and displayed

@@ -9,8 +9,8 @@ This document covers the GitHub Actions workflows for **A Riff In React**, which
 
 - ✅ **Workflow Status**: Fully operational and tested.
 - ✅ **Last Deployment**: Successful - September 6, 2025.
-- ✅ **Live API**: https://api-a-riff-in-react.westus.azurecontainerapps.io
-- ✅ **Live Frontend**: https://gentle-stone-08653e81e.1.azurestaticapps.net
+- ✅ **Live API**: `<YOUR_API_URL>`
+- ✅ **Live Frontend**: `<YOUR_FRONTEND_URL>`
 - ✅ **Authentication**: Microsoft Entra External ID integrated.
 - ✅ **Infrastructure**: Container Apps with managed identity for database access.
 - ✅ **Platform**: Successfully migrated from Windows App Service to Container Apps.
@@ -112,7 +112,7 @@ on:
 env:
   AZURE_RESOURCE_GROUP: riffinreact-rg
   AZURE_STATIC_WEB_APP_NAME: a-riff-in-react
-  API_URL: https://api-a-riff-in-react.westus.azurecontainerapps.io
+  API_URL: <YOUR_API_URL>
 
 jobs:
   build-and-deploy:
@@ -134,7 +134,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_API_URL: ${{ env.API_URL }}
+          VITE_API_BASE_URL: ${{ env.API_URL }}
           VITE_EXTERNAL_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
           VITE_EXTERNAL_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
       

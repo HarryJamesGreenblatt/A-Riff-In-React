@@ -16,8 +16,8 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 ## 🎉 Current Deployment Status
 
 - ✅ **Azure Infrastructure**: Container Apps environment deployed via Bicep
-✅ **Web Application**: Live at https://a-riff-in-react.harryjamesgreenblatt.com (custom domain, SSL enabled)
-- ✅ **Backend API**: Live at https://api-a-riff-in-react.westus.azurecontainerapps.io
+✅ **Web Application**: Live at `<YOUR_FRONTEND_URL>` (custom domain, SSL enabled)
+- ✅ **Backend API**: Live at `<YOUR_API_URL>`
 - ✅ **Authentication**: Microsoft Entra External ID **FULLY WORKING** ✅
 - ✅ **CI/CD Pipeline**: GitHub Actions workflows operational
 - ✅ **Database**: Azure SQL Database and Cosmos DB with managed identity
@@ -26,8 +26,8 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 ## Authentication Status: ✅ FULLY WORKING
 
 **Microsoft Entra External ID Integration:**
-- Client ID: `8e217770-697f-497e-b30b-27b214e87db1`
-- Tenant ID: `813307d1-6d39-4c75-8a38-2e34128203bc`
+- Client ID: `<YOUR_ENTRA_CLIENT_ID>`
+- Tenant ID: `<YOUR_ENTRA_TENANT_ID>`
 - Redirect URIs: Configured for both localhost and production
 - Token Flow: Working perfectly with redirect-based authentication
 - User Profiles: Successfully extracted and displayed
@@ -82,7 +82,7 @@ To enable external user authentication with Microsoft Entra External ID, you can
    az ad app create \
      --display-name "A-Riff-In-React-Entra" \
      --sign-in-audience "AzureADandPersonalMicrosoftAccount" \
-     --web-redirect-uris "http://localhost:5173" "https://gentle-stone-08653e81e.1.azurestaticapps.net"
+    --web-redirect-uris "http://localhost:5173" "<YOUR_FRONTEND_URL>"
    
    # Get the application ID (client ID)
    az ad app list --display-name "A-Riff-In-React-Entra" --query "[].appId" -o tsv
@@ -208,7 +208,7 @@ Ensure your application can use both local development settings and deployed set
    VITE_ENTRA_TENANT_ID=your-external-tenant-id
    VITE_REDIRECT_URI=http://localhost:5173
    VITE_POST_LOGOUT_URI=http://localhost:5173
-   VITE_API_URL=http://localhost:3001
+  VITE_API_BASE_URL=http://localhost:3001
    
    # For docker-compose.yml
    SQL_CONNECTION_STRING=Server=localhost;Database=ARiffInReact;User Id=sa;Password=YourPassword;TrustServerCertificate=True;

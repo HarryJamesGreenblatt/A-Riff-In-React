@@ -9,10 +9,13 @@ This guide provides step-by-step instructions for setting up and running the A R
 # Install dependencies
 npm install
 
-# Start frontend (connects to live Azure API)
-npm run start
-# or
+# Start frontend for development (recommended)
+# Use `npm run dev` for an interactive dev server with HMR
 npm run dev
+
+# For a local production preview, build then preview:
+# npm run build
+# npm run preview
 
 # Open: http://localhost:5173
 ```
@@ -69,14 +72,14 @@ Before you begin, make sure you have the following installed:
 
 ### Frontend Configuration
 
-Create a `.env.local` file in the project root with the following content:
+Create a `.env.local` file in the project root with the following content (canonical env var is `VITE_API_BASE_URL`):
 
 ```env
 VITE_ENTRA_CLIENT_ID=your-client-id
 VITE_ENTRA_TENANT_ID=your-tenant-id
 VITE_REDIRECT_URI=http://localhost:5173
 VITE_POST_LOGOUT_URI=http://localhost:5173
-VITE_API_URL=http://localhost:3001
+VITE_API_BASE_URL=http://localhost:3001
 ```
 
 ### API Configuration
@@ -219,8 +222,8 @@ For API debugging, you can:
 - Auth: Redirect to localhost
 
 ### Production
-- Frontend: `https://a-riff-in-react.harryjamesgreenblatt.com` (custom domain, SSL enabled)
-- API: `https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io`
+- Frontend: `<YOUR_FRONTEND_URL>` (custom domain, SSL enabled)
+- API: `<YOUR_API_URL>`
 - Auth: Redirect to production URL
 
 ## Testing Strategy
@@ -264,7 +267,7 @@ hotfix/* -> main
 
 If you encounter CORS errors:
 
-1. Verify the `VITE_API_URL` in your frontend `.env.local` file
+1. Verify the `VITE_API_BASE_URL` in your frontend `.env.local` file
 2. Check that the API CORS configuration includes your frontend URL
 3. Ensure you're using the correct protocol (http vs https)
 
