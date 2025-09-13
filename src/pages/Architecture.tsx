@@ -11,6 +11,10 @@ const Architecture: React.FC = () => (
       </article>
 
       
+      <article className="feature-card card-large">
+        <h3 className="font-bold mb-2">Infrastructure notes</h3>
+        <p className="text-gray-700">The template uses a shared SQL Server model to reduce cost: databases are created per-project on a shared server. Role assignments are handled via Bicep modules to grant managed identities access to the DB resources during deployment.</p>
+      </article>
 
       <article className="feature-card card-wide">
         <h3 className="font-bold mb-2">Deployment & CI/CD</h3>
@@ -21,10 +25,6 @@ const Architecture: React.FC = () => (
         </ul>
       </article>
 
-      <article className="feature-card card-large">
-        <h3 className="font-bold mb-2">Infrastructure notes</h3>
-        <p className="text-gray-700">The template uses a shared SQL Server model to reduce cost: databases are created per-project on a shared server. Role assignments are handled via Bicep modules to grant managed identities access to the DB resources during deployment.</p>
-      </article>
 
       
 
