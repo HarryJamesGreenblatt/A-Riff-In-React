@@ -1,6 +1,375 @@
 
+:root {
+  --bg: #f7fafc; /* light neutral */
+  --surface: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --accent: #0ea5a4; /* teal */
+  --radius: 10px;
+  --shadow: 0 6px 18px rgba(12, 18, 28, 0.06);
+  --site-max-width: 1200px; /* global max width for very large screens */
+  --footer-height: 64px;
+  --header-height: 72px;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
 body {
   margin: 0;
   min-width: 320px;
-  min-height: 100vh;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.45;
 }
+
+/* App layout: ensure footer sticks to bottom when content is short */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+/* constrain the app width on very large screens and center */
+.app-wrapper {
+  max-width: var(--site-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+/* make wrapper grow so footer sits after it at bottom when content is short */
+.app-wrapper { display:flex; flex-direction:column; flex:1 1 auto; }
+main {
+  flex: 1 1 auto;
+  background-color: bisque;
+}
+
+/* Header / Navbar */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: transparent;
+  border-bottom: 1px solid rgba(15,23,42,0.04);
+}
+header > div:first-child {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--muted);
+}
+.nav-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+.brand { font-weight: 700; font-size: 1.05rem; color:var(--muted)}
+.nav-link {
+  text-decoration: none;
+  color: var(--muted);
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  transition: background-color .15s ease, color .15s ease;
+}
+.nav-link:hover,
+.nav-link.active {
+  background: rgba(14,165,164,0.08);
+  color: var(--accent);
+}
+
+/* Main / Hero */
+.main-content {
+  max-width: 960px;
+  margin: 2.5rem auto;
+  padding: 0 1rem;
+  text-align: center;
+}
+.hero-title {
+  margin: 0 0 0.5rem 0;
+  font-size: clamp(1.75rem, 2.6vw, 2.6rem);
+  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Scoped 3D effect for the project title only. Uses the existing .project-title
+   class and a data-text attribute on the element to create a crisp pseudo-element
+   'face' so we don't affect the rest of the hero content. */
+.project-title {
+  position: relative;
+  display: inline-block;
+  color: var(--text);
+  font-weight: 800;
+  line-height: 1.02;
+  /* subtle base shadow for separation */
+  text-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 2px 6px rgba(12,18,28,0.05);
+}
+.project-title::before {
+  content: attr(data-text);
+  position: absolute;
+  left: 0; top: 0;
+  z-index: 1; /* place above panel background */
+  color: rgba(14,165,164,0.24); /* stronger teal face for visibility */
+  -webkit-transform: translate3d(3px, 3px, 0);
+  transform: translate3d(3px, 3px, 0);
+  filter: blur(0.35px);
+  opacity: 0.98;
+  pointer-events: none;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.02), 0 2px 6px rgba(12,18,28,0.04);
+}
+@media (prefers-reduced-motion: reduce) {
+  .project-title::before { -webkit-transform: none; transform: none; opacity: 0.95; }
+}
+.hero-title span { color: var(--accent); }
+.hero-desc {
+  margin: 0 0 1.25rem 0;
+  color: var(--muted);
+  max-width: 68ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.project-title{
+  color: #0b9d9b;
+}
+.hero-title-separator {
+  color: lightslategrey !important; 
+}
+
+
+.button-group {
+  display: inline-flex;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+.btn {
+  appearance: none;
+  border: 1px solid rgba(15,23,42,0.08);
+  background: linear-gradient(180deg, #ffffff, #fbfdfe);
+  padding: 0.5rem 0.9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+  transition: transform .12s ease, box-shadow .12s ease, background-color .12s ease;
+}
+
+.button-group .btn:first-child {
+  background: linear-gradient(180deg, var(--accent), #0b9d9b);
+  color: white;
+  border: none;
+}
+
+.btn:focus-visible {
+  outline: 3px solid rgba(14,165,164,0.18);
+  outline-offset: 2px;
+}
+
+.btn:hover { transform: translateY(-2px); }
+
+
+/* Features */
+.features, .feature-grid {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+.feature-grid { align-items: stretch; }
+.feature-card {
+  background: var(--surface);
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-align: left;
+  transition: transform .14s ease, box-shadow .14s ease;
+  max-width: 320px; /* default constrain cards for horizontal layout */
+  width: 100%;
+}
+.feature-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(12,18,28,0.08); }
+.feature-card > div { font-size: 1.6rem; margin-bottom: 0.4rem; }
+.feature-title { margin: 0 0 0.375rem 0; font-size: 1.05rem; font-weight: 700; }
+.feature-desc { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+/* Compact card tweaks */
+.feature-card { padding: 0.9rem; }
+.feature-body { display: flex; flex-direction: column; gap: 0.45rem; align-items: flex-start; }
+.feature-icon { font-size: 1.15rem; line-height: 1; display:inline-block; margin-right:0.35rem; vertical-align:middle; }
+.feature-title { font-size: 0.98rem; margin:0; display:inline-flex; align-items:center; gap:0.5rem; }
+.feature-desc { margin: 0; color: var(--muted); font-size: 0.88rem; }
+.feature-card { display:block; }
+.feature-card .feature-body { max-width: 100%; }
+
+@media (min-width: 880px) {
+  .feature-section { grid-template-columns: 1fr 360px; justify-items: start; align-items: stretch; }
+  .feature-column { justify-content: flex-end; }
+  .feature-card { max-width: 300px; }
+  /* make the left panel stretch to match the right column height and center its content */
+  .feature-panel { align-self: end; display:flex; flex-direction:column; justify-content:center; }
+}
+
+/* Feature section: two-column layout with panel */
+.feature-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: start;
+  justify-items: center;
+  margin-top: 1.5rem;
+}
+.feature-panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45));
+  padding: 1.2rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(12,18,28,0.04);
+  max-width: 520px;
+  width: 100%;
+  text-align: left;
+}
+.feature-column { width: 100%; display:flex; justify-content:center; }
+
+.page-cards .feature-card { margin-top: 0.85rem; }
+.page-cards .feature-title a { color: var(--accent); text-decoration: none; }
+.page-cards .feature-title a:hover { text-decoration: underline; }
+
+/* Treemap-like card grid for pages */
+.card-grid {
+  display: grid;
+  gap: 1rem;
+  grid-auto-rows: minmax(80px, auto);
+  grid-auto-flow: dense;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 720px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1100px) {
+  .card-grid { grid-template-columns: 1.2fr 0.8fr 0.9fr; }
+}
+
+/* Helpers to create non-symmetrical spans */
+
+/* Layout helpers for non-symmetric spans */
+.card-large { grid-column: span 2; grid-row: span 1; }
+.card-tall { grid-row: span 2; }
+.card-wide { grid-column: span 3; }
+
+/* Allow designated cards to expand past the default card max-width so diagrams and wide content
+   can use the full column width of the grid. This overrides the per-card max-width when
+   placed inside .card-grid. */
+.card-grid .card-large,
+.card-grid .card-wide,
+.card-grid .card-tall {
+  max-width: none; /* allow grid column to determine width */
+}
+
+/* Ensure SVGs embedded inside feature-card scale to available width instead of being clipped */
+.feature-card svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* ensure feature-card inside grid stretches */
+.card-grid .feature-card { align-self: stretch; }
+
+/* Constrain long, text-heavy content for readability when cards are wide. */
+.content-limited { max-width: 65ch; margin-left: 0; margin-right: 0; }
+
+@media (min-width: 880px) {
+  .feature-section { grid-template-columns: 1fr 360px; justify-items: start; }
+  .feature-column { justify-content: flex-end; }
+}
+
+/* Footer */
+footer {
+  border-top: 1px solid rgba(15,23,42,0.04);
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--muted);
+  background: var(--surface);
+  width: 100%;
+}
+
+/* inner container keeps footer content aligned with site width */
+.footer-inner {
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
+}
+
+/* Responsive helpers */
+@media (min-width: 900px) {
+  .main-content { margin-top: 3.25rem; }
+  .features { gap: 1.25rem; }
+}
+
+/* Center main content vertically on large screens so the composed feature block sits visually centered */
+@media (min-width: 880px) {
+  /* Instead of forcing .main-content to a viewport-based min-height (which caused
+     the document to exceed 100vh when combined with the app container), make the
+     layout rely on flex so the wrapper fills available space and main centers
+     its content. This avoids accidental extra scroll space and keeps the footer
+     visually pinned to the bottom when content is short. */
+  main {
+    display: flex;
+    align-items: center; /* center the composed block vertically */
+  }
+  .main-content {
+    /* allow .main-content to size naturally; centering comes from the parent */
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  .feature-section { margin-top: 0; margin-bottom: 0; }
+}
+
+/* make header sticky so navigation remains visible while scrolling */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: rgba(255,255,255,0.96);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+/* Minimal Tailwind-like utility fallbacks used in pages */
+.max-w-2xl { max-width: 42rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+.text-3xl { font-size: 1.875rem; line-height: 1.2; }
+.font-bold { font-weight: 700; }
+.mb-4 { margin-bottom: 1rem; }
+.text-gray-700 { color: #374151; }
+.text-gray-600 { color: #4b5563; }
+.list-disc { list-style-type: disc; }
+.ml-6 { margin-left: 1.5rem; }
+
+/* Utility: visually hidden for accessibility */
+.visually-hidden {
+  position: absolute !important;
+  height: 1px; width: 1px;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+  border: 0;
+  padding: 0;
+  margin: -1px;
+}
+
+/* small weak separator used in composed panels */
+.sep-weak {
+  border: 0;
+  height: 1px;
+  background: rgba(15,23,42,0.06);
+  margin: 1.25rem 0;
+  opacity: 0.98;
+}
+

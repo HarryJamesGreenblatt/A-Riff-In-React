@@ -10,9 +10,9 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <header>
-      <div>A Riff In React</div>
-      <nav>
+    <header role="banner">
+      <div aria-label="brand" className="brand">A Riff In React</div>
+      <nav role="navigation" aria-label="Main navigation">
         <ul className="nav-links">
           {navLinks.map((link) => (
             <li key={link.path}>

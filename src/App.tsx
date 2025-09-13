@@ -12,15 +12,17 @@ const App: React.FC = () => {
   return (
     <Router>
       <div className="app-container">
-        <Navbar />
-        <main>
-          <Routes>
-            <Route path="/" element={<Homepage />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/architecture" element={<Architecture />} />
-          </Routes>
-        </main>
-        <Footer />
+        <div className="app-wrapper">
+            <Navbar />
+            <main>
+              <Routes>
+                <Route path="/" element={<Homepage />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/architecture" element={<Architecture />} />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
       </div>
     </Router>
   );

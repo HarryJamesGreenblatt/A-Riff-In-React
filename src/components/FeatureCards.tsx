@@ -21,15 +21,19 @@ const features = [
 
 const FeatureCards: React.FC = () => {
   return (
-    <>
-      {features.map((feature, idx) => (
-        <div key={feature.title} className="feature-card">
-          <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>{["🎸","🎤","🎧"][idx]}</div>
-          <h3 className="feature-title">{feature.title}</h3>
-          <p className="feature-desc">{feature.description}</p>
-        </div>
-      ))}
-    </>
+    <div className="feature-grid" role="list">
+      {features.map((feature, idx) => {
+        const icons = ["🧩","🛡️","☁️"]; // modular, auth, cloud
+        return (
+          <article key={feature.title} className="feature-card" role="listitem">
+            <div className="feature-body">
+              <h3 className="feature-title"><span aria-hidden className="feature-icon">{icons[idx]}</span> {feature.title}</h3>
+              <p className="feature-desc">{feature.description}</p>
+            </div>
+          </article>
+        );
+      })}
+    </div>
   );
 };
 
