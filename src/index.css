@@ -214,7 +214,7 @@ header > div:first-child {
   /* make the left panel stretch to match the right column height and center its content */
   .feature-panel { align-self: end; display:flex; flex-direction:column; justify-content:center; }
   .feature-panel { text-align: left; }
-  .feature-panel .button-group { justify-content: flex-start; width: 100%; margin-left: 0; margin-right: 0; }
+  .feature-panel .button-group { width: 100%;}
 }
 
 /* Feature section: two-column layout with panel */
