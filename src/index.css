@@ -146,6 +146,8 @@ header > div:first-child {
   gap: 0.75rem;
   margin-bottom: 1.75rem;
 }
+.feature-panel { text-align: center; }
+.feature-panel .button-group { display: inline-flex; justify-content: center; width: auto; margin-left: auto; margin-right: auto; }
 .btn {
   appearance: none;
   border: 1px solid rgba(15,23,42,0.08);
@@ -211,6 +213,8 @@ header > div:first-child {
   .feature-card { max-width: 300px; }
   /* make the left panel stretch to match the right column height and center its content */
   .feature-panel { align-self: end; display:flex; flex-direction:column; justify-content:center; }
+  .feature-panel { text-align: left; }
+  .feature-panel .button-group { justify-content: flex-start; width: 100%; margin-left: 0; margin-right: 0; }
 }
 
 /* Feature section: two-column layout with panel */
@@ -229,7 +233,6 @@ header > div:first-child {
   box-shadow: 0 6px 24px rgba(12,18,28,0.04);
   max-width: 520px;
   width: 100%;
-  text-align: left;
 }
 .feature-column { width: 100%; display:flex; justify-content:center; }
 
