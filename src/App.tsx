@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import Homepage from "./components/Homepage";
 import Footer from "./components/Footer";
 import About from "./pages/About";
+import RegisterPage from "./pages/Register";
 import Architecture from "./pages/Architecture";
 import "./App.css";
 
@@ -18,6 +19,7 @@ const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<Homepage />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/register" element={<RegisterPage />} />
                 <Route path="/architecture" element={<Architecture />} />
               </Routes>
             </main>

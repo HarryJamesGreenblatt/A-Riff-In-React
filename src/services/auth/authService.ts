@@ -59,4 +59,33 @@ export class AuthService {
       }
     }
   }
+
+  /**
+   * Register a new user via backend API
+   */
+  static async register(payload: { name: string; email: string; password?: string }) {
+    try {
+      const apiBase = import.meta.env.VITE_API_BASE_URL || '/api'
+      const res = await fetch(`${apiBase}/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name: payload.name, email: payload.email }),
+      })
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body?.message || 'Registration failed')
+      }
+
+      const user = await res.json()
+      // Dispatch to store so frontend knows about the created user
+      store.dispatch(setCurrentUser(user))
+      return user
+    } catch (error) {
+      console.error('Registration error:', error)
+      throw error
+    }
+  }
 }

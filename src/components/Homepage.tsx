@@ -24,7 +24,7 @@ const Homepage: React.FC = () => {
             {!isAuthenticated && (
               <div className="button-group" role="group" aria-label="authentication">
                 <button className="btn" onClick={signIn}>Log In</button>
-                <Link to="/about" className="btn" style={{textDecoration:'none'}}>Register</Link>
+                <Link to="/register" className="btn" style={{textDecoration:'none'}}>Register</Link>
               </div>
             )}
 

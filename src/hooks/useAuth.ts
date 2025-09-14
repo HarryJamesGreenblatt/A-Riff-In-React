@@ -33,6 +33,20 @@ export const useAuth = () => {
     }
   }, []);
 
+  const register = useCallback(async (payload: { name: string; email: string; password?: string }) => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const user = await AuthService.register(payload)
+      return user
+    } catch (err) {
+      setError(err as Error)
+      throw err
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
   const getAccessToken = useCallback(async () => {
     try {
       const accessToken = await AuthService.getApiToken();
@@ -51,6 +65,7 @@ export const useAuth = () => {
     error,
     signIn,
     signOut,
+  register,
     getAccessToken,
     msalInstance: instance,
   };
