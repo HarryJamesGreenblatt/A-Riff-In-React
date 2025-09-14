@@ -8,8 +8,31 @@ import About from "./pages/About";
 import RegisterPage from "./pages/Register";
 import Architecture from "./pages/Architecture";
 import "./App.css";
+import PhoneCollectModal from "./components/auth/PhoneCollectModal";
+import { useAppSelector } from './store/hooks'
+import { useState } from 'react'
+import { AuthService } from './services/auth/authService'
 
 const App: React.FC = () => {
+  const { currentUser } = useAppSelector((s:any) => s.users)
+  const [phoneModalOpen, setPhoneModalOpen] = useState(false)
+
+  const handleSavePhone = async (phone: string) => {
+    if (!currentUser) return
+    try {
+      await AuthService.savePhoneForUser(currentUser.id, phone)
+      setPhoneModalOpen(false)
+      // Optionally refresh user state or dispatch an action
+    } catch (err) {
+      console.error('Failed to save phone', err)
+      throw err
+    }
+  }
+
+  // Open modal if user exists but phone is missing
+  if (currentUser && !currentUser.phone && !phoneModalOpen) {
+    setPhoneModalOpen(true)
+  }
   return (
     <Router>
       <div className="app-container">
@@ -22,6 +45,9 @@ const App: React.FC = () => {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/architecture" element={<Architecture />} />
               </Routes>
+              {currentUser && (
+                <PhoneCollectModal open={phoneModalOpen} onClose={() => setPhoneModalOpen(false)} onSave={handleSavePhone} />
+              )}
             </main>
             <Footer />
           </div>

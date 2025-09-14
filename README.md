@@ -180,3 +180,8 @@ Complete documentation is available in the [docs folder](./docs/README.md) with 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Authentication Status (2025-09-14)
+
+- The project implements MSAL with Microsoft Entra External ID and a hybrid plan to include Google social sign-in.
+- A hosted External ID user flow (`B2X_1_user-flow-for-a-riff-in-react`) exists but is not yet active for the SPA because the app must be associated with the user flow or the SPA must launch the user-flow authority. See `docs/07-authentication-msal.md` and `context/Auth Modernization/auth-modernization-journal.md` for detailed debugging notes and next steps.

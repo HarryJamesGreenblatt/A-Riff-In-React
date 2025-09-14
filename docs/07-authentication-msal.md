@@ -83,7 +83,8 @@ MSAL is integrated at multiple levels:
 4. Configure:
    - Name: "A Riff In React"
    - Supported account types: Choose based on your needs
-   - Redirect URI: `http://localhost:5173` (for development)
+  - Redirect URI: `http://localhost:5173` (for development)
+  - Redirect URI: `https://a-riff-in-react.harryjamesgreenblatt.com` (for production)
 5. Note the Application (client) ID and Directory (tenant) ID
 
 ### 2. Configure API Permissions
@@ -247,7 +248,7 @@ The `src/config/authConfig.ts` is already configured to use Microsoft Entra Exte
 **Azure AD App Registration:**
 - Client ID: `<YOUR_ENTRA_CLIENT_ID>`
 - Tenant ID: `<YOUR_ENTRA_TENANT_ID>`
-- Redirect URIs: `http://localhost:5173`, `https://a-riff-in-react.azurewebsites.net`
+ - Redirect URIs: `http://localhost:5173`, `https://a-riff-in-react.harryjamesgreenblatt.com`
 - Platform: Single Page Application (SPA)
 
 ### Troubleshooting - Issues Fixed

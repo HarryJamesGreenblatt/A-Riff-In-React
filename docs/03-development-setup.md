@@ -113,6 +113,12 @@ src/
 - [x] TypeScript compilation works without errors
 - [ ] ESLint and Prettier are configured
 - [ ] Basic routing is functional
+
+### Authentication status (2025-09-14)
+
+- The frontend has MSAL integrated for Microsoft Entra External ID and a Google SSO button wired to `AuthService.signIn('google')`.
+- A hosted External ID user flow exists (`B2X_1_user-flow-for-a-riff-in-react`) but the SPA did not present Google during testing because the app was not associated with the user flow or the user-flow authority wasn't used in the auth request.
+- Next: assign the app to the user flow in Azure Portal or set `VITE_ENTRA_USER_FLOW_AUTHORITY` in the local environment to the user-flow URL to force the SPA to call the hosted flow.
 - [ ] Project structure follows established conventions
 
 ### Step 1 Completed: Basic Vite Setup ✅

@@ -43,4 +43,18 @@ router.post('/', async (req, res) => {
   }
 });
 
+// PUT /api/users/:id
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, phone, email } = req.body;
+    const updated = await sqlService.updateUser(id, { firstName, lastName, phone, email });
+    if (!updated) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json(updated);
+  } catch (err) {
+    console.error('Error updating user:', err);
+    res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
 export default router;

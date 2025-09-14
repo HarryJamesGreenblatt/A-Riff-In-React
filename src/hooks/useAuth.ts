@@ -9,11 +9,17 @@ export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const signIn = useCallback(async () => {
+  // signIn can be called either as `signIn('google')` or directly as an
+  // onClick handler `onClick={signIn}`. To support both, accept a single
+  // parameter that may be a provider string or a MouseEvent and normalize it.
+  const signIn = useCallback(async (providerOrEvent?: any) => {
+    // If the first arg is a string, treat it as the provider. Otherwise
+    // assume the call came from an event handler and use the default.
+    const provider = typeof providerOrEvent === 'string' ? providerOrEvent as 'microsoft' | 'google' | 'facebook' : undefined;
     setIsLoading(true);
     setError(null);
     try {
-      await AuthService.signIn();
+      await AuthService.signIn(provider);
     } catch (err) {
       setError(err as Error);
     } finally {

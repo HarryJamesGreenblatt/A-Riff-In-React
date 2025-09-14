@@ -110,6 +110,29 @@
   background: #1d4ed8;
 }
 
+/* Modal styles */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2,6,23,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal {
+  background: #fff;
+  padding: 18px;
+  border-radius: 8px;
+  max-width: 420px;
+  width: 100%;
+}
+.modal-actions {
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  margin-top:12px;
+}
+
 /* Social CTAs */
 .register-heading {
   font-size: 2.25rem;

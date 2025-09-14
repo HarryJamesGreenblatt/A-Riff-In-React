@@ -45,6 +45,12 @@ export const loginRequest: PopupRequest = {
   redirectUri: import.meta.env.VITE_REDIRECT_URI || window.location.origin,
 };
 
+// Optional: override authority for a specific user flow (B2C/B2X) so the app
+// can launch the hosted External ID user flow that includes social providers.
+// Set this in your environment if you want to force using the user-flow authority
+// for sign-in flows that require it (for example, Google via External ID).
+export const userFlowAuthority: string = import.meta.env.VITE_ENTRA_USER_FLOW_AUTHORITY || "";
+
 export const graphConfig = {
   graphMeEndpoint: "https://graph.microsoft.com/v1.0/me",
 };

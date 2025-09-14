@@ -19,7 +19,6 @@ const RegisterPage: React.FC = () => {
             <div className="social-ctas-row">
               <button className="btn-social btn-ms" onClick={() => signIn('microsoft')} aria-label="Sign in with Microsoft">Microsoft</button>
               <button className="btn-social" onClick={() => signIn('google')} aria-label="Sign in with Google">Google</button>
-              <button className="btn-social" onClick={() => signIn('facebook')} aria-label="Sign in with Facebook">Facebook</button>
             </div>
           </div>
           <RegisterForm />

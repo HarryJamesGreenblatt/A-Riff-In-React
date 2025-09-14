@@ -1,5 +1,5 @@
 import { msalInstance } from "./msalInstance";
-import { loginRequest } from "../../config/authConfig";
+import { loginRequest, userFlowAuthority } from "../../config/authConfig";
 import { store } from "../../store";
 import { setCurrentUser } from "../../features/users/slice";
 
@@ -13,8 +13,15 @@ export class AuthService {
         // Use redirect for Microsoft login
         await msalInstance.loginRedirect(loginRequest);
       } else if (provider === 'google') {
-        // TODO: Implement Google login flow (MSAL or custom OAuth)
-        alert('Google login is not yet implemented.');
+        // If a user-flow authority is configured (VITE_ENTRA_USER_FLOW_AUTHORITY)
+        // then use it for this redirect. That forces MSAL to call the hosted
+        // user-flow endpoint (b2clogin) which will present social providers
+        // like Google. If not set, fall back to the default loginRequest.
+        if (userFlowAuthority && userFlowAuthority.length > 0) {
+          await msalInstance.loginRedirect({ ...loginRequest, authority: userFlowAuthority });
+        } else {
+          await msalInstance.loginRedirect(loginRequest);
+        }
       } else if (provider === 'facebook') {
         // TODO: Implement Facebook login flow (MSAL or custom OAuth)
         alert('Facebook login is not yet implemented.');
@@ -65,6 +72,28 @@ export class AuthService {
         console.error("Interactive token acquisition failed.", popupError);
         throw popupError;
       }
+    }
+  }
+
+  static async savePhoneForUser(userId: string, phone: string) {
+    try {
+      const apiBase = import.meta.env.VITE_API_BASE_URL || '/api'
+      const res = await fetch(`${apiBase}/users/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      })
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body?.message || 'Failed to save phone')
+      }
+
+      const user = await res.json()
+      return user
+    } catch (err) {
+      console.error('savePhoneForUser error', err)
+      throw err
     }
   }
 

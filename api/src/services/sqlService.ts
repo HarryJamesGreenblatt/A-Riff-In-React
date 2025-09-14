@@ -99,6 +99,29 @@ class SqlService {
       `);
     return result.recordset[0];
   }
+
+  async updateUser(id: string, patch: Partial<User>): Promise<User | null> {
+    const pool = await this.getConnection();
+    const existing = await this.getUserById(id);
+    if (!existing) return null;
+
+    const newFirst = patch.firstName ?? existing.firstName;
+    const newLast = patch.lastName ?? existing.lastName;
+    const newPhone = patch.phone ?? existing.phone;
+
+    const result = await pool.request()
+      .input('id', mssql.VarChar, id)
+      .input('firstName', mssql.VarChar, newFirst)
+      .input('lastName', mssql.VarChar, newLast)
+      .input('phone', mssql.VarChar, newPhone || null)
+      .query(`
+        UPDATE Users SET firstName=@firstName, lastName=@lastName, phone=@phone, updatedAt=GETDATE()
+        OUTPUT INSERTED.*
+        WHERE id=@id
+      `);
+
+    return result.recordset[0];
+  }
 }
 
 export const sqlService = new SqlService();
