@@ -13,7 +13,9 @@ IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Users')
 BEGIN
     CREATE TABLE Users (
         id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
-        name NVARCHAR(100) NOT NULL,
+        firstName NVARCHAR(100) NOT NULL,
+        lastName NVARCHAR(100) NOT NULL,
+        phone NVARCHAR(20) NULL,
         email NVARCHAR(255) NOT NULL UNIQUE,
         createdAt DATETIME NOT NULL DEFAULT GETDATE(),
         updatedAt DATETIME NOT NULL DEFAULT GETDATE()

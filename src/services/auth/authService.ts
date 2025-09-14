@@ -7,12 +7,20 @@ export class AuthService {
   /**
    * Sign in using popup
    */
-  static async signIn() {
+  static async signIn(provider: 'microsoft' | 'google' | 'facebook' = 'microsoft') {
     try {
-      // Use redirect instead of popup for more reliable authentication
-      await msalInstance.loginRedirect(loginRequest);
+      if (provider === 'microsoft') {
+        // Use redirect for Microsoft login
+        await msalInstance.loginRedirect(loginRequest);
+      } else if (provider === 'google') {
+        // TODO: Implement Google login flow (MSAL or custom OAuth)
+        alert('Google login is not yet implemented.');
+      } else if (provider === 'facebook') {
+        // TODO: Implement Facebook login flow (MSAL or custom OAuth)
+        alert('Facebook login is not yet implemented.');
+      }
     } catch (error) {
-      console.error("MSAL sign-in error:", error);
+      console.error("Sign-in error:", error);
       throw error;
     }
   }
@@ -63,7 +71,7 @@ export class AuthService {
   /**
    * Register a new user via backend API
    */
-  static async register(payload: { name: string; email: string; password?: string }) {
+  static async register(payload: { firstName: string; lastName: string; phone?: string; email: string }) {
     try {
       const apiBase = import.meta.env.VITE_API_BASE_URL || '/api'
       const res = await fetch(`${apiBase}/users`, {
@@ -71,7 +79,12 @@ export class AuthService {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name: payload.name, email: payload.email }),
+        body: JSON.stringify({
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+          phone: payload.phone,
+          email: payload.email
+        }),
       })
 
       if (!res.ok) {

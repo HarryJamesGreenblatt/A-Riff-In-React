@@ -4,7 +4,9 @@ import * as mssql from 'mssql';
 // Types
 interface User {
   id?: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
   email: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -80,22 +82,21 @@ class SqlService {
 
   async createUser(user: User): Promise<User> {
     const pool = await this.getConnection();
-    
     // Check if user already exists
     const existingUser = await this.getUserByEmail(user.email);
     if (existingUser) {
       return existingUser;
     }
-    
     const result = await pool.request()
-      .input('name', mssql.VarChar, user.name)
+      .input('firstName', mssql.VarChar, user.firstName)
+      .input('lastName', mssql.VarChar, user.lastName)
+      .input('phone', mssql.VarChar, user.phone || null)
       .input('email', mssql.VarChar, user.email)
       .query(`
-        INSERT INTO Users (name, email, createdAt, updatedAt)
+        INSERT INTO Users (firstName, lastName, phone, email, createdAt, updatedAt)
         OUTPUT INSERTED.*
-        VALUES (@name, @email, GETDATE(), GETDATE())
+        VALUES (@firstName, @lastName, @phone, @email, GETDATE(), GETDATE())
       `);
-    
     return result.recordset[0];
   }
 }

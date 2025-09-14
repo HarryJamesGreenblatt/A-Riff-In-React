@@ -31,12 +31,11 @@ router.get('/:id', async (req, res) => {
 // POST /api/users
 router.post('/', async (req, res) => {
   try {
-    const { name, email } = req.body;
-    if (!name || !email) {
-      return res.status(400).json({ message: 'Name and email are required' });
+    const { firstName, lastName, phone, email } = req.body;
+    if (!firstName || !lastName || !email) {
+      return res.status(400).json({ message: 'First name, last name, and email are required' });
     }
-    
-    const user = await sqlService.createUser({ name, email });
+    const user = await sqlService.createUser({ firstName, lastName, phone, email });
     res.status(201).json(user);
   } catch (err) {
     console.error('Error creating user:', err);

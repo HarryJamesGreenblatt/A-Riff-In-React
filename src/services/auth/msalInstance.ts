@@ -9,6 +9,12 @@ export const msalInstance = new PublicClientApplication(msalConfig);
 // Initialize the MSAL instance
 export const initializeMsal = async () => {
   try {
+    console.debug("MSAL config (resolved):", {
+      clientId: msalInstance.getConfiguration().auth.clientId,
+      authority: msalInstance.getConfiguration().auth.authority,
+      redirectUri: msalInstance.getConfiguration().auth.redirectUri,
+      postLogoutRedirectUri: msalInstance.getConfiguration().auth.postLogoutRedirectUri,
+    })
     await msalInstance.initialize();
     
     // Handle redirect promise

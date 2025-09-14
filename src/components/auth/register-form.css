@@ -66,6 +66,51 @@
   gap: 40px;
   align-items: start;
 }
+
+/* Social CTAs styling */
+.social-ctas {
+  margin-bottom: 24px;
+  padding: 18px 16px 16px 16px;
+  background: #f3f6fd;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(15,23,42,0.04);
+}
+.social-ctas-lead {
+  font-size: 1.05rem;
+  color: #1e293b;
+  margin-bottom: 10px;
+}
+.social-ctas-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.btn-social {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e0e7ff;
+  color: #1e293b;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.btn-social:hover {
+  background: #c7d2fe;
+}
+.btn-ms {
+  background: #2563eb;
+  color: #fff;
+}
+.btn-ms:hover {
+  background: #1d4ed8;
+}
+
+/* Social CTAs */
 .register-heading {
   font-size: 2.25rem;
   font-weight: 800;

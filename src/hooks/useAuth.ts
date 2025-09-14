@@ -33,7 +33,7 @@ export const useAuth = () => {
     }
   }, []);
 
-  const register = useCallback(async (payload: { name: string; email: string; password?: string }) => {
+  const register = useCallback(async (payload: { firstName: string; lastName: string; phone?: string; email: string }) => {
     setIsLoading(true)
     setError(null)
     try {
