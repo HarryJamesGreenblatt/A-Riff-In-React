@@ -4,20 +4,44 @@
 
 param(
 
-        [string]$TenantId,
-        [string]$ClientId,
-        [string]$UserFlowId,
-        [string]$GoogleClientId,
-        [string]$GoogleClientSecret,
-        [string]$GraphClientId = $env:AZURE_CLIENT_ID,
-        [string]$GraphClientSecret = $env:AZURE_CLIENT_SECRET,
-        [string]$GraphTenantId = $env:AZURE_TENANT_ID
-    )
+    [string]$TenantId,
+    [string]$ClientId,
+    [string]$UserFlowId,
+    [string]$GoogleClientId,
+    [string]$GoogleClientSecret,
+    [string]$GraphClientId = $env:AZURE_CLIENT_ID,
+    [string]$GraphClientSecret = $env:AZURE_CLIENT_SECRET,
+    [string]$GraphTenantId = $env:AZURE_TENANT_ID
+)
 
+
+# Minimal validation: respect parameters as passed (param defaults already read from env when provided by the caller)
+# Do not reassign params from environment; the workflow should pass them or rely on the param defaults.
+$missing = @()
+if (-not $TenantId) { $missing += 'TenantId' }
+if (-not $ClientId) { $missing += 'ClientId' }
+if (-not $UserFlowId) { $missing += 'UserFlowId' }
+if ($missing.Count -gt 0) {
+    Write-Error "Missing required parameters: $($missing -join ', ').\nPass them as script parameters or set the environment variables that are already used as param defaults (for example AZURE_CLIENT_ID/SECRET/TENANT or VITE_ENTRA_*)."
+    exit 1
+}
+
+# Skip Google provider configuration if credentials aren't provided
+$skipGoogle = -not ($GoogleClientId -and $GoogleClientSecret)
+if ($skipGoogle) { Write-Host "Warning: Google client credentials not provided. Skipping Google identity provider configuration." }
 
 # Connect to Microsoft Graph using service principal for CI/CD
+
+# Try PSCredential-based login if required by Microsoft.Graph module version
 if ($GraphClientId -and $GraphClientSecret -and $GraphTenantId) {
-    Connect-MgGraph -ClientId $GraphClientId -ClientSecret $GraphClientSecret -TenantId $GraphTenantId -Scopes "Application.ReadWrite.All, IdentityProvider.ReadWrite.All, User.ReadWrite.All"
+    try {
+        $secpasswd = ConvertTo-SecureString $GraphClientSecret -AsPlainText -Force
+        $credential = New-Object System.Management.Automation.PSCredential($GraphClientId, $secpasswd)
+        Connect-MgGraph -ClientSecretCredential $credential -TenantId $GraphTenantId -Scopes "Application.ReadWrite.All, IdentityProvider.ReadWrite.All, User.ReadWrite.All"
+    } catch {
+        Write-Host "PSCredential login failed, trying string-based login..."
+        Connect-MgGraph -ClientId $GraphClientId -ClientSecret $GraphClientSecret -TenantId $GraphTenantId -Scopes "Application.ReadWrite.All, IdentityProvider.ReadWrite.All, User.ReadWrite.All"
+    }
 } else {
     Write-Host "Service principal credentials not found. Falling back to interactive login."
     Connect-MgGraph -Scopes "Application.ReadWrite.All, IdentityProvider.ReadWrite.All, User.ReadWrite.All" -TenantId $TenantId
