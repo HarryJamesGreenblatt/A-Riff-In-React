@@ -1,11 +1,29 @@
 import type { Configuration, PopupRequest } from "@azure/msal-browser";
 
-// MSAL configuration for Microsoft Entra External ID
+// Determine if a B2C / External ID user flow authority was provided.
+const userFlowAuthorityEnv = import.meta.env.VITE_ENTRA_USER_FLOW_AUTHORITY || "";
+let defaultAuthority = `https://login.microsoftonline.com/${import.meta.env.VITE_ENTRA_TENANT_ID}`;
+let knownAuthorities: string[] = [];
+if (userFlowAuthorityEnv && userFlowAuthorityEnv.length > 0) {
+  // Use the user flow authority as the default authority so MSAL does not attempt
+  // cloud instance discovery against Azure AD (which fails for b2clogin endpoints).
+  defaultAuthority = userFlowAuthorityEnv;
+  try {
+    const url = new URL(userFlowAuthorityEnv);
+    // The host for a B2C authority is like "<tenant>.b2clogin.com"
+    knownAuthorities = [url.host];
+  } catch (err) {
+    // Fallback to tenant-based b2clogin host if parsing fails
+    knownAuthorities = [`${import.meta.env.VITE_ENTRA_TENANT_ID}.b2clogin.com`];
+  }
+}
+
+// MSAL configuration for Microsoft Entra External ID / Azure AD
 export const msalConfig: Configuration = {
   auth: {
     clientId: import.meta.env.VITE_ENTRA_CLIENT_ID || "your-client-id",
-    authority: `https://login.microsoftonline.com/${import.meta.env.VITE_ENTRA_TENANT_ID}`,
-    knownAuthorities: [],
+    authority: defaultAuthority,
+    knownAuthorities,
     redirectUri: import.meta.env.VITE_REDIRECT_URI || window.location.origin,
     postLogoutRedirectUri: import.meta.env.VITE_POST_LOGOUT_URI || window.location.origin,
   },
