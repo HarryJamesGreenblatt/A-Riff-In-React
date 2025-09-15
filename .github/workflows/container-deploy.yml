@@ -36,6 +36,10 @@ jobs:
 
       - name: Run Entra External ID setup script
         shell: pwsh
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         run: |
           $ErrorActionPreference = 'Stop'
           ./scripts/setup-entra-external-id.ps1 -TenantId '${{ secrets.EXTERNAL_TENANT_ID }}' -ClientId '${{ secrets.EXTERNAL_CLIENT_ID }}' -UserFlowId 'B2X_1_user-flow-for-a-riff-in-react' -GoogleClientId '${{ secrets.GOOGLE_CLIENT_ID }}' -GoogleClientSecret '${{ secrets.GOOGLE_CLIENT_SECRET }}'

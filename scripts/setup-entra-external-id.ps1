@@ -3,15 +3,25 @@
 # Purpose: Automate app registration, user flow association, and Google provider setup for Entra External ID
 
 param(
-    [string]$TenantId,
-    [string]$ClientId,
-    [string]$UserFlowId,
-    [string]$GoogleClientId,
-    [string]$GoogleClientSecret
-)
 
-# Connect to Microsoft Graph
-Connect-MgGraph -Scopes "Application.ReadWrite.All, IdentityProvider.ReadWrite.All, User.ReadWrite.All" -TenantId $TenantId
+        [string]$TenantId,
+        [string]$ClientId,
+        [string]$UserFlowId,
+        [string]$GoogleClientId,
+        [string]$GoogleClientSecret,
+        [string]$GraphClientId = $env:AZURE_CLIENT_ID,
+        [string]$GraphClientSecret = $env:AZURE_CLIENT_SECRET,
+        [string]$GraphTenantId = $env:AZURE_TENANT_ID
+    )
+
+
+# Connect to Microsoft Graph using service principal for CI/CD
+if ($GraphClientId -and $GraphClientSecret -and $GraphTenantId) {
+    Connect-MgGraph -ClientId $GraphClientId -ClientSecret $GraphClientSecret -TenantId $GraphTenantId -Scopes "Application.ReadWrite.All, IdentityProvider.ReadWrite.All, User.ReadWrite.All"
+} else {
+    Write-Host "Service principal credentials not found. Falling back to interactive login."
+    Connect-MgGraph -Scopes "Application.ReadWrite.All, IdentityProvider.ReadWrite.All, User.ReadWrite.All" -TenantId $TenantId
+}
 
 # 1. Ensure SPA app registration exists and has correct redirect URIs
 $app = Get-MgApplication -Filter "appId eq '$ClientId'"
