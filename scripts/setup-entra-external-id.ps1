@@ -17,7 +17,9 @@ param(
 
 # Connect to Microsoft Graph using service principal for CI/CD
 if ($GraphClientId -and $GraphClientSecret -and $GraphTenantId) {
-    Connect-MgGraph -ClientId $GraphClientId -ClientSecret $GraphClientSecret -TenantId $GraphTenantId -Scopes "Application.ReadWrite.All, IdentityProvider.ReadWrite.All, User.ReadWrite.All"
+    $secureSecret = ConvertTo-SecureString $GraphClientSecret -AsPlainText -Force
+    $spCredential = New-Object System.Management.Automation.PSCredential($GraphClientId, $secureSecret)
+    Connect-MgGraph -TenantId $GraphTenantId -Credential $spCredential -Scopes "Application.ReadWrite.All, IdentityProvider.ReadWrite.All, User.ReadWrite.All"
 } else {
     Write-Host "Service principal credentials not found. Falling back to interactive login."
     Connect-MgGraph -Scopes "Application.ReadWrite.All, IdentityProvider.ReadWrite.All, User.ReadWrite.All" -TenantId $TenantId

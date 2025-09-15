@@ -1,3 +1,4 @@
+  # The 'Set up PowerShell' step is not present in the workflow and has been removed from the patch.
 name: Deploy API to Container Apps
 
 on:
