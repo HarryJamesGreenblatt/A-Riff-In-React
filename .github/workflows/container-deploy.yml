@@ -33,6 +33,12 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Run Entra External ID setup script
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ./scripts/setup-entra-external-id.ps1 -TenantId '${{ secrets.EXTERNAL_TENANT_ID }}' -ClientId '${{ secrets.EXTERNAL_CLIENT_ID }}' -UserFlowId 'B2X_1_user-flow-for-a-riff-in-react' -GoogleClientId '${{ secrets.GOOGLE_CLIENT_ID }}' -GoogleClientSecret '${{ secrets.GOOGLE_CLIENT_SECRET }}'
       
       - name: Register Azure Resource Providers
         run: |
