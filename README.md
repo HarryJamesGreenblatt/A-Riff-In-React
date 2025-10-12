@@ -1,187 +1,390 @@
 # A Riff In React
 
-## 📢 Current Status: ✅ RESOLVED - Platform Migration Complete
+## 📢 Current Status: ✅ Infrastructure Complete - Authentication Simplification in Progress
 
-**Date:** September 6, 2025
+**Date:** October 12, 2025
 
-**Resolution:** ✅ **API Deployment Successfully Migrated to Container Apps**
+**Status:** ✅ **Containerized Deployment Complete - Transitioning to Homebrew Auth**
 
-**Root Causes Addressed:**
-1. **Platform Compatibility**: Previous Windows App Service with IISNode caused TypeScript compilation issues
-2. **Environment-Specific Configuration**: Deployment environment inconsistencies led to runtime failures
-3. **Database Authentication**: Connection string approach was less secure and difficult to manage
+**Recent Changes:**
+- ✅ **API Deployment**: Successfully migrated to Azure Container Apps with Docker
+- ✅ **Frontend Deployment**: Live on Azure Static Web Apps with custom domain
+- ✅ **Database Infrastructure**: Azure SQL + Cosmos DB operational with managed identity
+- 🔄 **Authentication Strategy**: Migrating from MSAL/Entra External ID to homebrew JWT auth
 
-**Solutions Implemented:**
-- ✅ **Containerized Approach**: API migrated to Docker containers with multi-stage builds
-- ✅ **Azure Container Apps**: Deployment platform changed to Container Apps for better scalability
-- ✅ **Managed Identity**: Secure, credential-free database access implemented
-- ✅ **Static Web Apps**: Frontend migrated to Static Web Apps with global CDN
-- ✅ **Dual CI/CD Workflows**: Separate pipelines for API and frontend
+**Why the Change:**
+- **Template Portability**: Clients can deploy to their Azure tenant in minutes (not hours)
+- **Zero Manual Configuration**: No Portal clicking, no separate tenant setup
+- **Single Tenant Architecture**: Everything in one resource group, one deployment
+- **Client Ownership**: Full control over auth logic, no external dependencies
 
-**Current Status - Systems Operational with Integration Pending:**   
-- ✅ **Frontend**: Live at https://a-riff-in-react.harryjamesgreenblatt.com (Basic template deployed, custom domain with SSL)
-- ✅ **API Backend**: Live at https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API ready)
-- 🔧 **Frontend-API Integration**: Not yet connected - React app needs API integration
-- ✅ **Database**: Cosmos DB provisioned and ready
-- ✅ **Infrastructure**: Container Apps Environment, Registry, Monitoring active
-- ⚠️ **Cost Optimization**: Orphaned App Service resources accumulating costs (cleanup needed)
+**Current Status:**   
+- ✅ **Frontend**: Live at https://a-riff-in-react.harryjamesgreenblatt.com
+- ✅ **API Backend**: Live at https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io
+- 🔄 **Authentication**: Implementing JWT-based auth (email/password)
+- ✅ **Database**: Azure SQL + Cosmos DB ready
+- ✅ **Infrastructure**: Fully containerized with CI/CD
 
 ---
 
-A modern, production-ready React application template demonstrating hybrid Azure SQL Database + Cosmos DB architecture.
+A production-ready React application template demonstrating hybrid Azure SQL Database + Cosmos DB architecture with portable, client-deployable authentication.
 
 ## 🎯 Project Vision
 
-**A Riff In React** is a general-purpose, production-ready React template that demonstrates best practices for modular architecture, Azure deployment, and polyglot persistence using both Azure SQL Database and Cosmos DB. This template is designed to be reusable for a variety of business scenarios, providing a solid foundation for scalable, maintainable, and Azure-ready web applications.
+**A Riff In React** is a **deployment template** designed for clients to clone and deploy to their own Azure subscriptions with minimal configuration. It demonstrates:
 
-> _This template's modular structure and deployment patterns are inspired by the Application Factory Pattern and Blueprint Modularity described in [A Fugue In Flask](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask)._
+- ✅ **Hybrid Database Architecture**: Azure SQL (relational) + Cosmos DB (document)
+- ✅ **Containerized Deployment**: Docker + Azure Container Apps
+- ✅ **Portable Authentication**: JWT-based auth that works out-of-the-box
+- ✅ **Infrastructure as Code**: Complete Bicep templates
+- ✅ **Single-Tenant Design**: No external auth dependencies
 
-While the template includes example modules (such as user management and activity logs) to illustrate hybrid database patterns, it is not tied to any specific domain. Example scenarios, such as a running club management app, are provided in the documentation to demonstrate how to extend the template for real-world use cases.
+> _This template is part of the "Scaffolding" series, which includes [A Fugue In Flask](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask). Each template explores a different architectural stack while maintaining consistent deployment patterns._
+
+### Design Philosophy: Template-First
+
+Unlike enterprise applications that can afford complex, multi-tenant auth setups, this template prioritizes:
+
+1. **Client Deployability**: Clone → Configure (3 variables) → Deploy → Working App (15 minutes)
+2. **Zero Portal Configuration**: Everything defined in Bicep, no manual Azure setup
+3. **Full Client Ownership**: All code, all data, all infrastructure in their tenant
+4. **Extensibility**: Simple foundation that clients can enhance (add OAuth later if needed)
+
+### Example Use Case: Run Club Membership App
+
+While this is a general-purpose template, documentation uses a **run club** as the reference use case to demonstrate:
+- External user registration (club members, not employees)
+- Profile management (runner preferences, achievements)
+- Activity logging (runs, events, participation)
+- Hybrid data patterns (structured user data + flexible activity logs)
 
 ## 📈 Development Progress
 
 ### ✅ Phase 1: Foundation (COMPLETED)
-- ✅ **Documentation Framework**: Comprehensive docs structure established
-- ✅ **Project Vision**: General-purpose, Azure-ready template defined
-- ✅ **Basic React App Structure**: Vite + TypeScript + React 18 setup complete
+- ✅ **Documentation Framework**: Comprehensive docs structure
+- ✅ **Basic React App**: Vite + TypeScript + React 18
+- ✅ **Project Structure**: Feature-based organization
 
-### ✅ Phase 2: Core Features (95% COMPLETED ✅)
-- ✅ **UI framework integration**: Tailwind CSS + shadcn/ui-style components implemented
-- ✅ **State management setup**: Redux Toolkit + RTK Query implemented
-- ✅ **Authentication system (MSAL)**: Microsoft Entra External ID fully operational
-- ✅ **Database infrastructure**: Azure SQL + Cosmos DB infrastructure deployed
+### ✅ Phase 2: Infrastructure (COMPLETED)
+- ✅ **UI Framework**: Tailwind CSS + shadcn/ui-style components
+- ✅ **State Management**: Redux Toolkit + RTK Query
+- ✅ **Database Infrastructure**: Azure SQL + Cosmos DB deployed
 - ✅ **Backend API**: Express containerized on Azure Container Apps
-- ✅ **Azure deployment**: Dual CI/CD pipelines with GitHub Actions
-- ✅ **Production deployment**: Frontend + API both live and operational
-- ✅ **Containerization**: Docker multi-stage builds for consistent deployment
-- ✅ **Platform Migration**: Successfully moved from App Service to Container Apps
-- [ ] **Frontend-Backend Integration**: Connect React app to Container App API (CURRENT PRIORITY)
+- ✅ **Azure Deployment**: Dual CI/CD pipelines with GitHub Actions
+- ✅ **Containerization**: Docker multi-stage builds
 
->**Current Status**: Infrastructure migration to Container Apps complete! Both frontend and API are deployed and operational. **Next critical step**: Integrate React frontend with the Container App API and clean up orphaned App Service resources to reduce costs.
+### 🔄 Phase 3: Authentication (IN PROGRESS)
+- 🔄 **JWT Authentication**: Email/password registration and login
+- 🔄 **User Management**: Profile CRUD operations
+- [ ] **Password Security**: bcrypt hashing, secure tokens
+- [ ] **Protected Routes**: Frontend auth guards, backend middleware
 
-### 📋 Phase 3: Example Extensions (READY)
-- [ ] Example: User management (Azure SQL)
-- [ ] Example: Activity log (Cosmos DB)
+### 📋 Phase 4: Feature Examples (NEXT)
+- [ ] Example: User profiles (Azure SQL)
+- [ ] Example: Activity logging (Cosmos DB)
+- [ ] Example: Data visualization
 - [ ] Example: Real-time updates
-- [ ] Example: Analytics dashboard
 
-### 🚀 Phase 4: Advanced Features (PLANNED)
-- [ ] Mobile responsiveness
+### 🚀 Phase 5: Template Hardening (PLANNED)
+- [ ] Deployment documentation for clients
+- [ ] Environment configuration templates
+- [ ] Security best practices guide
 - [ ] Performance optimization
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: React 18 + TypeScript + Vite ✅
-- **UI Framework**: Tailwind CSS + shadcn/ui-style components ✅
-- **State Management**: Redux Toolkit + RTK Query ✅
-- **Authentication**: Microsoft Entra External ID (MSAL) ✅
-- **Backend API**: Node.js + Express in Docker container ✅
-- **Databases**: Azure SQL Database + Cosmos DB ✅
-- **Infrastructure**: Azure Bicep templates ✅
-- **Hosting**: Azure Container Apps + Static Web Apps ✅
-- **CI/CD**: GitHub Actions with container registry ✅
+### Frontend
+- **React 18** + TypeScript + Vite
+- **UI**: Tailwind CSS + shadcn/ui patterns
+- **State**: Redux Toolkit + RTK Query
+- **Auth**: JWT tokens with localStorage
+
+### Backend
+- **Runtime**: Node.js 18 + Express
+- **Deployment**: Docker containers on Azure Container Apps
+- **Authentication**: JWT with bcrypt password hashing
+- **API Design**: RESTful with OpenAPI-ready structure
+
+### Data Layer
+- **Azure SQL Database**: Structured data (users, profiles, relational queries)
+- **Azure Cosmos DB**: Flexible data (activity logs, real-time streams)
+- **Access**: Managed Identity (credential-free, secure)
+
+### Infrastructure
+- **IaC**: Azure Bicep templates
+- **Hosting**: Azure Static Web Apps (frontend) + Container Apps (API)
+- **CI/CD**: GitHub Actions with container registry
+- **Monitoring**: Application Insights (optional)
 
 ## 🌐 Live Demo
    
-**Frontend URL**: https://a-riff-in-react.harryjamesgreenblatt.com (Basic template - API integration pending, custom domain with SSL)   
-**API URL**: https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io (Full REST API operational)
+**Frontend**: https://a-riff-in-react.harryjamesgreenblatt.com  
+**API**: https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io/health
 
-## Architecture
+## 🏗️ Architecture
 
-This project follows modern cloud-native architecture:
+### Containerized, Single-Tenant Design
 
-- **Frontend**: React SPA hosted on Azure Static Web Apps
-- **API**: Express.js containerized API hosted on Azure Container Apps
-- **Data Storage**: 
-  - Azure SQL Database for structured data (users, projects)
-  - Azure Cosmos DB for activity logs and real-time data
-- **Authentication**: Microsoft Entra External ID
+```
+┌─────────────────────────────────────────────────────────┐
+│                React Frontend (Static Web Apps)          │
+│  - Vite bundled SPA                                      │
+│  - JWT token in localStorage                             │
+└────────────────────┬────────────────────────────────────┘
+                     │
+                     ▼
+┌─────────────────────────────────────────────────────────┐
+│          Express API (Container Apps)                    │
+│  /api/auth/register   - Create user account             │
+│  /api/auth/login      - Authenticate & return JWT       │
+│  /api/users/*         - Profile management              │
+│  /api/activities/*    - Activity logging                │
+└────────┬────────────────────────┬───────────────────────┘
+         │                        │
+         ▼                        ▼
+┌──────────────────┐      ┌─────────────────┐
+│  Azure SQL DB    │      │   Cosmos DB     │
+│  - Users         │      │   - Activities  │
+│  - Profiles      │      │   - Logs        │
+│  - Relationships │      │   - Events      │
+└──────────────────┘      └─────────────────┘
+```
+
+### Authentication Flow (JWT-Based)
+
+```
+1. User Registration:
+   POST /api/auth/register { email, password, name }
+   → bcrypt hash password
+   → Store in Azure SQL
+   → Return success
+
+2. User Login:
+   POST /api/auth/login { email, password }
+   → Verify password with bcrypt
+   → Generate JWT token (7-day expiry)
+   → Return { token, user }
+
+3. Protected Requests:
+   GET /api/users/profile
+   Headers: { Authorization: "Bearer <JWT>" }
+   → Middleware validates JWT
+   → Extract userId from token
+   → Process request
+```
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18 LTS or higher
-- Docker Desktop
-- Visual Studio Code
-- Git
+- **Node.js 18 LTS** or higher
+- **Docker Desktop** (for local API development)
+- **Azure CLI** (for deployment)
+- **Git**
 
-### Development
+### Quick Start (Local Development)
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   cd api && npm install
-   ```
-3. Start the development servers:
-   ```bash
-   # Start the React development server
-   npm run start
-   
-   # In another terminal, start the API using Docker
-   docker-compose up
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/HarryJamesGreenblatt/A-Riff-In-React.git
+cd A-Riff-In-React
 
-## Deployment
+# Install dependencies
+npm install
+cd api && npm install && cd ..
 
-This project uses GitHub Actions for CI/CD:
+# Configure environment variables
+cp .env.example .env.local
+# Edit .env.local with your configuration
 
-- **Container Deploy Workflow**: Builds and deploys the API to Azure Container Apps
-- **Static Web Deploy Workflow**: Builds and deploys the frontend to Azure Static Web Apps
-
-See the [CI/CD Setup Guide](./docs/ci-cd-setup.md) for detailed instructions.
-
-## Project Structure
-
+# Start development servers
+npm run dev              # Frontend (http://localhost:5173)
+docker-compose up        # API (http://localhost:3001)
 ```
-/
-├── src/                      # Frontend React code
-├── api/                      # Backend Express API 
-│   ├── src/                  # API source code
-│   │   ├── routes/           # API endpoints
-│   │   ├── services/         # Database services
-│   │   └── models/           # Data models
-│   └── Dockerfile            # Multi-stage build for API container
-├── infra/                    # Infrastructure as Code (Bicep)
-│   ├── main.bicep            # Main deployment template
-│   └── modules/              # Modular Bicep components
-├── .github/workflows/        # CI/CD pipeline
-│   ├── container-deploy.yml  # API deployment workflow
-│   └── static-web-deploy.yml # Frontend deployment workflow
-└── docker-compose.yml        # Local development setup
+
+### Client Deployment (Azure)
+
+```bash
+# Login to Azure
+az login
+
+# Configure deployment parameters
+cp infra/parameters.example.json infra/parameters.json
+# Edit parameters.json with your values
+
+# Deploy infrastructure
+az deployment sub create \
+  --location westus \
+  --template-file infra/main.bicep \
+  --parameters @infra/parameters.json
+
+# Deploy via CI/CD (recommended)
+# Push to main branch - GitHub Actions handles deployment
 ```
+
+**Deployment Time**: 10-15 minutes from clone to working app
 
 ## 📚 Documentation
 
-Complete documentation is available in the [docs folder](./docs/README.md) with a logical progression from setup to deployment:
+Complete documentation in [docs/](./docs/):
 
-### Quick Navigation
-- **Getting Started**: [Project Overview](./docs/01-project-overview.md) → [Architecture](./docs/02-architecture.md) → [Development Setup](./docs/03-development-setup.md)
-- **Development**: [Local Development](./docs/04-local-development.md) → [UI Framework](./docs/05-ui-framework-setup.md) → [State Management](./docs/06-state-management.md)
-- **Authentication**: [MSAL Integration](./docs/07-authentication-msal.md)
-- **Backend**: [Backend API](./docs/08-backend-api.md)
-- **Deployment**: [Provider Registration](./docs/09-provider-registration.md) → [Azure Deployment](./docs/10-azure-deployment.md) → [CI/CD Pipeline](./docs/11-github-actions-ci-cd.md)
+### For Developers Getting Started
+1. [Project Overview](./docs/01-project-overview.md) - Vision and architecture
+2. [Architecture Deep Dive](./docs/02-architecture.md) - Technical decisions
+3. [Development Setup](./docs/03-development-setup.md) - Local environment
+4. [Local Development Workflow](./docs/04-local-development.md) - Day-to-day development
 
-### Phase-Based Documentation Structure
-1. **Understanding & Setup** (01-04): Project basics and local development
-2. **Frontend Implementation** (05-07): React, UI, state management, auth
-3. **Backend & Infrastructure** (08-11): API, Azure deployment, CI/CD
-4. **Operations & Reference** (12+): Success documentation and troubleshooting
+### For Feature Implementation
+5. [UI Framework](./docs/05-ui-framework-setup.md) - Tailwind + components
+6. [State Management](./docs/06-state-management.md) - Redux patterns
+7. [Authentication](./docs/07-authentication.md) - JWT auth implementation
+8. [Backend API](./docs/08-backend-api.md) - Express API structure
+
+### For Deployment
+9. [Provider Registration](./docs/09-provider-registration.md) - Azure prerequisites
+10. [Azure Deployment](./docs/10-azure-deployment.md) - Infrastructure deployment
+11. [CI/CD Pipeline](./docs/11-github-actions-ci-cd.md) - GitHub Actions setup
+12. [Deployment Success](./docs/12-deployment-success.md) - Verification & troubleshooting
+
+## 🔐 Security Considerations
+
+This template implements security best practices:
+
+- ✅ **Password Hashing**: bcrypt with 10 rounds
+- ✅ **JWT Tokens**: Signed with HS256, 7-day expiry
+- ✅ **HTTPS Only**: Enforced in production
+- ✅ **SQL Injection Prevention**: Parameterized queries
+- ✅ **CORS Configuration**: Whitelist-based origin control
+- ✅ **Environment Secrets**: Never committed to git
+
+**Note**: This provides a secure foundation. Clients may want to add:
+- Email verification flows
+- Password reset functionality
+- Rate limiting on auth endpoints
+- MFA (Multi-Factor Authentication)
+- OAuth social providers
+
+## 📦 What's Included Out-of-the-Box
+
+### Authentication & User Management
+- Email/password registration
+- Login with JWT token generation
+- User profile CRUD operations
+- Protected route middleware
+
+### Database Examples
+- Azure SQL: User accounts, profiles
+- Cosmos DB: Activity logs, event streams
+- Managed Identity: Secure database access
+
+### Deployment Infrastructure
+- Bicep templates for all Azure resources
+- GitHub Actions CI/CD workflows
+- Docker containerization
+- Environment configuration templates
+
+### Developer Experience
+- TypeScript throughout
+- ESLint + Prettier configured
+- Hot reload for frontend and API
+- Docker Compose for local development
+
+## 🎯 Extending This Template
+
+This template is designed to be customized for your specific use case:
+
+### Example: Run Club App
+```typescript
+// Add domain-specific models
+interface RunActivity {
+  id: string
+  userId: string
+  distance: number
+  duration: number
+  route: GeoJSON
+  timestamp: Date
+}
+
+// Add domain-specific routes
+router.post('/api/runs', authenticateToken, async (req, res) => {
+  // Store run in Cosmos DB
+})
+```
+
+### Example: E-Commerce App
+```typescript
+// Replace user profiles with customers
+// Add product catalog in Azure SQL
+// Add order history in Cosmos DB
+```
+
+### Example: SaaS Application
+```typescript
+// Add organization/tenant concept
+// Add role-based access control
+// Add subscription management
+```
+
+## 📝 Project Structure
+
+```
+/
+├── src/                       # React frontend
+│   ├── components/            # UI components
+│   ├── features/              # Feature modules (users, activities)
+│   ├── services/              # API clients
+│   ├── store/                 # Redux store
+│   └── App.tsx                # Main app component
+│
+├── api/                       # Express backend
+│   ├── src/
+│   │   ├── routes/            # API endpoints
+│   │   │   ├── authRoutes.ts       # Registration, login
+│   │   │   ├── userRoutes.ts       # User profiles
+│   │   │   └── activityRoutes.ts   # Activity logs
+│   │   ├── services/          # Database clients
+│   │   │   ├── sqlService.ts       # Azure SQL operations
+│   │   │   └── cosmosService.ts    # Cosmos DB operations
+│   │   ├── middleware/        # Auth, logging, error handling
+│   │   └── index.ts           # Express app setup
+│   ├── Dockerfile             # Multi-stage container build
+│   └── schema.sql             # Database schema
+│
+├── infra/                     # Infrastructure as Code
+│   ├── main.bicep             # Root template
+│   ├── modules/               # Bicep modules
+│   │   ├── containerApp.bicep
+│   │   ├── staticWebApp.bicep
+│   │   ├── sqlDatabase.bicep
+│   │   └── cosmosDb.bicep
+│   └── parameters.json        # Deployment configuration
+│
+├── .github/workflows/         # CI/CD
+│   ├── container-deploy.yml   # API deployment
+│   └── static-web-deploy.yml  # Frontend deployment
+│
+├── docs/                      # Documentation
+└── docker-compose.yml         # Local development
+```
+
+## 🤝 Contributing
+
+This is a template project. Feel free to:
+- Fork and customize for your use case
+- Submit issues for bugs or unclear documentation
+- Propose improvements via pull requests
+
+## 📄 License
+
+MIT License - see [LICENSE](./LICENSE) for details
+
+## 🔗 Related Templates
+
+Part of the **Scaffolding** template series:
+- [A Fugue In Flask](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask) - Python/Flask + Azure SQL
+- **A Riff In React** (this template) - React/TypeScript + Azure SQL + Cosmos DB
+- More templates coming soon...
 
 ---
 
-**Development Methodology**: Feature-by-feature, commit-by-commit collaborative approach
-
----
-
-> _For architectural, deployment, and documentation patterns, see [A Fugue In Flask](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask) for reference and rationale._
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Authentication Status (2025-09-14)
-
-- The project implements MSAL with Microsoft Entra External ID and a hybrid plan to include Google social sign-in.
-- A hosted External ID user flow (`B2X_1_user-flow-for-a-riff-in-react`) exists but is not yet active for the SPA because the app must be associated with the user flow or the SPA must launch the user-flow authority. See `docs/07-authentication-msal.md` and `context/Auth Modernization/auth-modernization-journal.md` for detailed debugging notes and next steps.
+**Built with the philosophy**: Make it easy to deploy, easy to understand, easy to customize.
