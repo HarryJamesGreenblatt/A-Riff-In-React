@@ -20,12 +20,14 @@ A core principle of the "Scaffolding" series of templates (`A Fugue in Flask`, `
 
 - **Shared SQL Server**: Instead of provisioning a new, costly Azure SQL Server for each project, all templates are designed to deploy their databases to a single, pre-existing shared server (e.g., `sequitur-sql-server` in the `db-rg` resource group).
 - **Dedicated Databases**: Each project provisions its own dedicated database (e.g., `riff-react-db`) on the shared server. This provides complete data and schema isolation between applications.
-- **Cross-Resource Group Deployment**: The database is deployed to the shared server's resource group using a dedicated Bicep module (`infra/modules/sqlRoleAssignment.bicep`), which is the best practice for deploying child resources (the database) to a parent resource (the server) located in a different resource group.
+- **Cosmos DB**: Each project provisions its own Cosmos DB account (e.g., `cosmos-a-riff-in-react`) in the `db-rg` resource group, maintaining the pattern of database resources being centralized.
+- **Cross-Resource Group Deployment**: Both SQL databases and Cosmos DB role assignments are deployed to the `db-rg` resource group using dedicated Bicep modules (`infra/modules/sqlRoleAssignment.bicep` and `infra/modules/cosmosRoleAssignment.bicep`), which is the best practice for deploying child resources to a parent resource located in a different resource group.
 
 This pattern provides the best of both worlds:
-1.  **Cost Efficiency**: Avoids the high cost of running multiple SQL server instances.
-2.  **Isolation & Security**: Each application has its own database and credentials, ensuring strong security and data boundaries.
+1.  **Cost Efficiency**: Avoids the high cost of running multiple SQL server instances; Cosmos DB accounts are project-specific but centrally managed.
+2.  **Isolation & Security**: Each application has its own database and Cosmos DB account with independent credentials, ensuring strong security and data boundaries.
 3.  **Independent Schemas**: Each database has a completely independent schema, allowing for tailored data models per application without conflict.
+4.  **Centralized Database Management**: All database resources (SQL and NoSQL) in one resource group simplifies management, cost tracking, and lifecycle operations.
 
 ## Backend Architecture: Express on Azure Container Apps
 

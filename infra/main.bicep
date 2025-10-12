@@ -37,7 +37,7 @@ param existingSqlDatabaseName string = 'riff-react-db'
 @description('The name of the existing Cosmos DB account')
 param existingCosmosDbAccountName string = 'cosmos-a-riff-in-react'
 
-@description('The resource group of the existing Cosmos DB account')
+@description('The resource group of the existing Cosmos DB account. Following the Scaffolding architecture pattern, all database resources (SQL and Cosmos DB) should be in the db-rg resource group.')
 param existingCosmosDbResourceGroup string = 'db-rg'
 
 // Variables for resource naming
