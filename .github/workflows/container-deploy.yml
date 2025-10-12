@@ -1,4 +1,3 @@
-  # The 'Set up PowerShell' step is not present in the workflow and has been removed from the patch.
 name: Deploy API to Container Apps
 
 on:
@@ -17,7 +16,10 @@ env:
   EXISTING_SQL_SERVER_RG: db-rg
   EXISTING_SQL_SERVER_NAME: sequitur-sql-server
   EXISTING_SQL_DATABASE_NAME: riff-react-db
+  EXISTING_COSMOS_DB_NAME: cosmos-a-riff-in-react
+  EXISTING_COSMOS_DB_RG: db-rg
   ACR_NAME: ariffreactacr
+  CORS_ORIGINS: https://a-riff-in-react.harryjamesgreenblatt.com,http://localhost:5173
 
 jobs:
   build-and-deploy:
@@ -34,9 +36,6 @@ jobs:
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
-      # Note: Entra External ID setup is a one-time configuration
-      # Run ./scripts/setup-entra-external-id.ps1 manually when needed
       
       - name: Register Azure Resource Providers
         run: |
@@ -125,11 +124,13 @@ jobs:
             containerRegistry=${{ env.ACR_NAME }}.azurecr.io
             containerRegistryUsername=${{ env.ACR_USERNAME }}
             containerRegistryPassword=${{ env.ACR_PASSWORD }}
-            externalTenantId=${{ secrets.EXTERNAL_TENANT_ID }}
-            externalClientId=${{ secrets.EXTERNAL_CLIENT_ID }}
+            jwtSecret=${{ secrets.JWT_SECRET }}
+            corsOrigins=${{ env.CORS_ORIGINS }}
             existingSqlServerName=${{ env.EXISTING_SQL_SERVER_NAME }}
             existingSqlServerResourceGroup=${{ env.EXISTING_SQL_SERVER_RG }}
             existingSqlDatabaseName=${{ env.EXISTING_SQL_DATABASE_NAME }}
+            existingCosmosDbAccountName=${{ env.EXISTING_COSMOS_DB_NAME }}
+            existingCosmosDbResourceGroup=${{ env.EXISTING_COSMOS_DB_RG }}
       
       - name: Verify Deployment
         run: |

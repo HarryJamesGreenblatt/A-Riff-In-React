@@ -17,11 +17,12 @@ param containerRegistryUsername string
 @secure()
 param containerRegistryPassword string
 
-@description('The Microsoft Entra External ID tenant ID')
-param externalTenantId string
+@description('JWT secret for signing authentication tokens (min 32 characters)')
+@secure()
+param jwtSecret string
 
-@description('The Microsoft Entra External ID client ID')
-param externalClientId string
+@description('Allowed CORS origins (comma-separated)')
+param corsOrigins string = 'https://a-riff-in-react.harryjamesgreenblatt.com,http://localhost:5173'
 
 // Existing resources to reference
 @description('The name of the existing SQL Server')
@@ -33,29 +34,32 @@ param existingSqlServerResourceGroup string = 'db-rg'
 @description('The name of the existing SQL Database')
 param existingSqlDatabaseName string = 'riff-react-db'
 
-// Note: Cosmos DB is mentioned in docs but not implemented in current infrastructure
-// This parameter is commented out as it's not currently used
-// @description('The name of the existing Cosmos DB account')
-// param existingCosmosDbAccountName string = 'cosmos-a-riff-in-react'
+@description('The name of the existing Cosmos DB account')
+param existingCosmosDbAccountName string = 'cosmos-a-riff-in-react'
+
+@description('The resource group of the existing Cosmos DB account')
+param existingCosmosDbResourceGroup string = 'db-rg'
 
 // Variables for resource naming
 var containerAppEnvName = 'env-${environmentName}'
-var containerAppName = 'ca-api-${environmentName}' // Changed prefix to prevent conflicts with existing App Service
+var containerAppName = 'ca-api-${environmentName}'
 var logAnalyticsName = 'log-${environmentName}'
 var managedIdentityName = 'id-${environmentName}'
+var staticWebAppName = 'swa-${environmentName}'
 
 // Tags for all resources
 var tags = {
   application: 'A-Riff-In-React'
   environment: environmentName
   azd_env_name: environmentName
+  authStrategy: 'JWT'
 }
 
 // Reference to existing SQL Server
 var sqlServerFqdn = '${existingSqlServerName}.database.windows.net'
 
-// Note: Cosmos DB is mentioned in docs but not implemented in current infrastructure
-// We'll remove references to Cosmos DB for now to simplify deployment
+// Parse CORS origins from comma-separated string
+var corsOriginsArray = split(corsOrigins, ',')
 
 // Create a user-assigned managed identity for the Container App
 resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
@@ -83,9 +87,17 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   }
 }
 
-// Reference existing Application Insights
-resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
+// Application Insights
+resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: 'appi-${environmentName}'
+  location: location
+  tags: tags
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalytics.id
+    RetentionInDays: 30
+  }
 }
 
 // Container Apps Environment
@@ -129,7 +141,12 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
           }
         ]
         corsPolicy: {
-          allowedOrigins: ['*']
+          allowedOrigins: corsOriginsArray
+          allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+          allowedHeaders: ['*']
+          exposeHeaders: ['*']
+          maxAge: 3600
+          allowCredentials: true
         }
       }
       registries: [
@@ -140,6 +157,10 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
         }
       ]
       secrets: [
+        {
+          name: 'jwt-secret'
+          value: jwtSecret
+        }
         {
           name: 'sql-connection-string'
           value: 'Server=${sqlServerFqdn};Database=${existingSqlDatabaseName};Authentication=Active Directory Default;'
@@ -173,24 +194,40 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
               value: '8080'
             }
             {
-              name: 'SQL_SERVER'
+              name: 'JWT_SECRET'
+              secretRef: 'jwt-secret'
+            }
+            {
+              name: 'JWT_EXPIRY'
+              value: '7d'
+            }
+            {
+              name: 'SQL_SERVER_ENDPOINT'
               value: sqlServerFqdn
             }
             {
-              name: 'SQL_DATABASE'
+              name: 'SQL_DATABASE_NAME'
               value: existingSqlDatabaseName
+            }
+            {
+              name: 'MANAGED_IDENTITY_CLIENT_ID'
+              value: managedIdentity.properties.clientId
+            }
+            {
+              name: 'COSMOS_ENDPOINT'
+              value: 'https://${existingCosmosDbAccountName}.documents.azure.com:443/'
+            }
+            {
+              name: 'COSMOS_DATABASE_NAME'
+              value: 'ARiffInReact'
             }
             {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
               secretRef: 'ai-connection-string'
             }
             {
-              name: 'EXTERNAL_TENANT_ID'
-              value: externalTenantId
-            }
-            {
-              name: 'EXTERNAL_CLIENT_ID'
-              value: externalClientId
+              name: 'CORS_ORIGINS'
+              value: corsOrigins
             }
           ]
         }
@@ -213,40 +250,53 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
   }
 }
 
-// Reference existing App Service (not Static Web App)
-@description('The name of the existing web app')
-param webAppName string = 'a-riff-in-react'
+// Static Web App for frontend
+resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
+  name: staticWebAppName
+  location: location
+  tags: tags
+  sku: {
+    name: 'Free'
+    tier: 'Free'
+  }
+  properties: {
+    repositoryUrl: 'https://github.com/HarryJamesGreenblatt/A-Riff-In-React'
+    branch: 'main'
+    buildProperties: {
+      appLocation: '/'
+      apiLocation: ''
+      outputLocation: 'dist'
+    }
+  }
+}
 
-// Reference existing Key Vault
-@description('The name of the existing key vault')
-param keyVaultName string = 'kv-a-riff-in-react'
+// SQL Database role assignment module
+module sqlRoleAssignment 'modules/sqlRoleAssignment.bicep' = {
+  name: 'sqlRoleAssignment'
+  scope: resourceGroup(existingSqlServerResourceGroup)
+  params: {
+    sqlServerName: existingSqlServerName
+    databaseName: existingSqlDatabaseName
+    managedIdentityPrincipalId: managedIdentity.properties.principalId
+    managedIdentityName: managedIdentity.name
+  }
+}
 
-// Update Key Vault access policy - done manually
-output keyVaultAccessInstructions string = '''
-To manually grant the managed identity access to Key Vault:
-1. Navigate to the Key Vault: ${keyVaultName} in the Azure Portal
-2. Go to "Access policies"
-3. Add a new access policy with the following details:
-   - Principal: ${managedIdentity.properties.principalId}
-   - Secret permissions: Get, List
-'''
-
-// SQL Database access - simplified approach without deployment script
-// We'll just output instructions for manual role assignment since
-// the identity doesn't have sufficient permissions to execute the script
-output sqlRoleAssignmentInstructions string = '''
-To manually assign the necessary SQL permissions:
-1. Use the Azure Portal to navigate to the SQL Server: ${existingSqlServerName} in resource group ${existingSqlServerResourceGroup}
-2. Go to "Azure Active Directory" and ensure the server has an Azure AD admin configured
-3. Connect to the database ${existingSqlDatabaseName} using that admin
-4. Execute the following T-SQL:
-   CREATE USER [${managedIdentity.properties.principalId}] FROM EXTERNAL PROVIDER;
-   ALTER ROLE db_datareader ADD MEMBER [${managedIdentity.properties.principalId}];
-'''
-
-// Remove Cosmos DB role assignment since we're not creating Cosmos DB yet
+// Cosmos DB role assignment module
+module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
+  name: 'cosmosRoleAssignment'
+  scope: resourceGroup(existingCosmosDbResourceGroup)
+  params: {
+    cosmosDbAccountName: existingCosmosDbAccountName
+    managedIdentityPrincipalId: managedIdentity.properties.principalId
+  }
+}
 
 // Outputs
 output containerAppUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
-output webAppUrl string = 'https://${webAppName}.azurewebsites.net'
+output staticWebAppUrl string = 'https://${staticWebApp.properties.defaultHostname}'
+output staticWebAppDeploymentToken string = staticWebApp.listSecrets().properties.apiKey
 output managedIdentityId string = managedIdentity.id
+output managedIdentityClientId string = managedIdentity.properties.clientId
+output managedIdentityPrincipalId string = managedIdentity.properties.principalId
+output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
