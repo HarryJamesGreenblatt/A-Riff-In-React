@@ -270,33 +270,8 @@ resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
   }
 }
 
-// SQL Database role assignment module
-module sqlRoleAssignment 'modules/sqlRoleAssignment.bicep' = {
-  name: 'sqlRoleAssignment'
-  scope: resourceGroup(existingSqlServerResourceGroup)
-  params: {
-    sqlServerName: existingSqlServerName
-    principalId: managedIdentity.properties.principalId
-    roleName: 'db_datareader'
-  }
-}
-
-// Cosmos DB role assignment module
-module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
-  name: 'cosmosRoleAssignment'
-  scope: resourceGroup(existingCosmosDbResourceGroup)
-  params: {
-    cosmosDbAccountName: existingCosmosDbAccountName
-    principalId: managedIdentity.properties.principalId
-    roleDefinitionId: '00000000-0000-0000-0000-000000000002' // Built-in Cosmos DB Data Contributor role
-  }
-}
-
-// Outputs
-output containerAppUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
-output staticWebAppUrl string = 'https://${staticWebApp.properties.defaultHostname}'
-output staticWebAppDeploymentToken string = staticWebApp.listSecrets().properties.apiKey
-output managedIdentityId string = managedIdentity.id
-output managedIdentityClientId string = managedIdentity.properties.clientId
-output managedIdentityPrincipalId string = managedIdentity.properties.principalId
-output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
+// SQL Database role assignment module - DISABLED
+// Moved to GitHub workflow post-deployment step
+// Reason: Deployment script resource has limitations with cross-resource-group deployments
+// See: .github/workflows/container-deploy.yml (Setup SQL Managed Identity Access step)
+//

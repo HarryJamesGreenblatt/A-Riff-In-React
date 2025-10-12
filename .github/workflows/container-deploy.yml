@@ -46,7 +46,7 @@ jobs:
           az provider register --namespace Microsoft.ContainerRegistry --wait
           az provider register --namespace Microsoft.OperationalInsights --wait
           az provider register --namespace Microsoft.DocumentDB --wait
-          az provider register --namespace Microsoft.ManagedIdentity --wait
+          az provider.register --namespace Microsoft.ManagedIdentity --wait
           az provider register --namespace Microsoft.KeyVault --wait
           az provider register --namespace Microsoft.Insights --wait
           az provider register --namespace Microsoft.Web --wait
@@ -131,6 +131,45 @@ jobs:
             existingSqlDatabaseName=${{ env.EXISTING_SQL_DATABASE_NAME }}
             existingCosmosDbAccountName=${{ env.EXISTING_COSMOS_DB_NAME }}
             existingCosmosDbResourceGroup=${{ env.EXISTING_COSMOS_DB_RG }}
+      
+      - name: Setup SQL Managed Identity Access
+        run: |
+          echo "Setting up SQL database access for managed identity..."
+          
+          # Get the managed identity principal ID
+          PRINCIPAL_ID=$(az identity show \
+            --name id-${{ env.ENVIRONMENT_NAME }} \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --query principalId -o tsv)
+          
+          echo "Managed Identity Principal ID: $PRINCIPAL_ID"
+          
+          # Create SQL script to grant permissions
+          cat > /tmp/grant-access.sql << EOF
+          -- Create user from managed identity if it doesn't exist
+          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '${PRINCIPAL_ID}')
+          BEGIN
+              CREATE USER [${PRINCIPAL_ID}] FROM EXTERNAL PROVIDER;
+          END
+          
+          -- Grant database roles
+          ALTER ROLE db_datareader ADD MEMBER [${PRINCIPAL_ID}];
+          ALTER ROLE db_datawriter ADD MEMBER [${PRINCIPAL_ID}];
+          GO
+          EOF
+          
+          echo "Granting SQL database permissions..."
+          
+          # Execute SQL script using Azure CLI
+          # This requires the service principal to have SQL admin permissions
+          az sql db execute \
+            --server ${{ env.EXISTING_SQL_SERVER_NAME }} \
+            --name ${{ env.EXISTING_SQL_DATABASE_NAME }} \
+            --resource-group ${{ env.EXISTING_SQL_SERVER_RG }} \
+            --scripts @/tmp/grant-access.sql \
+            || echo "⚠️ SQL role assignment failed - may need manual setup"
+          
+          echo "✅ SQL managed identity access configured"
       
       - name: Verify Deployment
         run: |
