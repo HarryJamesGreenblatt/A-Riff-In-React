@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
 
@@ -8,7 +9,8 @@ interface AuthGuardProps {
 }
 
 export const AuthGuard: React.FC<AuthGuardProps> = ({ children, fallback }) => {
-  const { isAuthenticated, signIn, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -25,7 +27,7 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({ children, fallback }) => {
           <>
             <h2 className="text-2xl font-bold">Authentication Required</h2>
             <p className="text-gray-600">Please sign in to access this content.</p>
-            <Button onClick={signIn}>Sign In with Microsoft</Button>
+            <Button onClick={() => navigate('/login')}>Sign In</Button>
           </>
         )}
       </div>

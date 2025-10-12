@@ -1,9 +1,11 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../ui/Button';
 
 export const LoginButton: React.FC = () => {
-  const { isAuthenticated, currentUser, signIn, signOut, isLoading } = useAuth();
+  const { isAuthenticated, currentUser, signOut, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   if (isAuthenticated && currentUser) {
     return (
@@ -26,10 +28,10 @@ export const LoginButton: React.FC = () => {
   return (
     <Button
       variant="primary"
-      onClick={signIn}
+      onClick={() => navigate('/login')}
       disabled={isLoading}
     >
-      {isLoading ? 'Signing in...' : 'Sign In with Microsoft'}
+      Sign In
     </Button>
   );
 };

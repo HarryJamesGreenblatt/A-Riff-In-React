@@ -1,11 +1,11 @@
-
 import React from "react";
 import FeatureCards from "./FeatureCards";
 import { useAuth } from "../hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Homepage: React.FC = () => {
-  const { isAuthenticated, signIn } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <main className="main-content" role="main">
@@ -23,7 +23,7 @@ const Homepage: React.FC = () => {
 
             {!isAuthenticated && (
               <div className="button-group" role="group" aria-label="authentication">
-                <button className="btn" onClick={signIn}>Log In</button>
+                <button className="btn" onClick={() => navigate('/login')}>Log In</button>
                 <Link to="/register" className="btn" style={{textDecoration:'none'}}>Register</Link>
               </div>
             )}
@@ -31,7 +31,7 @@ const Homepage: React.FC = () => {
             <hr aria-hidden className="sep-weak" />
 
             <h3 className="feature-title">What this template is</h3>
-            <p className="feature-desc">A concise, production-aware starter that shows how to structure features, connect to Azure SQL & Cosmos DB, and use MSAL for authentication.</p>
+            <p className="feature-desc">A concise, production-aware starter that shows how to structure features, connect to Azure SQL & Cosmos DB, and use JWT authentication.</p>
             <p className="feature-desc">Start at the <Link to="/about">About page</Link> or read the quick-summary in the docs to learn when to reuse this scaffold.</p>
             
           </div>

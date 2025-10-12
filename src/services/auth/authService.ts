@@ -47,6 +47,7 @@ export interface User {
   email: string;
   name: string;
   role: string;
+  phone?: string;
 }
 
 // Auth response interface
@@ -109,6 +110,23 @@ export class AuthService {
   static async getCurrentUser(): Promise<User> {
     const response = await apiClient.get<{ user: User }>('/api/auth/me');
     return response.data.user;
+  }
+
+  /**
+   * Save phone number for user
+   */
+  static async savePhoneForUser(userId: string, phone: string): Promise<User> {
+    const response = await apiClient.put<{ user: User }>(
+      `/api/users/${userId}`,
+      { phone }
+    );
+    
+    // Update local storage and Redux store
+    const updatedUser = response.data.user;
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    store.dispatch(setCurrentUser(updatedUser));
+    
+    return updatedUser;
   }
 
   /**

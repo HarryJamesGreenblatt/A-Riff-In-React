@@ -1,4 +1,3 @@
-
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
@@ -8,6 +7,7 @@ import About from "./pages/About";
 import RegisterPage from "./pages/Register";
 import Architecture from "./pages/Architecture";
 import AuthTest from "./pages/AuthTest";
+import { LoginForm } from "./components/auth/LoginForm";
 import "./App.css";
 import PhoneCollectModal from "./components/auth/PhoneCollectModal";
 import { useAppSelector } from './store/hooks'
@@ -43,6 +43,7 @@ const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<Homepage />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/login" element={<LoginForm />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/architecture" element={<Architecture />} />
                 <Route path="/auth-test" element={<AuthTest />} />
