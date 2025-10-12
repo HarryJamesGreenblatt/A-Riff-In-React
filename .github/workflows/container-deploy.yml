@@ -16,7 +16,7 @@ env:
   EXISTING_SQL_SERVER_RG: db-rg
   EXISTING_SQL_SERVER_NAME: sequitur-sql-server
   EXISTING_SQL_DATABASE_NAME: riff-react-db
-  EXISTING_COSMOS_DB_NAME: cosmos-a-riff-in-react
+  EXISTING_COSMOS_DB_NAME: riff-react-cosmos-db
   EXISTING_COSMOS_DB_RG: db-rg
   ACR_NAME: ariffreactacr
   CORS_ORIGINS: https://a-riff-in-react.harryjamesgreenblatt.com,http://localhost:5173
