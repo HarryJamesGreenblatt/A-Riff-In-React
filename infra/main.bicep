@@ -276,9 +276,8 @@ module sqlRoleAssignment 'modules/sqlRoleAssignment.bicep' = {
   scope: resourceGroup(existingSqlServerResourceGroup)
   params: {
     sqlServerName: existingSqlServerName
-    databaseName: existingSqlDatabaseName
-    managedIdentityPrincipalId: managedIdentity.properties.principalId
-    managedIdentityName: managedIdentity.name
+    principalId: managedIdentity.properties.principalId
+    roleName: 'db_datareader'
   }
 }
 
@@ -288,7 +287,8 @@ module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
   scope: resourceGroup(existingCosmosDbResourceGroup)
   params: {
     cosmosDbAccountName: existingCosmosDbAccountName
-    managedIdentityPrincipalId: managedIdentity.properties.principalId
+    principalId: managedIdentity.properties.principalId
+    roleDefinitionId: '00000000-0000-0000-0000-000000000002' // Built-in Cosmos DB Data Contributor role
   }
 }
 
