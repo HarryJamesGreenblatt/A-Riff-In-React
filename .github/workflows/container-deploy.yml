@@ -47,7 +47,7 @@ jobs:
           az provider register --namespace Microsoft.OperationalInsights --wait
           az provider register --namespace Microsoft.DocumentDB --wait
           az provider register --namespace Microsoft.ManagedIdentity --wait
-          az provider register --namespace Microsoft.KeyVault --wait
+          az provider.register --namespace Microsoft.KeyVault --wait
           az provider register --namespace Microsoft.Insights --wait
           az provider register --namespace Microsoft.Web --wait
           
@@ -144,40 +144,104 @@ jobs:
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
             --query principalId -o tsv)
           
-          echo "Managed Identity Principal ID: $PRINCIPAL_ID"
+          echo "✓ Managed Identity Principal ID: $PRINCIPAL_ID"
           echo ""
-          echo "⚠️  MANUAL SETUP REQUIRED (one-time only)"
+          
+          # Create SQL script
+          cat > /tmp/grant-access.sql << EOF
+          IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '${PRINCIPAL_ID}')
+          BEGIN
+              CREATE USER [${PRINCIPAL_ID}] FROM EXTERNAL PROVIDER;
+              PRINT 'Created user for managed identity';
+          END
+          ELSE
+          BEGIN
+              PRINT 'User already exists';
+          END
+          
+          IF IS_ROLEMEMBER('db_datareader', '${PRINCIPAL_ID}') = 0
+          BEGIN
+              ALTER ROLE db_datareader ADD MEMBER [${PRINCIPAL_ID}];
+              PRINT 'Added db_datareader role';
+          END
+          
+          IF IS_ROLEMEMBER('db_datawriter', '${PRINCIPAL_ID}') = 0
+          BEGIN
+              ALTER ROLE db_datawriter ADD MEMBER [${PRINCIPAL_ID}];
+              PRINT 'Added db_datawriter role';
+          END
+          
+          PRINT 'SQL permissions configured successfully';
+          EOF
+          
+          echo "Attempting automated SQL role assignment..."
           echo ""
-          echo "The managed identity needs database permissions."
-          echo "Run these commands in Azure Cloud Shell or Azure Data Studio:"
-          echo ""
-          echo "-- Connect to: ${{ env.EXISTING_SQL_SERVER_NAME }}.database.windows.net"
-          echo "-- Database: ${{ env.EXISTING_SQL_DATABASE_NAME }}"
-          echo ""
-          echo "CREATE USER [${PRINCIPAL_ID}] FROM EXTERNAL PROVIDER;"
-          echo "ALTER ROLE db_datareader ADD MEMBER [${PRINCIPAL_ID}];"
-          echo "ALTER ROLE db_datawriter ADD MEMBER [${PRINCIPAL_ID}];"
-          echo "GO"
-          echo ""
-          echo "========================================="
-          echo ""
-          echo "Or use Azure CLI (if you have SQL admin access):"
-          echo ""
-          echo "az sql server ad-admin list \\"
-          echo "  --server ${{ env.EXISTING_SQL_SERVER_NAME }} \\"
-          echo "  --resource-group ${{ env.EXISTING_SQL_SERVER_RG }}"
-          echo ""
-          echo "If no admin is set, add yourself as Azure AD admin first:"
-          echo ""
-          echo "az sql server ad-admin create \\"
-          echo "  --server ${{ env.EXISTING_SQL_SERVER_NAME }} \\"
-          echo "  --resource-group ${{ env.EXISTING_SQL_SERVER_RG }} \\"
-          echo "  --display-name 'Your Name' \\"
-          echo "  --object-id <your-object-id>"
-          echo ""
-          echo "========================================="
-          echo "✅ Managed identity info displayed above"
-          echo "   Continue with deployment - SQL access can be set up later"
+          
+          # Try automated setup using Azure AD authentication
+          if az sql db execute \
+            --server ${{ env.EXISTING_SQL_SERVER_NAME }} \
+            --database ${{ env.EXISTING_SQL_DATABASE_NAME }} \
+            --resource-group ${{ env.EXISTING_SQL_SERVER_RG }} \
+            --auth-type ADPassword \
+            --file /tmp/grant-access.sql 2>&1; then
+            
+            echo ""
+            echo "========================================="
+            echo "✅ SQL PERMISSIONS CONFIGURED AUTOMATICALLY"
+            echo "========================================="
+            echo "The managed identity has been granted:"
+            echo "  • db_datareader role"
+            echo "  • db_datawriter role"
+            echo ""
+            
+          else
+            
+            echo ""
+            echo "========================================="
+            echo "⚠️  AUTOMATED SETUP FAILED - MANUAL SETUP REQUIRED"
+            echo "========================================="
+            echo ""
+            echo "The automated SQL role assignment failed."
+            echo "This is expected if the GitHub service principal"
+            echo "doesn't have SQL admin permissions."
+            echo ""
+            echo "Please run these commands manually (one-time setup):"
+            echo ""
+            echo "Option 1: Azure Cloud Shell (Recommended)"
+            echo "-------------------------------------------"
+            echo "1. Open https://shell.azure.com"
+            echo "2. Run: sqlcmd -S ${{ env.EXISTING_SQL_SERVER_NAME }}.database.windows.net -d ${{ env.EXISTING_SQL_DATABASE_NAME }} -G"
+            echo "3. Execute:"
+            echo ""
+            echo "   CREATE USER [${PRINCIPAL_ID}] FROM EXTERNAL PROVIDER;"
+            echo "   ALTER ROLE db_datareader ADD MEMBER [${PRINCIPAL_ID}];"
+            echo "   ALTER ROLE db_datawriter ADD MEMBER [${PRINCIPAL_ID}];"
+            echo "   GO"
+            echo ""
+            echo "Option 2: Azure Data Studio"
+            echo "-------------------------------------------"
+            echo "1. Connect to: ${{ env.EXISTING_SQL_SERVER_NAME }}.database.windows.net"
+            echo "2. Database: ${{ env.EXISTING_SQL_DATABASE_NAME }}"
+            echo "3. Authentication: Azure Active Directory"
+            echo "4. Execute the SQL commands above"
+            echo ""
+            echo "Option 3: Grant GitHub SP SQL Admin Access"
+            echo "-------------------------------------------"
+            echo "To enable automated setup in future deployments:"
+            echo ""
+            echo "az sql server ad-admin create \\敖
+            echo "  --server ${{ env.EXISTING_SQL_SERVER_NAME }} \\
+            echo "  --resource-group ${{ env.EXISTING_SQL_SERVER_RG }} \\
+            echo "  --display-name 'GitHub Actions SP' \\
+            echo "  --object-id \$(az ad sp list --display-name 'GitHub Actions' --query '[0].id' -o tsv)"
+            echo ""
+            echo "========================================="
+            echo "📝 See docs/Auth/SQL-MANAGED-IDENTITY-SETUP.md for details"
+            echo ""
+            echo "⚠️  Note: API will not be able to access database until this is completed"
+            echo ""
+            
+          fi
       
       - name: Verify Deployment
         run: |
