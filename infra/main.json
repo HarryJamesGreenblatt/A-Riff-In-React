@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.1.42791",
-      "templateHash": "8250707885558158515"
+      "templateHash": "4143208613565340368"
     }
   },
   "parameters": {
@@ -335,6 +335,8 @@
         "tier": "Free"
       },
       "properties": {
+        "repositoryUrl": "https://github.com/HarryJamesGreenblatt/A-Riff-In-React",
+        "branch": "main",
         "buildProperties": {
           "appLocation": "/",
           "apiLocation": "",

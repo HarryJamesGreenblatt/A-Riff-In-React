@@ -260,8 +260,8 @@ resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
     tier: 'Free'
   }
   properties: {
-    // Repository configuration removed to avoid listSecrets() error
-    // Deploy frontend separately using GitHub Actions or Azure Static Web Apps CLI
+    repositoryUrl: 'https://github.com/HarryJamesGreenblatt/A-Riff-In-React'
+    branch: 'main'
     buildProperties: {
       appLocation: '/'
       apiLocation: ''
