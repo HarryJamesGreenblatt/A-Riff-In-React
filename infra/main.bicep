@@ -55,8 +55,8 @@ var tags = {
   authStrategy: 'JWT'
 }
 
-// Reference to existing SQL Server
-var sqlServerFqdn = '${existingSqlServerName}.database.windows.net'
+// Reference to existing SQL Server - using environment() function for cloud compatibility
+var sqlServerFqdn = '${existingSqlServerName}.${environment().suffixes.sqlServerHostname}'
 
 // Parse CORS origins from comma-separated string
 var corsOriginsArray = split(corsOrigins, ',')
@@ -260,8 +260,8 @@ resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
     tier: 'Free'
   }
   properties: {
-    repositoryUrl: 'https://github.com/HarryJamesGreenblatt/A-Riff-In-React'
-    branch: 'main'
+    // Repository configuration removed to avoid listSecrets() error
+    // Deploy frontend separately using GitHub Actions or Azure Static Web Apps CLI
     buildProperties: {
       appLocation: '/'
       apiLocation: ''
@@ -299,7 +299,6 @@ module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
 // Outputs
 output containerAppUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
 output staticWebAppUrl string = 'https://${staticWebApp.properties.defaultHostname}'
-output staticWebAppDeploymentToken string = staticWebApp.listSecrets().properties.apiKey
 output managedIdentityId string = managedIdentity.id
 output managedIdentityClientId string = managedIdentity.properties.clientId
 output managedIdentityPrincipalId string = managedIdentity.properties.principalId

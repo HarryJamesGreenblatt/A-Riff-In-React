@@ -1,12 +1,11 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "languageVersion": "2.0",
   "contentVersion": "1.0.0.0",
   "metadata": {
     "_generator": {
       "name": "bicep",
       "version": "0.36.1.42791",
-      "templateHash": "11303740467816839228"
+      "templateHash": "8250707885558158515"
     }
   },
   "parameters": {
@@ -86,7 +85,7 @@
     },
     "existingCosmosDbAccountName": {
       "type": "string",
-      "defaultValue": "cosmos-a-riff-in-react",
+      "defaultValue": "riff-react-cosmos-db",
       "metadata": {
         "description": "The name of the existing Cosmos DB account"
       }
@@ -95,7 +94,7 @@
       "type": "string",
       "defaultValue": "db-rg",
       "metadata": {
-        "description": "The resource group of the existing Cosmos DB account"
+        "description": "The resource group of the existing Cosmos DB account. Following the Scaffolding architecture pattern, all database resources (SQL and Cosmos DB) should be in the db-rg resource group."
       }
     }
   },
@@ -111,18 +110,18 @@
       "azd_env_name": "[parameters('environmentName')]",
       "authStrategy": "JWT"
     },
-    "sqlServerFqdn": "[format('{0}.database.windows.net', parameters('existingSqlServerName'))]",
+    "sqlServerFqdn": "[format('{0}.{1}', parameters('existingSqlServerName'), environment().suffixes.sqlServerHostname)]",
     "corsOriginsArray": "[split(parameters('corsOrigins'), ',')]"
   },
-  "resources": {
-    "managedIdentity": {
+  "resources": [
+    {
       "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
       "apiVersion": "2023-01-31",
       "name": "[variables('managedIdentityName')]",
       "location": "[parameters('location')]",
       "tags": "[variables('tags')]"
     },
-    "logAnalytics": {
+    {
       "type": "Microsoft.OperationalInsights/workspaces",
       "apiVersion": "2022-10-01",
       "name": "[variables('logAnalyticsName')]",
@@ -141,7 +140,7 @@
         }
       }
     },
-    "applicationInsights": {
+    {
       "type": "Microsoft.Insights/components",
       "apiVersion": "2020-02-02",
       "name": "[format('appi-{0}', parameters('environmentName'))]",
@@ -154,10 +153,10 @@
         "RetentionInDays": 30
       },
       "dependsOn": [
-        "logAnalytics"
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsName'))]"
       ]
     },
-    "containerAppEnvironment": {
+    {
       "type": "Microsoft.App/managedEnvironments",
       "apiVersion": "2022-10-01",
       "name": "[variables('containerAppEnvName')]",
@@ -167,16 +166,16 @@
         "appLogsConfiguration": {
           "destination": "log-analytics",
           "logAnalyticsConfiguration": {
-            "customerId": "[reference('logAnalytics').customerId]",
-            "sharedKey": "[listKeys('logAnalytics', '2022-10-01').primarySharedKey]"
+            "customerId": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsName')), '2022-10-01').customerId]",
+            "sharedKey": "[listKeys(resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsName')), '2022-10-01').primarySharedKey]"
           }
         }
       },
       "dependsOn": [
-        "logAnalytics"
+        "[resourceId('Microsoft.OperationalInsights/workspaces', variables('logAnalyticsName'))]"
       ]
     },
-    "containerApp": {
+    {
       "type": "Microsoft.App/containerApps",
       "apiVersion": "2022-10-01",
       "name": "[variables('containerAppName')]",
@@ -238,7 +237,7 @@
             },
             {
               "name": "ai-connection-string",
-              "value": "[reference('applicationInsights').ConnectionString]"
+              "value": "[reference(resourceId('Microsoft.Insights/components', format('appi-{0}', parameters('environmentName'))), '2020-02-02').ConnectionString]"
             },
             {
               "name": "acr-password",
@@ -282,7 +281,7 @@
                 },
                 {
                   "name": "MANAGED_IDENTITY_CLIENT_ID",
-                  "value": "[reference('managedIdentity').clientId]"
+                  "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2023-01-31').clientId]"
                 },
                 {
                   "name": "COSMOS_ENDPOINT",
@@ -320,12 +319,12 @@
         }
       },
       "dependsOn": [
-        "applicationInsights",
-        "containerAppEnvironment",
-        "managedIdentity"
+        "[resourceId('Microsoft.Insights/components', format('appi-{0}', parameters('environmentName')))]",
+        "[resourceId('Microsoft.App/managedEnvironments', variables('containerAppEnvName'))]",
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName'))]"
       ]
     },
-    "staticWebApp": {
+    {
       "type": "Microsoft.Web/staticSites",
       "apiVersion": "2022-09-01",
       "name": "[variables('staticWebAppName')]",
@@ -336,8 +335,6 @@
         "tier": "Free"
       },
       "properties": {
-        "repositoryUrl": "https://github.com/HarryJamesGreenblatt/A-Riff-In-React",
-        "branch": "main",
         "buildProperties": {
           "appLocation": "/",
           "apiLocation": "",
@@ -345,103 +342,7 @@
         }
       }
     },
-    "sqlRoleAssignment": {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "sqlRoleAssignment",
-      "resourceGroup": "[parameters('existingSqlServerResourceGroup')]",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "sqlServerName": {
-            "value": "[parameters('existingSqlServerName')]"
-          },
-          "principalId": {
-            "value": "[reference('managedIdentity').principalId]"
-          },
-          "roleName": {
-            "value": "db_datareader"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.36.1.42791",
-              "templateHash": "3367833725391653867"
-            }
-          },
-          "parameters": {
-            "sqlServerName": {
-              "type": "string",
-              "metadata": {
-                "description": "The name of the SQL Server"
-              }
-            },
-            "principalId": {
-              "type": "string",
-              "metadata": {
-                "description": "The principal ID of the managed identity"
-              }
-            },
-            "roleName": {
-              "type": "string",
-              "metadata": {
-                "description": "The role to assign to the managed identity"
-              }
-            }
-          },
-          "variables": {
-            "sqlServerNameVar": "[parameters('sqlServerName')]"
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Resources/deploymentScripts",
-              "apiVersion": "2020-10-01",
-              "name": "[format('grant-sql-role-{0}', uniqueString(parameters('sqlServerName'), parameters('principalId'), parameters('roleName')))]",
-              "location": "[resourceGroup().location]",
-              "kind": "AzureCLI",
-              "properties": {
-                "azCliVersion": "2.37.0",
-                "retentionInterval": "P1D",
-                "timeout": "PT30M",
-                "cleanupPreference": "OnSuccess",
-                "environmentVariables": [
-                  {
-                    "name": "SQL_SERVER",
-                    "value": "[parameters('sqlServerName')]"
-                  },
-                  {
-                    "name": "PRINCIPAL_ID",
-                    "value": "[parameters('principalId')]"
-                  },
-                  {
-                    "name": "ROLE_NAME",
-                    "value": "[parameters('roleName')]"
-                  }
-                ],
-                "scriptContent": "      #!/bin/bash\r\n      \r\n      # Log in with the managed identity\r\n      az login --identity\r\n      \r\n      # Get the SQL Server resource ID\r\n      RESOURCE_ID=$(az sql server show -n $SQL_SERVER -g $(az group show --query name -o tsv) --query id -o tsv)\r\n      \r\n      # Create an Azure AD-only authentication administrator if it doesn't exist\r\n      ADMIN_EXISTS=$(az sql server ad-admin show --server $SQL_SERVER --query id --output tsv || echo \"\")\r\n      \r\n      if [ -z \"$ADMIN_EXISTS\" ]; then\r\n        # Get the current user's object ID\r\n        CURRENT_USER_ID=$(az ad signed-in-user show --query id -o tsv)\r\n        \r\n        # Set the current user as the AD admin\r\n        az sql server ad-admin create --server $SQL_SERVER --display-name \"AzureAD Admin\" --object-id $CURRENT_USER_ID\r\n      fi\r\n      \r\n      # Execute SQL command to create the user and assign the role\r\n      # This uses the sqlcmd utility with Azure AD authentication\r\n      cat > script.sql << EOL\r\n      -- Create user from external provider if it doesn't exist\r\n      IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = '$PRINCIPAL_ID')\r\n      BEGIN\r\n          CREATE USER [${PRINCIPAL_ID}] FROM EXTERNAL PROVIDER;\r\n      END\r\n      \r\n      -- Add user to role\r\n      ALTER ROLE [$ROLE_NAME] ADD MEMBER [${PRINCIPAL_ID}];\r\n      GO\r\n      EOL\r\n      \r\n      # Use the Azure CLI to execute the SQL script\r\n      az sql db query --server $SQL_SERVER --database master --query-file script.sql\r\n      \r\n      echo \"SQL role assignment completed\"\r\n    "
-              }
-            }
-          ],
-          "outputs": {
-            "scriptStatus": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.Resources/deploymentScripts', format('grant-sql-role-{0}', uniqueString(parameters('sqlServerName'), parameters('principalId'), parameters('roleName')))), '2020-10-01').provisioningState]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "managedIdentity"
-      ]
-    },
-    "cosmosRoleAssignment": {
+    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2022-09-01",
       "name": "cosmosRoleAssignment",
@@ -456,7 +357,7 @@
             "value": "[parameters('existingCosmosDbAccountName')]"
           },
           "principalId": {
-            "value": "[reference('managedIdentity').principalId]"
+            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2023-01-31').principalId]"
           },
           "roleDefinitionId": {
             "value": "00000000-0000-0000-0000-000000000002"
@@ -469,7 +370,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.36.1.42791",
-              "templateHash": "1710354984730068179"
+              "templateHash": "4721164041795500950"
             }
           },
           "parameters": {
@@ -488,7 +389,7 @@
             "roleDefinitionId": {
               "type": "string",
               "metadata": {
-                "description": "The role definition ID to assign to the managed identity"
+                "description": "The role definition ID to assign to the managed identity (use built-in role IDs like 00000000-0000-0000-0000-000000000002 for Data Contributor)"
               }
             }
           },
@@ -499,7 +400,7 @@
               "name": "[format('{0}/{1}', parameters('cosmosDbAccountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), parameters('principalId'), parameters('roleDefinitionId')))]",
               "properties": {
                 "principalId": "[parameters('principalId')]",
-                "roleDefinitionId": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('cosmosDbAccountName'), parameters('roleDefinitionId'))]",
+                "roleDefinitionId": "[format('{0}/sqlRoleDefinitions/{1}', resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), parameters('roleDefinitionId'))]",
                 "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))]"
               }
             }
@@ -513,22 +414,18 @@
         }
       },
       "dependsOn": [
-        "managedIdentity"
+        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName'))]"
       ]
     }
-  },
+  ],
   "outputs": {
     "containerAppUrl": {
       "type": "string",
-      "value": "[format('https://{0}', reference('containerApp').configuration.ingress.fqdn)]"
+      "value": "[format('https://{0}', reference(resourceId('Microsoft.App/containerApps', variables('containerAppName')), '2022-10-01').configuration.ingress.fqdn)]"
     },
     "staticWebAppUrl": {
       "type": "string",
-      "value": "[format('https://{0}', reference('staticWebApp').defaultHostname)]"
-    },
-    "staticWebAppDeploymentToken": {
-      "type": "string",
-      "value": "[listSecrets('staticWebApp', '2022-09-01').properties.apiKey]"
+      "value": "[format('https://{0}', reference(resourceId('Microsoft.Web/staticSites', variables('staticWebAppName')), '2022-09-01').defaultHostname)]"
     },
     "managedIdentityId": {
       "type": "string",
@@ -536,15 +433,15 @@
     },
     "managedIdentityClientId": {
       "type": "string",
-      "value": "[reference('managedIdentity').clientId]"
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2023-01-31').clientId]"
     },
     "managedIdentityPrincipalId": {
       "type": "string",
-      "value": "[reference('managedIdentity').principalId]"
+      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2023-01-31').principalId]"
     },
     "applicationInsightsConnectionString": {
       "type": "string",
-      "value": "[reference('applicationInsights').ConnectionString]"
+      "value": "[reference(resourceId('Microsoft.Insights/components', format('appi-{0}', parameters('environmentName'))), '2020-02-02').ConnectionString]"
     }
   }
 }
