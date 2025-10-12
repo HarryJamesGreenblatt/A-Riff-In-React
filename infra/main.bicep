@@ -249,28 +249,27 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
   }
 }
 
-// Static Web App for frontend - TEMPORARILY REMOVED FOR TESTING
-// Testing if this resource is causing the "content already consumed" error
-/*
-resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
-  name: staticWebAppName
-  location: location
-  tags: tags
-  sku: {
-    name: 'Free'
-    tier: 'Free'
-  }
-  properties: {
-    repositoryUrl: 'https://github.com/HarryJamesGreenblatt/A-Riff-In-React'
-    branch: 'main'
-    buildProperties: {
-      appLocation: '/'
-      apiLocation: ''
-      outputLocation: 'dist'
-    }
-  }
-}
-*/
+// ============================================================================
+// STATIC WEB APP - MANAGED SEPARATELY VIA FRONTEND WORKFLOW
+// ============================================================================
+// The Static Web App (swa-a-riff-in-react) is NOT managed by this Bicep template.
+// 
+// Reason: Azure ARM has limitations when updating GitHub-integrated Static Web Apps
+// via Bicep, causing "content already consumed" deployment errors.
+//
+// Frontend Deployment:
+//   - Managed by: .github/workflows/frontend-deploy.yml
+//   - Triggers on: Changes to src/**, public/**, etc.
+//   - Deployment Method: Azure CLI + Static Web Apps Deploy action
+//   - Auto-creates Static Web App if it doesn't exist
+//
+// This separation provides:
+//   ? Reliable infrastructure deployments (no ARM conflicts)
+//   ? Independent frontend/backend deployment cycles
+//   ? Cleaner separation of concerns
+//
+// See: docs/Auth/ROOT-CAUSE-VERIFIED.md for detailed explanation
+// ============================================================================
 
 // SQL Database role assignment module - DISABLED
 // Moved to GitHub workflow post-deployment step
@@ -287,9 +286,7 @@ resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
 //   }
 // }
 
-// Cosmos DB role assignment module - TEMPORARILY DISABLED FOR TESTING
-// Testing if this module is causing the "content already consumed" error
-/*
+// Cosmos DB role assignment module
 module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
   name: 'cosmosRoleAssignment'
   scope: resourceGroup(existingCosmosDbResourceGroup)
@@ -299,12 +296,14 @@ module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
     roleDefinitionId: '00000000-0000-0000-0000-000000000002' // Built-in Cosmos DB Data Contributor role
   }
 }
-*/
 
 // Outputs
 output containerAppUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
-// output staticWebAppUrl string = 'https://${staticWebApp.properties.defaultHostname}'  // COMMENTED - resource disabled for testing
 output managedIdentityId string = managedIdentity.id
 output managedIdentityClientId string = managedIdentity.properties.clientId
 output managedIdentityPrincipalId string = managedIdentity.properties.principalId
 output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
+
+// NOTE: Static Web App URL is not output here because the resource is managed separately.
+// To get the Static Web App URL, use:
+//   az staticwebapp show --name swa-a-riff-in-react --resource-group riffinreact-rg --query defaultHostname -o tsv
