@@ -45,7 +45,6 @@ var containerAppEnvName = 'env-${environmentName}'
 var containerAppName = 'ca-api-${environmentName}'
 var logAnalyticsName = 'log-${environmentName}'
 var managedIdentityName = 'id-${environmentName}'
-var staticWebAppName = 'swa-${environmentName}'
 
 // Tags for all resources
 var tags = {
@@ -250,7 +249,9 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
   }
 }
 
-// Static Web App for frontend
+// Static Web App for frontend - TEMPORARILY REMOVED FOR TESTING
+// Testing if this resource is causing the "content already consumed" error
+/*
 resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
   name: staticWebAppName
   location: location
@@ -269,6 +270,7 @@ resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
     }
   }
 }
+*/
 
 // SQL Database role assignment module - DISABLED
 // Moved to GitHub workflow post-deployment step
@@ -301,7 +303,7 @@ module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
 
 // Outputs
 output containerAppUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
-output staticWebAppUrl string = 'https://${staticWebApp.properties.defaultHostname}'
+// output staticWebAppUrl string = 'https://${staticWebApp.properties.defaultHostname}'  // COMMENTED - resource disabled for testing
 output managedIdentityId string = managedIdentity.id
 output managedIdentityClientId string = managedIdentity.properties.clientId
 output managedIdentityPrincipalId string = managedIdentity.properties.principalId

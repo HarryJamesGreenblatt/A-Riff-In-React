@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.36.1.42791",
-      "templateHash": "4143208613565340368"
+      "templateHash": "17299824778479463638"
     }
   },
   "parameters": {
@@ -103,7 +103,6 @@
     "containerAppName": "[format('ca-api-{0}', parameters('environmentName'))]",
     "logAnalyticsName": "[format('log-{0}', parameters('environmentName'))]",
     "managedIdentityName": "[format('id-{0}', parameters('environmentName'))]",
-    "staticWebAppName": "[format('swa-{0}', parameters('environmentName'))]",
     "tags": {
       "application": "A-Riff-In-React",
       "environment": "[parameters('environmentName')]",
@@ -323,111 +322,12 @@
         "[resourceId('Microsoft.App/managedEnvironments', variables('containerAppEnvName'))]",
         "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName'))]"
       ]
-    },
-    {
-      "type": "Microsoft.Web/staticSites",
-      "apiVersion": "2022-09-01",
-      "name": "[variables('staticWebAppName')]",
-      "location": "[parameters('location')]",
-      "tags": "[variables('tags')]",
-      "sku": {
-        "name": "Free",
-        "tier": "Free"
-      },
-      "properties": {
-        "repositoryUrl": "https://github.com/HarryJamesGreenblatt/A-Riff-In-React",
-        "branch": "main",
-        "buildProperties": {
-          "appLocation": "/",
-          "apiLocation": "",
-          "outputLocation": "dist"
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2022-09-01",
-      "name": "cosmosRoleAssignment",
-      "resourceGroup": "[parameters('existingCosmosDbResourceGroup')]",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "cosmosDbAccountName": {
-            "value": "[parameters('existingCosmosDbAccountName')]"
-          },
-          "principalId": {
-            "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName')), '2023-01-31').principalId]"
-          },
-          "roleDefinitionId": {
-            "value": "00000000-0000-0000-0000-000000000002"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.36.1.42791",
-              "templateHash": "4721164041795500950"
-            }
-          },
-          "parameters": {
-            "cosmosDbAccountName": {
-              "type": "string",
-              "metadata": {
-                "description": "The name of the Cosmos DB account"
-              }
-            },
-            "principalId": {
-              "type": "string",
-              "metadata": {
-                "description": "The principal ID of the managed identity"
-              }
-            },
-            "roleDefinitionId": {
-              "type": "string",
-              "metadata": {
-                "description": "The role definition ID to assign to the managed identity (use built-in role IDs like 00000000-0000-0000-0000-000000000002 for Data Contributor)"
-              }
-            }
-          },
-          "resources": [
-            {
-              "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
-              "apiVersion": "2022-08-15",
-              "name": "[format('{0}/{1}', parameters('cosmosDbAccountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), parameters('principalId'), parameters('roleDefinitionId')))]",
-              "properties": {
-                "principalId": "[parameters('principalId')]",
-                "roleDefinitionId": "[format('{0}/sqlRoleDefinitions/{1}', resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), parameters('roleDefinitionId'))]",
-                "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))]"
-              }
-            }
-          ],
-          "outputs": {
-            "roleAssignmentId": {
-              "type": "string",
-              "value": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments', parameters('cosmosDbAccountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), parameters('principalId'), parameters('roleDefinitionId')))]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName'))]"
-      ]
     }
   ],
   "outputs": {
     "containerAppUrl": {
       "type": "string",
       "value": "[format('https://{0}', reference(resourceId('Microsoft.App/containerApps', variables('containerAppName')), '2022-10-01').configuration.ingress.fqdn)]"
-    },
-    "staticWebAppUrl": {
-      "type": "string",
-      "value": "[format('https://{0}', reference(resourceId('Microsoft.Web/staticSites', variables('staticWebAppName')), '2022-09-01').defaultHostname)]"
     },
     "managedIdentityId": {
       "type": "string",
