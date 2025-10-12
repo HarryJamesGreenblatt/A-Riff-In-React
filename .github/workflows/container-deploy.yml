@@ -46,7 +46,7 @@ jobs:
           az provider register --namespace Microsoft.ContainerRegistry --wait
           az provider register --namespace Microsoft.OperationalInsights --wait
           az provider register --namespace Microsoft.DocumentDB --wait
-          az provider.register --namespace Microsoft.ManagedIdentity --wait
+          az provider register --namespace Microsoft.ManagedIdentity --wait
           az provider register --namespace Microsoft.KeyVault --wait
           az provider register --namespace Microsoft.Insights --wait
           az provider register --namespace Microsoft.Web --wait
