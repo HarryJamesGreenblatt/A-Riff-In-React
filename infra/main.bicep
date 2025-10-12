@@ -285,7 +285,9 @@ resource staticWebApp 'Microsoft.Web/staticSites@2022-09-01' = {
 //   }
 // }
 
-// Cosmos DB role assignment module
+// Cosmos DB role assignment module - TEMPORARILY DISABLED FOR TESTING
+// Testing if this module is causing the "content already consumed" error
+/*
 module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
   name: 'cosmosRoleAssignment'
   scope: resourceGroup(existingCosmosDbResourceGroup)
@@ -295,6 +297,7 @@ module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
     roleDefinitionId: '00000000-0000-0000-0000-000000000002' // Built-in Cosmos DB Data Contributor role
   }
 }
+*/
 
 // Outputs
 output containerAppUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
