@@ -56,6 +56,23 @@ class SqlService {
     }
   }
 
+  /**
+   * Generic query function for parameterized queries
+   */
+  async query(sql: string, params?: Record<string, any>): Promise<mssql.IResult<any>> {
+    const pool = await this.getConnection();
+    const request = pool.request();
+    
+    // Add parameters if provided
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        request.input(key, value);
+      });
+    }
+    
+    return request.query(sql);
+  }
+
   async getUsers(): Promise<User[]> {
     const pool = await this.getConnection();
     const result = await pool.request().query('SELECT * FROM Users');
@@ -125,3 +142,6 @@ class SqlService {
 }
 
 export const sqlService = new SqlService();
+
+// Export query function for direct use in routes
+export const query = (sql: string, params?: Record<string, any>) => sqlService.query(sql, params);

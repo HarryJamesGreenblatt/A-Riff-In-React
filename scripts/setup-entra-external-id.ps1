@@ -84,11 +84,30 @@ function Invoke-MgRest {
     if (-not (Get-Command Invoke-MgGraphRequest -ErrorAction SilentlyContinue)) {
         throw "Microsoft.Graph module REST helper not available."
     }
-
-    if ($Body -ne $null) {
+    if ($null -ne $Body) {
         return Invoke-MgGraphRequest -Method $Method -Uri $Uri -Body ($Body | ConvertTo-Json -Depth 10)
     }
     return Invoke-MgGraphRequest -Method $Method -Uri $Uri
+}
+
+# Helper: try to extract a response body string from various response shapes (module or az outputs)
+function Get-ResponseContentString {
+    param($resp)
+    try {
+        if ($null -eq $resp) { return $null }
+        if ($resp -is [string]) { return $resp }
+        if ($resp.PSObject.Properties.Name -contains 'Content') {
+            $c = $resp.Content
+            if ($c -is [string]) { return $c }
+            if ($c -and $c.GetType().GetMethod('ReadAsStringAsync')) {
+                return $c.ReadAsStringAsync().Result
+            }
+            try { return $c | ConvertTo-Json -Depth 5 } catch { return $c.ToString() }
+        }
+        # If az rest returned an object with value property, serialize it
+        if ($resp.PSObject.Properties.Name -contains 'value') { return ($resp | ConvertTo-Json -Depth 10) }
+        return ($resp | ConvertTo-Json -Depth 10)
+    } catch { return $null }
 }
 
 # Helper: Az module lookups (read-only discovery). These operate via Az.Resources and Az.Accounts context.
@@ -189,7 +208,7 @@ if ($PreferModule -and (Get-Command Connect-MgGraph -ErrorAction SilentlyContinu
                 }
                 if (-not $json -or -not ($json.value)) {
                     Write-Host "Module REST returned no usable content; falling back to az rest for app lookup."
-                    $respAz = Invoke-AzRest -Method GET -Uri $uri
+                    $respAz = & $function:Invoke-AzRest -Method GET -Uri $uri
                     if ($respAz -and $respAz.value -and $respAz.value.Count -gt 0) { $json = $respAz }
                 }
                 if ($json -and $json.value -and $json.value.Count -gt 0) {
@@ -229,7 +248,7 @@ if ($PreferModule -and (Get-Command Connect-MgGraph -ErrorAction SilentlyContinu
                     }
                     if (-not $json2 -or -not ($json2.value)) {
                         Write-Host "Module REST by displayName returned no usable content; falling back to az rest."
-                        $respAz2 = Invoke-AzRest -Method GET -Uri $uri2
+                        $respAz2 = & $function:Invoke-AzRest -Method GET -Uri $uri2
                         if ($respAz2 -and $respAz2.value -and $respAz2.value.Count -gt 0) { $json2 = $respAz2 }
                     }
                     if ($json2 -and $json2.value -and $json2.value.Count -gt 0) {
@@ -286,7 +305,7 @@ if (-not $app -and (Get-Command az -ErrorAction SilentlyContinue)) {
         $baseUri = "https://graph.microsoft.com/v1.0/applications"
         $filterParam = "`$filter=" + [System.Web.HttpUtility]::UrlEncode($filter)
         $uri = "$baseUri" + "?" + $filterParam
-        $resp = Invoke-AzRest -Method GET -Uri $uri
+    $resp = & $function:Invoke-AzRest -Method GET -Uri $uri
         if ($resp.value -and $resp.value.Count -gt 0) { $app = $resp.value[0] }
         # If still not found by appId, try to find an application by displayName as a fallback
         if (-not $app) {
@@ -294,7 +313,7 @@ if (-not $app -and (Get-Command az -ErrorAction SilentlyContinue)) {
             $filter2 = "displayName eq 'A-Riff-In-React SPA'"
             $filterParam2 = "`$filter=" + [System.Web.HttpUtility]::UrlEncode($filter2)
             $uri2 = "$baseUri" + "?" + $filterParam2
-            $resp2 = Invoke-AzRest -Method GET -Uri $uri2
+            $resp2 = & $function:Invoke-AzRest -Method GET -Uri $uri2
             if ($resp2.value -and $resp2.value.Count -gt 0) { $app = $resp2.value[0] }
         }
     } catch { Write-Host "az rest lookup failed: $($_.Exception.Message)" }
@@ -304,26 +323,41 @@ if (-not $app -and (Get-Command az -ErrorAction SilentlyContinue)) {
         Write-Host "App registration not found (az path). Creating..."
         $body = @{ displayName = 'A-Riff-In-React SPA'; web = @{ redirectUris = $redirectUris } } | ConvertTo-Json -Depth 5
         if ($DryRun) { Write-Host "DryRun: would POST to applications with body: $body" } else {
-            try { $newApp = Invoke-AzRest -Method POST -Uri "https://graph.microsoft.com/v1.0/applications" -Body $body; $app = $newApp; $ClientId = $app.appId; Write-Host "Created app registration with clientId: $ClientId (via az rest)" } catch { Write-Host "az rest create app failed: $($_.Exception.Message)" }
+                try { $newApp = & $function:Invoke-AzRest -Method POST -Uri "https://graph.microsoft.com/v1.0/applications" -Body $body; $app = $newApp; $ClientId = $app.appId; Write-Host "Created app registration with clientId: $ClientId (via az rest)" } catch { Write-Host "az rest create app failed: $($_.Exception.Message)" }
         }
     } else {
         Write-Host "App registration found via az. Ensuring redirect URIs are set..."
         $body = @{ web = @{ redirectUris = $redirectUris } } | ConvertTo-Json -Depth 3
-        if ($DryRun) { Write-Host "DryRun: would PATCH application $($app.id) with body: $body" } else { try { Invoke-AzRest -Method PATCH -Uri "https://graph.microsoft.com/v1.0/applications/$($app.id)" -Body $body; Write-Host "Updated app redirect URIs via az rest." } catch { Write-Host "Failed to update app via az rest: $($_.Exception.Message)" } }
+    if ($DryRun) { Write-Host "DryRun: would PATCH application $($app.id) with body: $body" } else { try { & $function:Invoke-AzRest -Method PATCH -Uri "https://graph.microsoft.com/v1.0/applications/$($app.id)" -Body $body; Write-Host "Updated app redirect URIs via az rest." } catch { Write-Host "Failed to update app via az rest: $($_.Exception.Message)" } }
     }
 }
 
 # 2. Associate app registration with user flow
 $userFlowAssociated = $false
-# Try the module cmdlet first (if available)
-if (Get-Command New-MgIdentityB2xUserFlowApplication -ErrorAction SilentlyContinue) {
+# Prefer the authenticationEventsFlow include-application cmdlet when available (adds the app to the user flow)
+if (Get-Command New-MgIdentityAuthenticationEventFlowIncludeApplication -ErrorAction SilentlyContinue) {
     try {
-        Write-Host "Associating app with user flow via Microsoft.Graph module..."
-        if ($DryRun) { Write-Host "DryRun: would run New-MgIdentityB2xUserFlowApplication -UserFlowId $UserFlowId -AppId $ClientId" } else { New-MgIdentityB2xUserFlowApplication -UserFlowId $UserFlowId -AppId $ClientId -ErrorAction Stop }
+        Write-Host "Associating app with user flow via Microsoft.Graph Identity.SignIns module (authenticationEventsFlow include-application)..."
+        $bodyParam = @{ "@odata.type" = "#microsoft.graph.authenticationConditionApplication"; appId = $ClientId }
+        if ($DryRun) { Write-Host "DryRun: would run New-MgIdentityAuthenticationEventFlowIncludeApplication -AuthenticationEventsFlowId $UserFlowId -BodyParameter $bodyParam" } else {
+            New-MgIdentityAuthenticationEventFlowIncludeApplication -AuthenticationEventsFlowId $UserFlowId -BodyParameter $bodyParam -ErrorAction Stop
+        }
         $userFlowAssociated = $true
-        Write-Host "Associated app with user flow via module."
-    } catch { Write-Host "Module attempt to associate app with user flow failed: $($_.Exception.Message)" }
+        Write-Host "Associated app with user flow via module cmdlet."
+    } catch { Write-Host "Module attempt (authenticationEventsFlow include-application) failed: $($_.Exception.Message)" }
+} elseif (Get-Command New-MgBetaIdentityAuthenticationEventFlowIncludeApplication -ErrorAction SilentlyContinue) {
+    try {
+        Write-Host "Associating app with user flow via Microsoft.Graph.Beta Identity.SignIns module (beta include-application)..."
+        $bodyParam = @{ "@odata.type" = "#microsoft.graph.authenticationConditionApplication"; appId = $ClientId }
+        if ($DryRun) { Write-Host "DryRun: would run New-MgBetaIdentityAuthenticationEventFlowIncludeApplication -AuthenticationEventsFlowId $UserFlowId -BodyParameter $bodyParam" } else {
+            New-MgBetaIdentityAuthenticationEventFlowIncludeApplication -AuthenticationEventsFlowId $UserFlowId -BodyParameter $bodyParam -ErrorAction Stop
+        }
+        $userFlowAssociated = $true
+        Write-Host "Associated app with user flow via beta module cmdlet."
+    } catch { Write-Host "Beta module attempt (authenticationEventsFlow include-application) failed: $($_.Exception.Message)" }
 }
+    # If module cmdlets aren't available, fall back to REST $ref or includeApplications endpoint
+    Write-Host "Module cmdlet not available; falling back to REST approach for including application in user flow."
 
 # If module approach didn't run or failed, try secure az/Az fallback using $ref collection add
 if (-not $userFlowAssociated) {
@@ -348,35 +382,93 @@ if (-not $userFlowAssociated) {
         }
     } catch { Write-Host "Az lookup for service principal failed: $($_.Exception.Message)" }
 
+    # If we still don't have the service principal id, try to resolve it via Graph (deterministic, suitable for CI)
+    if (-not $spObjectId) {
+        try {
+            Write-Host "Attempting to resolve servicePrincipal id for clientId $ClientId via Graph..."
+            $spFilter = "appId eq '$ClientId'"
+            $spEnc = [System.Web.HttpUtility]::UrlEncode($spFilter)
+            $spUri = "https://graph.microsoft.com/v1.0/servicePrincipals?`$filter=$spEnc"
+            if (Get-Command Invoke-MgGraphRequest -ErrorAction SilentlyContinue) {
+                $spResp = Invoke-MgGraphRequest -Method GET -Uri $spUri -ErrorAction SilentlyContinue
+                if ($spResp) {
+                    if ($spResp -is [string]) { $spJson = $spResp | ConvertFrom-Json } elseif ($spResp.PSObject.Properties.Name -contains 'Content') { $spJson = $spResp.Content | ConvertFrom-Json } else { $spJson = $spResp }
+                    if ($spJson -and $spJson.value -and $spJson.value.Count -gt 0) { $spObjectId = $spJson.value[0].id }
+                }
+            } elseif (Get-Command az -ErrorAction SilentlyContinue) {
+                $spRespAz = & $function:Invoke-AzRest -Method GET -Uri $spUri
+                if ($spRespAz -and $spRespAz.value -and $spRespAz.value.Count -gt 0) { $spObjectId = $spRespAz.value[0].id }
+            }
+            if ($spObjectId) { Write-Host "Resolved servicePrincipal id: $spObjectId" }
+        } catch { Write-Warning "Failed to resolve servicePrincipal id via Graph: $($_.Exception.Message)" }
+    }
+
     if (-not $appObjectId) { Write-Host "Unable to determine application object id to reference in user flow association; skipping association." }
     else {
+        # Try the newer includeApplications REST endpoint for authenticationEventsFlow
+        $includeUriBeta = "https://graph.microsoft.com/beta/identity/authenticationEventsFlows/$UserFlowId/includeApplications"
+        # v1 endpoint (define before use)
+        $includeUriV1 = "https://graph.microsoft.com/v1.0/identity/authenticationEventsFlows/$UserFlowId/includeApplications"
+        $includeBody = @{ "@odata.type" = "#microsoft.graph.authenticationConditionApplication"; appId = $ClientId }
+
         if (Get-Command Invoke-MgGraphRequest -ErrorAction SilentlyContinue) {
             try {
-                Write-Host "Associating app with user flow via Microsoft.Graph module REST ($ref pattern)..."
-                $uri = "https://graph.microsoft.com/beta/identity/b2xUserFlows/$UserFlowId/applications/`$ref"
-                if ($spObjectId) {
-                    $odataId = "https://graph.microsoft.com/v1.0/servicePrincipals/$spObjectId"
-                } else {
-                    $odataId = "https://graph.microsoft.com/v1.0/applications/$appObjectId"
+                Write-Host "Attempting to include application in authenticationEventsFlow via module REST (beta endpoint)..."
+                if ($DryRun) { Write-Host "DryRun: would POST $includeUriBeta with body: $($includeBody | ConvertTo-Json -Depth 6)" } else {
+                    $resp = Invoke-MgGraphRequest -Method POST -Uri $includeUriBeta -ContentType 'application/json' -Body ($includeBody | ConvertTo-Json -Depth 10) -ErrorAction Stop
+                    Write-Host "Included application via module REST."
+                    $userFlowAssociated = $true
                 }
-                $body = @{ "@odata.id" = $odataId }
-                if ($DryRun) { Write-Host "DryRun: would POST $uri with body: $($body | ConvertTo-Json)" } else { Invoke-MgRest -Method POST -Uri $uri -Body $body }
-                $userFlowAssociated = $true
-                Write-Host "Associated app with user flow via module REST."
-            } catch { Write-Host "Module REST attempt failed: $($_.Exception.Message)" }
-        } elseif (Get-Command az -ErrorAction SilentlyContinue) {
-            try {
-                Write-Host "Falling back to az rest to associate app with user flow using $ref pattern..."
-                $uri = "https://graph.microsoft.com/beta/identity/b2xUserFlows/$UserFlowId/applications/" + '$ref'
-                $odataId = "https://graph.microsoft.com/v1.0/applications/$appObjectId"
-                $body = @{ "@odata.id" = $odataId } | ConvertTo-Json -Depth 3
-                if ($DryRun) { Write-Host "DryRun: would POST $uri with body: $body" } else { Invoke-AzRest -Method POST -Uri $uri -Body $body }
-                $userFlowAssociated = $true
-                Write-Host "Associated app with user flow via az rest."
-            } catch { Write-Host "az rest attempt failed: $($_.Exception.Message)" }
-        } else {
-            Write-Host "No available method (module or az) to perform REST fallback; cannot associate app with user flow from this environment."
+            } catch { Write-Warning "Module REST includeApplications attempt failed: $($_.Exception.Message)" }
         }
+
+        # Try v1.0 includeApplications if beta returned NotFound
+        if (-not $userFlowAssociated -and (Get-Command Invoke-MgGraphRequest -ErrorAction SilentlyContinue)) {
+            try {
+                Write-Host "Attempting v1.0 includeApplications endpoint via module REST..."
+                if ($DryRun) { Write-Host "DryRun: would POST $includeUriV1 with body: $($includeBody | ConvertTo-Json -Depth 6)" } else {
+                    $resp1 = Invoke-MgGraphRequest -Method POST -Uri $includeUriV1 -ContentType 'application/json' -Body ($includeBody | ConvertTo-Json -Depth 10) -ErrorAction Stop
+                    $r1Content = Get-ResponseContentString $resp1
+                    Write-Host "Included application via module REST v1.0. Response: $r1Content"
+                    $userFlowAssociated = $true
+                }
+            } catch { Write-Warning "v1.0 includeApplications attempt failed: $($_.Exception.Message)" }
+        }
+
+        if (-not $userFlowAssociated -and (Get-Command az -ErrorAction SilentlyContinue)) {
+            try {
+                Write-Host "Falling back to az rest to include application in authenticationEventsFlow (beta endpoint)..."
+                $bodyJson = ($includeBody | ConvertTo-Json -Depth 6)
+                if ($DryRun) { Write-Host "DryRun: would POST $includeUriBeta with body: $bodyJson" } else {
+                    # Use our deterministic Invoke-AzRest wrapper (call the function explicitly to avoid colliding with Az module cmdlets)
+                    & $function:Invoke-AzRest -Method POST -Uri $includeUriBeta -Body $bodyJson
+                }
+                $userFlowAssociated = $true
+                Write-Host "Included application via az rest."
+            } catch { Write-Host "az rest includeApplications attempt failed: $($_.Exception.Message)" }
+        }
+
+        # As a final fallback, try the older $ref pattern against b2xUserFlows/applications/$ref (keeps backward compatibility)
+        if (-not $userFlowAssociated -and ( (Get-Command az -ErrorAction SilentlyContinue) -or (Get-Command Invoke-MgGraphRequest -ErrorAction SilentlyContinue) )) {
+            try {
+                Write-Host "Falling back to legacy $ref pattern on b2xUserFlows (may not be supported on all tenants)..."
+                $uri = "https://graph.microsoft.com/beta/identity/b2xUserFlows/$UserFlowId/applications/`$ref"
+                if ($spObjectId) { $odataId = "https://graph.microsoft.com/v1.0/servicePrincipals/$spObjectId" } else { $odataId = "https://graph.microsoft.com/v1.0/applications/$appObjectId" }
+                $refBody = @{ "@odata.id" = $odataId } | ConvertTo-Json -Depth 3
+                if ($DryRun) { Write-Host "DryRun: would POST $uri with body: $refBody" } else {
+                    try {
+                        if (Get-Command Invoke-MgGraphRequest -ErrorAction SilentlyContinue) { Invoke-MgGraphRequest -Method POST -Uri $uri -ContentType 'application/json' -Body $refBody -ErrorAction Stop } else { & $function:Invoke-AzRest -Method POST -Uri $uri -Body $refBody }
+                    } catch {
+                        # Capture body/message for diagnostics
+                        try { Write-Warning "Legacy $ref POST failed: $($null -ne $_.Exception.Response ? ($_.Exception.Response | ConvertTo-Json -Depth 5) : $_.Exception.Message)" } catch { Write-Warning "Legacy $ref POST failed: $($_.Exception.Message)" }
+                        throw
+                    }
+                }
+                $userFlowAssociated = $true
+                Write-Host "Associated app with user flow via legacy $ref pattern."
+            } catch { Write-Host "Legacy $ref fallback failed: $($_.Exception.Message)" }
+        }
+        if (-not $userFlowAssociated) { Write-Warning "Unable to associate application with user flow using any known method." }
     }
 }
 
@@ -387,26 +479,44 @@ if (-not $skipGoogle) {
         try { $existing = Get-MgIdentityProvider -Filter "displayName eq 'Google'" -ErrorAction SilentlyContinue; if ($existing) { $existingProvider = $existing[0] } } catch { Write-Host "Module lookup for identity provider failed: $($_.Exception.Message)" }
     }
 
-    if (-not $existingProvider -and (Get-Command az -ErrorAction SilentlyContinue)) {
+    if (-not $existingProvider) {
+        # Try several strategies to find an existing Google provider: prefer module cmdlet, then az rest listing
         try {
-            $filter = "displayName eq 'Google'"
-            $baseUri = "https://graph.microsoft.com/v1.0/identity/identityProviders"
-            $filterParam = "`$filter=" + [System.Web.HttpUtility]::UrlEncode($filter)
-            $uri = "$baseUri" + "?" + $filterParam
-            $resp = Invoke-AzRest -Method GET -Uri $uri
-            if ($resp.value -and $resp.value.Count -gt 0) { $existingProvider = $resp.value[0] }
-        } catch { Write-Host "az rest lookup for identity providers failed: $($_.Exception.Message)" }
+            if (Get-Command Get-MgIdentityProvider -ErrorAction SilentlyContinue) {
+                $all = Get-MgIdentityProvider -ErrorAction SilentlyContinue
+                if ($all) { $existingProvider = $all | Where-Object { ($_.identityProviderType -and $_.identityProviderType -eq 'Google') -or ($_.displayName -and $_.displayName -match 'Google') } | Select-Object -First 1 }
+            }
+        } catch { }
+
+        if (-not $existingProvider -and (Get-Command az -ErrorAction SilentlyContinue)) {
+            try {
+                $uriAll = "https://graph.microsoft.com/beta/identity/identityProviders"
+                $resp = & $function:Invoke-AzRest -Method GET -Uri $uriAll
+                if ($resp -and $resp.value -and $resp.value.Count -gt 0) {
+                    $existingProvider = $resp.value | Where-Object { ($_.'identityProviderType' -eq 'Google') -or ($_.'displayName' -match 'Google') } | Select-Object -First 1
+                }
+            } catch { Write-Host "az rest lookup for identity providers failed: $($_.Exception.Message)" }
+        }
     }
 
     if ($existingProvider) {
         Write-Host "Google identity provider exists. Updating clientId/secret..."
         if ($DryRun) { Write-Host "DryRun: would update provider id $($existingProvider.id) with new client id/secret" } else {
             try {
-                if (Get-Command Update-MgIdentityProvider -ErrorAction SilentlyContinue) {
-                    Update-MgIdentityProvider -IdentityProviderId $existingProvider.Id -AdditionalProperties @{ clientId = $GoogleClientId; clientSecret = $GoogleClientSecret } -ErrorAction Stop
-                    Write-Host "Updated Google provider via module."
+                $updateBody = @{ clientId = $GoogleClientId; clientSecret = $GoogleClientSecret }
+                $updJson = $updateBody | ConvertTo-Json -Depth 5
+                # Prefer module REST if available, then fall back to az rest
+                if (Get-Command Invoke-MgGraphRequest -ErrorAction SilentlyContinue) {
+                    try {
+                        Invoke-MgGraphRequest -Method PATCH -Uri "https://graph.microsoft.com/beta/identity/identityProviders/$($existingProvider.id)" -ContentType 'application/json' -Body $updJson -ErrorAction Stop
+                        Write-Host "Updated Google provider via module REST."
+                    } catch {
+                        Write-Warning "Module REST PATCH failed: $($_.Exception.Message) - falling back to az rest."
+                        & $function:Invoke-AzRest -Method PATCH -Uri "https://graph.microsoft.com/beta/identity/identityProviders/$($existingProvider.id)" -Body $updJson
+                        Write-Host "Updated Google provider via az rest."
+                    }
                 } else {
-                    Invoke-AzRest -Method PATCH -Uri "https://graph.microsoft.com/beta/identity/identityProviders/$($existingProvider.id)" -Body (@{ clientId = $GoogleClientId; clientSecret = $GoogleClientSecret } | ConvertTo-Json)
+                    & $function:Invoke-AzRest -Method PATCH -Uri "https://graph.microsoft.com/beta/identity/identityProviders/$($existingProvider.id)" -Body $updJson
                     Write-Host "Updated Google provider via az rest."
                 }
             } catch { Write-Host "Failed to update Google provider: $($_.Exception.Message)" }
@@ -415,18 +525,88 @@ if (-not $skipGoogle) {
         Write-Host "Google identity provider not found. Creating..."
         if ($DryRun) { Write-Host "DryRun: would create Google identity provider with clientId <redacted>" } else {
             try {
-                # Use explicit REST body to create the Google identity provider (beta endpoint).
-                $providerBody = @{ displayName = 'Google'; identityProviderType = 'Google'; clientId = $GoogleClientId; clientSecret = $GoogleClientSecret }
+                # Use documented shape: @odata.type = microsoft.graph.socialIdentityProvider and identityProviderType = 'Google'
+                $providerBody = @{ "@odata.type" = "#microsoft.graph.socialIdentityProvider"; displayName = 'Google'; identityProviderType = 'Google'; clientId = $GoogleClientId; clientSecret = $GoogleClientSecret }
                 if ($DryRun) {
-                    Write-Host "DryRun: would create identity provider with body: $($providerBody | ConvertTo-Json -Depth 5)"
+                    Write-Host "DryRun: would create identity provider with body: $($providerBody | ConvertTo-Json -Depth 6)"
                 } else {
                     try {
+                        $idErr = $null
+                        $idResp = $null
                         if (Get-Command Invoke-MgGraphRequest -ErrorAction SilentlyContinue) {
-                            Invoke-MgRest -Method POST -Uri "https://graph.microsoft.com/beta/identity/identityProviders" -Body $providerBody
-                            Write-Host "Created Google provider via Microsoft.Graph REST."
+                            try { $idResp = Invoke-MgGraphRequest -Method POST -Uri "https://graph.microsoft.com/beta/identity/identityProviders" -ContentType 'application/json' -Body ($providerBody | ConvertTo-Json -Depth 10) -ErrorAction SilentlyContinue -ErrorVariable idErr } catch { $idResp = $null; $idErr = $_ }
                         } else {
-                            Invoke-AzRest -Method POST -Uri "https://graph.microsoft.com/beta/identity/identityProviders" -Body ($providerBody | ConvertTo-Json -Depth 5)
-                            Write-Host "Created Google provider via az rest."
+                            try { $idResp = & $function:Invoke-AzRest -Method POST -Uri "https://graph.microsoft.com/beta/identity/identityProviders" -Body ($providerBody | ConvertTo-Json -Depth 10) } catch { $idResp = $null; $idErr = $_ }
+                        }
+
+                        $idStatus = $null
+                        $idContent = $null
+                        if ($idResp) {
+                            if ($idResp -is [string]) { $idContent = $idResp } elseif ($idResp.PSObject.Properties.Name -contains 'Content') { $idContent = $idResp.Content } else { $idContent = $idResp | ConvertTo-Json -Depth 10 }
+                            if ($idResp.PSObject.Properties.Name -contains 'StatusCode') { $idStatus = $idResp.StatusCode }
+                        }
+
+                        if ($idStatus -and ($idStatus -ge 200 -and $idStatus -lt 300)) {
+                            Write-Host "Successfully created identity provider via module REST. Status: $idStatus"
+                        } else {
+                            Write-Warning "Identity provider creation failed. Status: $idStatus"
+                            if ($idErr) {
+                                Write-Warning "Identity provider error: $idErr"
+                                # Try to extract response content from error variable if present
+                                try {
+                                    if ($idErr.Exception.Response) { $idContent = Get-ResponseContentString $idErr.Exception.Response }
+                                    elseif ($idErr.Response) { $idContent = Get-ResponseContentString $idErr.Response }
+                                } catch { }
+                            }
+                            if ($idContent) {
+                                try { $parsedId = $idContent | ConvertFrom-Json -ErrorAction SilentlyContinue; Write-Warning "Response body: $($parsedId | ConvertTo-Json -Depth 10)" } catch { Write-Warning "Raw response: $idContent" }
+                            } else { Write-Warning "No response content available for identity provider creation." }
+
+                            # If identity provider already exists by Type, locate it and attempt to update instead of failing.
+                            $alreadyExists = $false
+                            try {
+                                if ($idContent) {
+                                    $raw = $idContent -as [string]
+                                    if ($raw -match "already exists" -or $raw -match "IdentityProvider with Type") { $alreadyExists = $true }
+                                }
+                            } catch { }
+
+                            if ($alreadyExists) {
+                                Write-Host "Detected existing Google identity provider by creation error; locating existing provider to update..."
+                                try {
+                                    # Try to find provider by identityProviderType eq 'Google'
+                                    $prov = $null
+                                    $filter = "identityProviderType eq 'Google'"
+                                    $enc = [System.Web.HttpUtility]::UrlEncode($filter)
+                                    $uriProv = "https://graph.microsoft.com/beta/identity/identityProviders?`$filter=$enc"
+                                    if (Get-Command Invoke-MgGraphRequest -ErrorAction SilentlyContinue) {
+                                        $respProv = Invoke-MgGraphRequest -Method GET -Uri $uriProv -ErrorAction SilentlyContinue
+                                        if ($respProv) {
+                                            if ($respProv -is [string]) { $prov = ($respProv | ConvertFrom-Json).value[0] } elseif ($respProv.PSObject.Properties.Name -contains 'Content') { $prov = ($respProv.Content | ConvertFrom-Json).value[0] } else { $prov = $respProv.value[0] }
+                                        }
+                                    } elseif (Get-Command az -ErrorAction SilentlyContinue) {
+                                        $respProv = & $function:Invoke-AzRest -Method GET -Uri $uriProv
+                                        if ($respProv -and $respProv.value -and $respProv.value.Count -gt 0) { $prov = $respProv.value[0] }
+                                    }
+
+                                    if ($prov -and $prov.id) {
+                                        Write-Host "Found existing Google provider with id: $($prov.id). Performing update with new client id/secret..."
+                                        $updBody = @{ clientId = $GoogleClientId; clientSecret = $GoogleClientSecret } | ConvertTo-Json -Depth 5
+                                        if (Get-Command Invoke-MgGraphRequest -ErrorAction SilentlyContinue) {
+                                            Write-Host "Updating provider via module REST (Invoke-MgGraphRequest)..."
+                                            Invoke-MgGraphRequest -Method PATCH -Uri "https://graph.microsoft.com/beta/identity/identityProviders/$($prov.id)" -Body $updBody -ErrorAction Stop
+                                        } else {
+                                            Write-Host "Updating provider via az rest PATCH..."
+                                            & $function:Invoke-AzRest -Method PATCH -Uri "https://graph.microsoft.com/beta/identity/identityProviders/$($prov.id)" -Body $updBody
+                                        }
+                                        Write-Host "Updated existing Google identity provider successfully."
+                                    } else {
+                                        Write-Warning "Unable to locate the existing Google provider to update; please inspect tenant state manually."
+                                    }
+                                } catch { Write-Warning "Failed to locate/update existing Google provider: $($_.Exception.Message)" }
+                            } else {
+                                throw "Failed to create Google provider: Response status code does not indicate success: $idStatus"
+                            }
                         }
                     } catch { Write-Host "Failed to create Google provider: $($_.Exception.Message)" }
                 }

@@ -7,6 +7,7 @@ import Footer from "./components/Footer";
 import About from "./pages/About";
 import RegisterPage from "./pages/Register";
 import Architecture from "./pages/Architecture";
+import AuthTest from "./pages/AuthTest";
 import "./App.css";
 import PhoneCollectModal from "./components/auth/PhoneCollectModal";
 import { useAppSelector } from './store/hooks'
@@ -44,6 +45,7 @@ const App: React.FC = () => {
                 <Route path="/about" element={<About />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/architecture" element={<Architecture />} />
+                <Route path="/auth-test" element={<AuthTest />} />
               </Routes>
               {currentUser && (
                 <PhoneCollectModal open={phoneModalOpen} onClose={() => setPhoneModalOpen(false)} onSave={handleSavePhone} />

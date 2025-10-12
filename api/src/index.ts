@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 
 // Routes
+import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import activityRoutes from './routes/activityRoutes';
 
@@ -24,11 +25,13 @@ app.get('/health', (req, res) => {
     status: 'OK',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    version: '1.0.1'  // Added version information
+    authStrategy: 'JWT',
+    version: '1.0.2'
   });
 });
 
 // API routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/activities', activityRoutes);
 
@@ -36,7 +39,8 @@ app.use('/api/activities', activityRoutes);
 app.get('/', (req, res) => {
   res.status(200).json({ 
     message: 'A-Riff-In-React API is running',
-    version: '1.0.0',
+    version: '1.0.2',
+    authStrategy: 'JWT',
     documentation: '/api-docs'
   });
 });
@@ -44,6 +48,7 @@ app.get('/', (req, res) => {
 // Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+  console.log(`Auth strategy: JWT`);
 });
 
 export default app;
