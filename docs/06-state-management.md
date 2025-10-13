@@ -188,12 +188,9 @@ When connecting to Azure backends:
 - Implement proper error handling for network failures
 - Use RTK Query's retry mechanisms for resilience
 
-### 2. Authentication with MSAL
+### 2. Authentication
 
-Future MSAL integration will:
-- Store tokens securely
-- Automatically refresh tokens
-- Inject tokens into API headers
+This project now uses a JWT-based authentication approach by default. For implementation details and frontend integration, see `docs/07-authentication.md`.
 
 ### 3. Optimistic Updates
 
@@ -247,7 +244,6 @@ If migrating from Context API or other state management:
 
 ## Next Steps
 
-- [ ] Integrate MSAL for authentication
 - [ ] Add WebSocket support for real-time updates
 - [ ] Implement offline support with persistence
 - [ ] Add Redux DevTools configuration

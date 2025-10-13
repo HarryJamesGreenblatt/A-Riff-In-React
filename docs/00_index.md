@@ -59,7 +59,7 @@ Production operations, troubleshooting, and success documentation.
 ## 🔄 Document Maintenance
 
 ### Recent Updates (October 12, 2025)
-- **Authentication Strategy Change**: Migrated from MSAL/Entra External ID to JWT-based auth
+- **Authentication Strategy Change**: Migrated from MSAL/Entra External ID to JWT-based auth; `docs/07-authentication.md` is the canonical guide.
 - **Template-First Focus**: Emphasized portable, client-deployable architecture
 - **Simplified Deployment**: Removed manual Portal configuration requirements
 - **Archived**: MSAL documentation moved to `archive/` folder

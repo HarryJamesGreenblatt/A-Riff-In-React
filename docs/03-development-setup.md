@@ -114,12 +114,17 @@ src/
 - [ ] ESLint and Prettier are configured
 - [ ] Basic routing is functional
 
-### Authentication status (2025-09-14)
+### Authentication status (UPDATED)
 
-- The frontend has MSAL integrated for Microsoft Entra External ID and a Google SSO button wired to `AuthService.signIn('google')`.
-- A hosted External ID user flow exists (`B2X_1_user-flow-for-a-riff-in-react`) but the SPA did not present Google during testing because the app was not associated with the user flow or the user-flow authority wasn't used in the auth request.
-- Next: assign the app to the user flow in Azure Portal or set `VITE_ENTRA_USER_FLOW_AUTHORITY` in the local environment to the user-flow URL to force the SPA to call the hosted flow.
-- [ ] Project structure follows established conventions
+The project has migrated from MSAL/Entra External ID to an in-repo JWT authentication strategy to support a template-first, zero-portal-configuration deployment experience. The full migration is complete and documented; developers should follow the JWT-based guides below rather than the old MSAL notes.
+
+- Primary auth documentation: `docs/07-authentication.md` (JWT implementation and frontend integration)
+- Migration summary and verification: `docs/Auth/JWT-MIGRATION-COMPLETE.md`
+- One-time SQL permission step (if required): `docs/Auth/SQL-SETUP-STEP-BY-STEP.md`
+
+Notes:
+- The codebase and infrastructure have been updated to use JWT (bcrypt password hashing on the API, JWT tokens, and managed identity for database access).
+- Old MSAL/Entra artifacts and guidance have been archived. Do not follow MSAL/Entra configuration instructions in older documents.
 
 ### Step 1 Completed: Basic Vite Setup ✅
 

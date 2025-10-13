@@ -155,6 +155,8 @@ interface Activity {
 
 ## 🔐 Authentication Architecture: JWT-Based
 
+This template uses a JWT-based authentication implementation. The project completed a migration away from MSAL/Entra External ID to a self-contained JWT approach to support rapid, zero-portal deployments. See `docs/07-authentication.md` for details and `docs/Auth/JWT-MIGRATION-COMPLETE.md` for migration notes and verification.
+
 Unlike enterprise applications that use Azure AD or Entra External ID, this template uses a **homebrew JWT authentication** pattern optimized for **template deployability**.
 
 ### Why JWT Instead of Entra External ID?
