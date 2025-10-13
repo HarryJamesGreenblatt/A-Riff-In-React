@@ -55,7 +55,8 @@ var tags = {
 }
 
 // Reference to existing SQL Server - using environment() function for cloud compatibility
-var sqlServerFqdn = '${existingSqlServerName}.${environment().suffixes.sqlServerHostname}'
+// Use replace to collapse accidental double-dots if any component produces an extra '.'
+var sqlServerFqdn = replace('${existingSqlServerName}.${environment().suffixes.sqlServerHostname}', '..', '.')
 
 // Parse CORS origins from comma-separated string
 var corsOriginsArray = split(corsOrigins, ',')
