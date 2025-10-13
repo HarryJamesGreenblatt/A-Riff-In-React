@@ -200,16 +200,18 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
               name: 'JWT_EXPIRY'
               value: '7d'
             }
+            // Canonical SQL env names used by the application. Keep these; do not rely on legacy aliases.
             {
-              name: 'SQL_SERVER_ENDPOINT'
+              name: 'SQL_SERVER'
               value: sqlServerFqdn
             }
             {
-              name: 'SQL_DATABASE_NAME'
+              name: 'SQL_DATABASE'
               value: existingSqlDatabaseName
             }
+            // Expose the managed identity client id using the standard AZURE_CLIENT_ID name
             {
-              name: 'MANAGED_IDENTITY_CLIENT_ID'
+              name: 'AZURE_CLIENT_ID'
               value: managedIdentity.properties.clientId
             }
             {
@@ -273,7 +275,13 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
 
 // SQL Database role assignment module - DISABLED
 // Moved to GitHub workflow post-deployment step
-// Reason: Deployment script resource has limitations with cross-resource-group deployments
+// Reason: Deployment script resources have limitations:
+//   1. Need managed identity with SQL admin permissions
+//   2. Cross-resource-group authentication complexity
+//   3. Additional Azure costs for deployment script executions
+//   4. Simpler to handle in workflow with proper error handling
+//
+// Current approach: GitHub workflow attempts automated setup, falls back to clear manual instructions
 // See: .github/workflows/container-deploy.yml (Setup SQL Managed Identity Access step)
 //
 // module sqlRoleAssignment 'modules/sqlRoleAssignment.bicep' = {
