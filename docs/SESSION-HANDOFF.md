@@ -1,372 +1,232 @@
-# Session Handoff: JWT Auth Implementation & Infrastructure Alignment - COMPLETE! ?
+# Session Handoff — Next Session Agent Context
 
-**Date**: October 12, 2025  
-**Last Updated**: December 12, 2024 (FINAL)  
-**Session Goal**: ? **COMPLETE** - Implement JWT authentication and align ALL infrastructure for template deployment
-
-## ?? Mission: COMPLETE
-
-Complete the migration from MSAL/Entra External ID to JWT authentication across:
-1. ? **Documentation** (COMPLETE)
-2. ? **Application Code** (COMPLETE - deployed to production)
-3. ? **Infrastructure (Bicep)** (COMPLETE - JWT-ready and deployed)
-4. ? **CI/CD Workflows** (COMPLETE - SQL role assignment automated with fallback)
-5. ? **Deployed Azure Resources** (VERIFIED - see DEPLOYMENT-VERIFICATION-DEC2024.md)
-6. ? **Frontend Code Cleanup** (COMPLETE - all MSAL removed)
-
-**Status**: 95% Complete - Only SQL setup + end-to-end testing remaining
+**Date**: 2025-10-13  
+**Last Updated**: End of session (post SQL fix, frontend deployment fix, phone schema issue identified)
 
 ---
 
-## ?? Latest Session (December 12, 2024)
+## Summary
 
-### ? Completed Tasks
-
-1. **Removed MSAL Files**
-   - ? Deleted `src/config/authConfig.ts`
-   - ? Deleted `src/services/auth/msalInstance.ts`
-   - ?? Archived `api/docs/05-authentication-msal.md`
-
-2. **Updated Frontend for JWT**
-   - ? Updated `src/main.tsx` - Removed MsalProvider
-   - ? Rewrote `src/hooks/useAuth.ts` - JWT implementation
-   - ? Updated `src/components/auth/LoginButton.tsx` - Navigate to login
-   - ? Updated `src/components/auth/AuthGuard.tsx` - Navigate to login
-   - ? Updated `src/App.tsx` - Added /login route
-   - ? Updated `src/pages/Register.tsx` - Removed social login
-   - ? Updated `src/components/Homepage.tsx` - Navigate to login
-   - ? Added `savePhoneForUser` method to AuthService
-
-3. **Created Frontend Configuration**
-   - ? Created `.env.example` with VITE_API_BASE_URL
-
-4. **Verified Build**
-   - ? Build succeeds with no TypeScript errors
-   - ? No MSAL dependencies found
-   - ? All components using JWT authentication
-
-5. **Documentation**
-   - ? Created `docs/Auth/JWT-MIGRATION-COMPLETE.md`
-   - ? Updated SESSION-HANDOFF.md (this file)
+The **A-Riff-In-React** template is deployed to Azure with JWT authentication. Registration and login work end-to-end. A phone-collection modal was causing a 500 error; root cause: `Users` table lacks a `phone` column.
 
 ---
 
-## ?? What Was Accomplished
+## Current Status (What Works)
 
-### ? Documentation Overhaul (COMPLETE)
-- Updated README.md with JWT authentication architecture
-- Rewrote docs/01-project-overview.md for template-first philosophy
-- Created docs/07-authentication.md with comprehensive JWT guide
-- Updated docs/00_index.md navigation
-- Archived old MSAL documentation
-- Committed changes: `14c2af1`
+? **Infrastructure deployed successfully**:
+- Container App: `ca-api-a-riff-in-react` (API running, health endpoint OK)
+- Static Web App: `swa-a-riff-in-react` (frontend deployed, correct API URL baked in)
+- Managed Identity: `id-a-riff-in-react` (clientId: `994510d1-c3e8-422f-8dc9-ba517cce51ea`)
+- Azure SQL: `sequitur-sql-server.database.windows.net` / `riff-react-db`
+- Cosmos DB: `riff-react-cosmos-db`
 
-**See**: `docs/DOCUMENTATION-OVERHAUL-SUMMARY.md` for full details
+? **Authentication working**:
+- Registration: `POST /api/auth/register` ? creates user in SQL, returns success
+- Login: `POST /api/auth/login` ? verifies password, returns JWT token
+- Protected routes: JWT middleware validates tokens correctly
+- Test script (`scripts/test-registration.ps1`) runs successfully (health ?, register ?, login ?, /api/auth/me ?)
 
-### ? Infrastructure (COMPLETE & DEPLOYED)
-- Bicep template fully migrated to JWT parameters
-- No Entra/MSAL parameters present
-- JWT_SECRET and CORS_ORIGINS properly configured
-- Static Web App managed separately (documented in ROOT-CAUSE-VERIFIED.md)
-- Cosmos DB role assignment automated via Bicep module
-- Deployed and verified in production
+? **Database connectivity fixed**:
+- Container App env var `SQL_SERVER` corrected from `sequitur-sql-server..database.windows.net` (double-dot typo) to `sequitur-sql-server.database.windows.net`
+- Managed identity (`id-a-riff-in-react`) granted `db_datareader` + `db_datawriter` roles in SQL DB
+- SQL principal created as `EXTERNAL_USER` using display name (GUID-based creation failed; display name worked)
 
-**See**: `infra/main.bicep` - all JWT environment variables configured
-
-### ? CI/CD Workflow (COMPLETE & WORKING)
-- Removed obsolete Entra/MSAL parameters
-- JWT_SECRET and CORS_ORIGINS properly passed
-- SQL role assignment automated with graceful fallback
-- Deployment succeeds even if SQL setup requires manual intervention
-- Verified working in deployment run 18440026886
-
-**See**: `.github/workflows/container-deploy.yml` and `docs/Auth/SQL-ROLE-ASSIGNMENT-UPDATE.md`
-
-### ? Application Code (COMPLETE & DEPLOYED)
-- ? Backend JWT auth implemented (routes, middleware, bcrypt)
-- ? Frontend JWT auth implemented (service, components)
-- ? Deployed to production Container App
-- ? Health endpoint confirms JWT auth strategy
-- ? Awaiting end-to-end testing (requires SQL setup)
-
-**See**: `docs/Auth/REFACTOR-COMPLETE.md` for implementation details
+? **Frontend deployment fixed**:
+- Workflow (`.github/workflows/frontend-deploy.yml`) now sets `VITE_API_BASE_URL` (was `VITE_API_URL`, causing localhost fallback)
+- Production frontend now correctly calls Container App API
 
 ---
 
-## ?? Critical Insight from This Session
+## Outstanding Issue (What Needs Fixing)
 
-**The Problem We Solved:**
-- This is a **deployment template** that clients should clone and deploy in 15 minutes
-- MSAL/Entra External ID required 2-3 hours of manual Portal configuration
-- JWT authentication enables near-zero-configuration deployment
-
-**What We Achieved:**
-- ? Infrastructure deployment: <3 minutes
-- ? Zero Portal configuration for deployment
-- ?? One manual SQL command required (5 minutes, documented)
-- ? Health check confirms JWT auth running in production
+?? **Phone collection fails with 500 error**:
+- User completes registration, then sees "We need one more thing" modal asking for phone number.
+- Clicking "Save" POSTs to `PUT /api/users/:id` with `{ phone: "..." }` body.
+- Backend throws 500 (unhandled error).
+- **Root cause**: `Users` table schema (in `api/schema.sql`) has no `phone` column.
+- Current columns: `id`, `email`, `passwordHash`, `name`, `role`, `emailVerified`, `createdAt`, `updatedAt`.
 
 ---
 
-## ?? Required: SQL Role Assignment (One-Time Setup)
+## Recommended Fix (Next Agent: Start Here)
 
-### Status
-SQL role assignment automation attempted but `az sql db execute` command not available in GitHub Actions.
+### Option A: Add `phone` column to `Users` table (simplest, recommended)
 
-### Manual Setup Required (5 minutes)
+1. **Update schema** (`api/schema.sql`):
+   ```sql
+   -- Add phone column (nullable, optional field)
+   IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'phone')
+   BEGIN
+       ALTER TABLE Users ADD phone NVARCHAR(20) NULL;
+   END
+   GO
+   ```
 
-**Principal ID**: `6b3d9f97-b02a-44d9-bace-253cd5efb20a`
+2. **Run schema update on production DB**:
+   - Connect as SQL admin or AAD admin (`Harry Greenblatt`, objectId: `e7829b96-0ba1-464f-b529-62fcba7aa683`).
+   - Execute the ALTER TABLE statement.
+   - Or: run full `api/schema.sql` (it's idempotent with IF NOT EXISTS guards).
 
-**Azure Cloud Shell** (Recommended):
-```bash
-# 1. Open https://shell.azure.com
-# 2. Connect
-sqlcmd -S sequitur-sql-server.database.windows.net -d riff-react-db -G
+3. **Update backend code** (if needed):
+   - `api/src/services/sqlService.ts` ? `createUser` and `updateUser` already handle `phone` param (check existing code; may already be compatible).
+   - `api/src/routes/authRoutes.ts` ? registration route accepts `{ email, password, name }` but not phone yet. If you want phone at registration, add it to the request body validation and pass to `sqlService.createUser({ ..., phone })`.
+   - `api/src/routes/userRoutes.ts` ? `PUT /api/users/:id` route already calls `sqlService.updateUser(id, { phone })`. Once column exists, this should work.
 
-# 3. Execute
-CREATE USER [6b3d9f97-b02a-44d9-bace-253cd5efb20a] FROM EXTERNAL PROVIDER;
-ALTER ROLE db_datareader ADD MEMBER [6b3d9f97-b02a-44d9-bace-253cd5efb20a];
-ALTER ROLE db_datawriter ADD MEMBER [6b3d9f97-b02a-44d9-bace-253cd5efb20a];
-GO
+4. **Update frontend registration form** (optional, if collecting phone upfront):
+   - `src/components/auth/RegisterForm.tsx` ? add phone input field.
+   - `src/services/auth/authService.ts` ? `register(email, password, name, phone?)` method.
+   - Or: keep the modal approach; just ensure the PUT endpoint works after adding the column.
+
+5. **Test**:
+   - Re-run registration test: `.\scripts\test-registration.ps1` ? should succeed.
+   - Test phone save via UI modal ? should succeed (no more 500).
+
+6. **Deploy**:
+   - Commit schema change, backend changes (if any), frontend changes (if any).
+   - Push ? CI/CD will redeploy backend (Container App) and frontend (Static Web App).
+
+---
+
+## Key Files & Locations
+
+**Infrastructure**:
+- Bicep template: `infra/main.bicep` (Container App, managed identity, SQL config)
+- Workflows: `.github/workflows/container-deploy.yml` (backend), `.github/workflows/frontend-deploy.yml` (frontend)
+
+**Backend (API)**:
+- Schema: `api/schema.sql` (SQL table definitions)
+- Auth routes: `api/src/routes/authRoutes.ts` (register, login, /me)
+- User routes: `api/src/routes/userRoutes.ts` (GET/POST/PUT /api/users)
+- SQL service: `api/src/services/sqlService.ts` (DB query logic)
+
+**Frontend**:
+- Auth service: `src/services/auth/authService.ts` (register, login, savePhoneForUser)
+- Register form: `src/components/auth/RegisterForm.tsx`
+- Phone modal: `src/components/auth/PhoneCollectModal.tsx` (triggers PUT /api/users/:id)
+- RTK Query base: `src/store/api.ts` (sets `baseUrl: import.meta.env.VITE_API_BASE_URL`)
+
+**Testing**:
+- `scripts/test-registration.ps1` ? automated registration test (health, register, login, /me)
+- `scripts/setup-sql-permissions.ps1` ? grant DB permissions to managed identity
+
+---
+
+## Environment Configuration
+
+**Container App Environment Variables** (set in `infra/main.bicep` and deployed):
+- `SQL_SERVER`: `sequitur-sql-server.database.windows.net` ? (fixed from `..` typo)
+- `SQL_DATABASE`: `riff-react-db`
+- `AZURE_CLIENT_ID`: `994510d1-c3e8-422f-8dc9-ba517cce51ea` (managed identity)
+- `JWT_SECRET`: (secretRef) ?
+- `CORS_ORIGINS`: `https://a-riff-in-react.harryjamesgreenblatt.com,http://localhost:5173`
+
+**Static Web App Build Environment** (set in `.github/workflows/frontend-deploy.yml`):
+- `VITE_API_BASE_URL`: `https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io` ? (fixed from `VITE_API_URL`)
+
+**Key Vault Secrets** (fallback/admin access):
+- `kv-a-riff-in-react` ? `SQL-CONNECTION-STRING` (SQL admin credentials for manual DB access)
+
+---
+
+## Quick Commands (PowerShell / Cloud Shell)
+
+**Verify Container App env**:
+```powershell
+az containerapp show -n ca-api-a-riff-in-react -g riffinreact-rg --query "properties.template.containers[0].env" -o json
 ```
 
-**See**: `docs/Auth/SQL-MANAGED-IDENTITY-SETUP.md` for alternative setup methods
-
----
-
-## ? COMPLETED: Recent Tasks
-
-### ? TASK 1: Audit Recent Deployments (COMPLETE)
-
-**Status**: Deployment run 18440026886 verified successful
-
-**Key Findings**:
-- ? Container App deployed successfully
-- ? Health endpoint accessible and responding
-- ? JWT authentication strategy confirmed
-- ? No Entra/MSAL environment variables
-- ?? SQL permissions require manual setup (one-time)
-
-### ? TASK 2: Review & Update Bicep Infrastructure (COMPLETE)
-
-**Status**: Bicep template fully JWT-ready and deployed
-
-? JWT Parameters Present:
-```bicep
-param jwtSecret string @secure()
-param corsOrigins string
+**Run registration test**:
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\test-registration.ps1
 ```
 
-? No Entra/MSAL Parameters (removed)
-
-? Container App running with correct environment variables (verified via health endpoint)
-
-### ? TASK 3: Update CI/CD Workflows (COMPLETE)
-
-**Status**: Workflow fully updated and tested in production
-
-? JWT parameters passed correctly  
-? No Entra/MSAL parameters  
-? SQL role assignment automation with fallback working  
-? Deployment completes successfully
-
-### ? TASK 4: Audit Deployed Azure Resources (COMPLETE)
-
-**Container App URL**: `ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io`
-
-Resources verified:
-- ? Container Apps Environment
-- ? Container App (API) - Running with JWT
-- ? Static Web App (Frontend - managed separately)
-- ? Azure SQL Database (permissions pending)
-- ? Cosmos DB (role assignment automated)
-- ? User-Assigned Managed Identity
-- ? Container Registry
-- ? Log Analytics Workspace
-- ? Application Insights
-
-? No MSAL/Entra artifacts found
-
----
-
-## ? Remaining Tasks
-
-### TASK 5: Test JWT Authentication (Code)
-
-**Status**: Ready for testing after SQL setup
-
-#### Backend Testing (Production)
-```bash
-# Test registration (after SQL setup)
-curl -X POST https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"SecurePass123!","name":"Test User"}'
-
-# Test login
-curl -X POST https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"SecurePass123!"}'
+**Tail Container App logs**:
+```powershell
+az containerapp logs show -n ca-api-a-riff-in-react -g riffinreact-rg --follow
 ```
 
-**See**: `docs/Auth/TESTING-GUIDE.md` for complete testing instructions
+**Connect to SQL DB as admin** (to run schema updates):
+```powershell
+# Get SQL admin credentials from Key Vault
+$kv = az keyvault secret show --vault-name kv-a-riff-in-react --name SQL-CONNECTION-STRING -o json | ConvertFrom-Json
+$conn = $kv.value
+$pw = ([regex]::Match($conn,'Password\s*=\s*([^;]+)','IgnoreCase')).Groups[1].Value
+$user = ([regex]::Match($conn,'(User\s*Id|User|Uid)\s*=\s*([^;]+)','IgnoreCase')).Groups[2].Value
 
-#### Frontend Testing (Local)
-```bash
-# Start frontend
-npm run dev
-
-# Test in browser:
-# 1. Navigate to /register
-# 2. Create an account
-# 3. Login with credentials
-# 4. Verify token in localStorage
-# 5. Test protected routes
+# Run sqlcmd
+sqlcmd -S "sequitur-sql-server.database.windows.net" -d "riff-react-db" -U $user -P $pw -i api\schema.sql
 ```
 
-### TASK 6: Clean Up Code Artifacts
-
-**Check if these exist and remove:**
-- [ ] `src/services/auth/msalConfig.ts`
-- [ ] Any `@azure/msal-*` imports in code
-- [ ] MSAL provider wrappers in `App.tsx` or `main.tsx`
-
-**Remove from `package.json`:**
-- [ ] `@azure/msal-browser`
-- [ ] `@azure/msal-react`
-
-**Update `.env.example` files:**
-- [ ] Remove `VITE_ENTRA_CLIENT_ID`
-- [ ] Remove `VITE_ENTRA_TENANT_ID`
-- [ ] Add `VITE_API_BASE_URL=http://localhost:8080`
-
-**Archive scripts:**
-- [ ] `scripts/setup-entra-external-id.ps1` (move to `scripts/archive/`)
+Or use Azure Data Studio / SSMS with AAD auth (`Harry Greenblatt` account).
 
 ---
 
-## ? Success Criteria
+## Known Issues & Workarounds
 
-The migration is complete when:
+**Issue**: Azure CLI in some environments hits intermittent SSL/connection resets when calling Container Apps APIs.  
+**Workaround**: Use Azure Portal for env edits, or run commands in Cloud Shell.
 
-### Infrastructure ? (100% Complete)
-- [x] Bicep templates contain NO Entra/MSAL parameters
-- [x] Bicep templates include JWT_SECRET and CORS_ORIGINS
-- [x] CI/CD workflows don't reference Entra secrets
-- [x] SQL role assignment automated with fallback
-- [x] Deployed Container App has correct environment variables
-- [x] No orphaned MSAL resources in Azure
-- [x] Health endpoint confirms JWT auth strategy
+**Issue**: SQL principal creation by GUID failed; display name worked.  
+**Workaround**: Use managed identity display name (`id-a-riff-in-react`) instead of GUID when creating SQL principals.
 
-### Code ? (Deployed, Testing Pending)
-- [x] JWT authentication routes implemented
-- [x] Frontend auth service implemented
-- [x] Login/Register components created
-- [x] Deployed to production
-- [ ] End-to-end testing complete (blocked by SQL setup)
-- [ ] Protected routes working (needs testing)
-- [ ] MSAL code artifacts removed
+**Issue**: Frontend was hitting `localhost:8080` in production.  
+**Fixed**: Changed workflow env var from `VITE_API_URL` to `VITE_API_BASE_URL`.
 
-### Template Experience ?? (Almost There!)
-- [x] Client can clone repo
-- [x] Client configures 3 environment variables
-- [x] Client runs `az deployment` command
-- [x] Deployment completes in <3 minutes
-- [ ] One manual SQL command (5 minutes, documented)
-- [ ] End-to-end auth working
-
-**Progress**: ~95% Complete!
+**Issue**: Phone save fails with 500.  
+**Root cause**: `Users` table missing `phone` column.  
+**Fix**: Add column (see "Recommended Fix" above).
 
 ---
 
-## ?? Next Actions (In Order)
+## Architecture Overview (for context)
 
-1. **Complete SQL Setup** (5 min) ?
-   - Run SQL commands in Cloud Shell
-   - Verify permissions granted
-
-2. **Test JWT Auth Endpoints** (15 min)
-   - Test registration endpoint
-   - Test login endpoint
-   - Test protected /me endpoint
-   - Verify token generation
-
-3. **Clean Up MSAL Artifacts** (10 min)
-   - Remove MSAL packages
-   - Remove MSAL code files
-   - Update .env.example
-   - Archive old scripts
-
-4. **Test Frontend** (15 min)
-   - Start frontend locally
-   - Test registration flow
-   - Test login flow
-   - Verify token storage
-   - Test protected routes
-
-5. **Final Verification** (10 min)
-   - Test end-to-end in production
-   - Verify no errors in logs
-   - Update success criteria
-   - Document completion
-
-**Total Remaining Time**: ~55 minutes to 100% completion!
-
----
-
-## ?? Key Documents for Reference
-
-1. **`docs/Auth/DEPLOYMENT-VERIFICATION-DEC2024.md`** - Latest deployment verification ? NEW
-2. **`docs/07-authentication.md`** - Complete JWT implementation guide
-3. **`docs/Auth/REFACTOR-COMPLETE.md`** - Code implementation status
-4. **`docs/Auth/SQL-ROLE-ASSIGNMENT-UPDATE.md`** - Workflow SQL setup
-5. **`docs/Auth/SQL-MANAGED-IDENTITY-SETUP.md`** - Manual SQL setup guide
-6. **`docs/Auth/ROOT-CAUSE-VERIFIED.md`** - Static Web App separation
-7. **`docs/Auth/TESTING-GUIDE.md`** - Testing instructions
-8. **`infra/main.bicep`** - Infrastructure template
-9. **`.github/workflows/container-deploy.yml`** - Deployment workflow
-
----
-
-## ?? Important Reminders
-
-1. **Template-First Mindset**: Every change should make client deployment easier ?
-2. **Zero Manual Config**: Achieved except for one SQL command (well-documented) ?
-3. **Test Deployability**: Deployment tested and working in <3 minutes ?
-4. **Security Matters**: JWT secret secure, bcrypt implemented ?
-5. **Document Changes**: All changes documented ?
-
----
-
-## ?? Quick Status Check Commands
-
-```bash
-# Check health endpoint (works now!)
-curl https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io/health
-
-# Check recent deployments
-gh run list --limit 5
-
-# View latest deployment logs
-gh run view --log 18440026886
+```
+???????????????????????????????????????????????????????????
+?        React Frontend (Azure Static Web Apps)          ?
+?  - Vite bundled SPA                                     ?
+?  - JWT token in localStorage                            ?
+?  - Env: VITE_API_BASE_URL (baked in at build time)     ?
+???????????????????????????????????????????????????????????
+                     ? HTTPS
+                     ?
+???????????????????????????????????????????????????????????
+?     Express API (Azure Container Apps)                  ?
+?  - Node.js 18 + TypeScript                             ?
+?  - JWT authentication (bcrypt + jsonwebtoken)          ?
+?  - Managed Identity auth to SQL/Cosmos                 ?
+?  - Endpoints: /api/auth/*, /api/users/*               ?
+???????????????????????????????????????????????????????????
+         ?                        ?
+         ?                        ?
+????????????????????      ???????????????????
+?  Azure SQL DB    ?      ?   Cosmos DB     ?
+?  - Users table   ?      ?   - Activities  ?
+?  - Managed ID    ?      ?   - Logs        ?
+?    access        ?      ?                 ?
+????????????????????      ???????????????????
 ```
 
 ---
 
-**Session updated**: December 12, 2024  
-**Latest deployment**: Run 18440026886 - SUCCESS ?  
-**Status**: Infrastructure ? | Code ? | Deployed ? | Testing ?  
-**Progress**: 95% Complete  
-**Branch**: `main`
+## Next Steps for Next Agent
+
+1. **Add `phone` column to `Users` table** (run schema update on prod DB).
+2. **Verify phone save works** (re-test registration flow in UI).
+3. **Optional**: Move phone input to registration form (remove modal).
+4. **Commit & deploy** changes.
+5. **Update docs** (if needed) to reflect phone field availability.
 
 ---
 
-## ?? Congratulations!
+## Contact / Handoff Notes
 
-You've successfully:
-- ? Migrated from MSAL to JWT authentication
-- ? Updated all infrastructure to support JWT
-- ? Deployed working Container App with JWT
-- ? Eliminated Entra External ID dependencies
-- ? Achieved <3 minute deployment time
+- **Template owner**: Harry James Greenblatt (HJG@sequitur.solutions)
+- **Azure subscription**: (see `az account show`)
+- **Repo**: https://github.com/HarryJamesGreenblatt/A-Riff-In-React
+- **Branch**: `main` (production)
 
-**Just a few more steps to 100% completion!** ??
+All critical deployment issues resolved except phone schema. Registration/login fully functional. Frontend-backend integration complete.
+
+---
+
+**End of handoff. Good luck!**
