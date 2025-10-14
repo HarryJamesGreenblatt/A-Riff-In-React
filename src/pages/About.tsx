@@ -27,7 +27,7 @@ const About: React.FC = () => (
       <article className="feature-card card-large">
         <h3 className="font-bold mb-2">Key Capabilities</h3>
         <ul className="list-disc ml-6 text-gray-600">
-          <li>Pre-wired MSAL authentication using Microsoft Entra External ID.</li>
+          <li>JWT-based authentication (email/password) with tokens stored in localStorage for the default template flow.</li>
           <li>Containerized API (Express) built with Docker and intended for Azure Container Apps.</li>
           <li>RTK Query for efficient data fetching and caching.</li>
         </ul>

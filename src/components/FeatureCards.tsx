@@ -9,7 +9,7 @@ const features = [
   {
     title: "Authentication",
     description:
-      "Microsoft Entra External ID integration for secure, modern user authentication.",
+      "JWT-based email/password authentication by default (tokens stored client-side).",
   },
   {
     title: "Azure Ready",
@@ -17,7 +17,6 @@ const features = [
       "Pre-configured for seamless deployment to Azure Container Apps and Static Web Apps.",
   },
 ];
-
 
 const FeatureCards: React.FC = () => {
   return (

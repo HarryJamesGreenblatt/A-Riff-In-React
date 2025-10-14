@@ -25,10 +25,12 @@ const Architecture: React.FC = () => (
         </ul>
       </article>
 
+      <article className="feature-card card-wide">
+        <h3 className="font-bold mb-2">Authentication</h3>
+        <p className="text-gray-700">The default authentication implementation for this template is JWT-based (email/password). The codebase and documentation were migrated from an earlier MSAL/Entra External ID approach to a template-first JWT flow to enable zero-portal deployments. Developers can extend the template to use Entra/MSAL if desired — see the docs folder for guidance.</p>
+      </article>
 
-      
-
-      
+       
     </section>
   </div>
 );
