@@ -25,19 +25,23 @@ Write-Host ""
 Write-Host "=========================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Test 2: Register New User
+# Test 2: Register New User (with phone)
 Write-Host "2. Testing Registration Endpoint..." -ForegroundColor Yellow
 $timestamp = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $testEmail = "test-$timestamp@example.com"
 $testName = "Test User $timestamp"
+# generate a pseudo phone number for test
+$numberPart = ([string]($timestamp % 1000000)).PadLeft(6,'0')
+$testPhone = "+1555" + $numberPart
 
 $registerBody = @{
     email = $testEmail
     password = "TestPass123!"
     name = $testName
+    phone = $testPhone
 } | ConvertTo-Json
 
-Write-Host "Attempting to register user: $testEmail" -ForegroundColor Gray
+Write-Host "Attempting to register user: $testEmail with phone $testPhone" -ForegroundColor Gray
 Write-Host ""
 
 try {
@@ -49,6 +53,7 @@ try {
     Write-Host "  Email: $($registerResponse.user.email)" -ForegroundColor Gray
     Write-Host "  Name: $($registerResponse.user.name)" -ForegroundColor Gray
     Write-Host "  Role: $($registerResponse.user.role)" -ForegroundColor Gray
+    Write-Host "  Phone: $($registerResponse.user.phone)" -ForegroundColor Gray
     Write-Host ""
     
     Write-Host "=========================================" -ForegroundColor Cyan
@@ -86,6 +91,7 @@ try {
             Write-Host ""
             Write-Host "User details:" -ForegroundColor Gray
             $meResponse.user | ConvertTo-Json
+            Write-Host "Phone from /api/auth/me: $($meResponse.user.phone)" -ForegroundColor Gray
             
         } catch {
             Write-Host "? Protected route access failed" -ForegroundColor Red

@@ -60,10 +60,10 @@ export class AuthService {
   /**
    * Register a new user
    */
-  static async register(email: string, password: string, name: string): Promise<User> {
+  static async register(email: string, password: string, name: string, phone?: string): Promise<User> {
     const response = await apiClient.post<{ success: boolean; user: User }>(
       '/api/auth/register',
-      { email, password, name }
+      { email, password, name, phone }
     );
     
     const user = response.data.user;

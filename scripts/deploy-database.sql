@@ -23,6 +23,7 @@ BEGIN
         passwordHash NVARCHAR(255) NULL,
         name NVARCHAR(255) NOT NULL,
         role NVARCHAR(50) NOT NULL DEFAULT 'member',
+        phone NVARCHAR(20) NULL,
         createdAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
         updatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE()
     );
@@ -57,6 +58,15 @@ BEGIN
         PRINT '  Adding role column...';
         ALTER TABLE Users ADD role NVARCHAR(50) NOT NULL DEFAULT 'member';
         PRINT '  ? role column added';
+    END
+    
+    -- Add phone column if missing
+    IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+                   WHERE TABLE_NAME = 'Users' AND COLUMN_NAME = 'phone')
+    BEGIN
+        PRINT '  Adding phone column...';
+        ALTER TABLE Users ADD phone NVARCHAR(20) NULL;
+        PRINT '  ? phone column added';
     END
     
     PRINT '  ? Schema check complete';

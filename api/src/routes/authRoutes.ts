@@ -12,7 +12,7 @@ const SALT_ROUNDS = 10;
  */
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, phone } = req.body;
 
     // Validation
     if (!email || !password || !name) {
@@ -39,12 +39,12 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     // Hash password
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    // Create user
+    // Create user (include phone if provided)
     const result = await query(
-      `INSERT INTO Users (email, passwordHash, name, role, createdAt, updatedAt)
-       OUTPUT INSERTED.id, INSERTED.email, INSERTED.name, INSERTED.role, INSERTED.createdAt
-       VALUES (@email, @passwordHash, @name, 'member', GETUTCDATE(), GETUTCDATE())`,
-      { email, passwordHash, name }
+      `INSERT INTO Users (email, passwordHash, name, role, phone, createdAt, updatedAt)
+       OUTPUT INSERTED.id, INSERTED.email, INSERTED.name, INSERTED.role, INSERTED.phone, INSERTED.createdAt
+       VALUES (@email, @passwordHash, @name, 'member', @phone, GETUTCDATE(), GETUTCDATE())`,
+      { email, passwordHash, name, phone: phone || null }
     );
 
     const user = result.recordset[0];
@@ -56,6 +56,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
         email: user.email,
         name: user.name,
         role: user.role,
+        phone: user.phone,
         createdAt: user.createdAt
       }
     });
@@ -81,7 +82,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
     // Find user
     const result = await query(
-      'SELECT id, email, passwordHash, name, role FROM Users WHERE email = @email',
+      'SELECT id, email, passwordHash, name, role, phone FROM Users WHERE email = @email',
       { email }
     );
 
@@ -109,7 +110,8 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role
+        role: user.role,
+        phone: user.phone
       }
     });
   } catch (error) {
@@ -131,7 +133,7 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res: Response): Pr
 
     // Get full user details
     const result = await query(
-      'SELECT id, email, name, role, createdAt FROM Users WHERE id = @userId',
+      'SELECT id, email, name, role, phone, createdAt FROM Users WHERE id = @userId',
       { userId: req.user.userId }
     );
 
@@ -148,6 +150,7 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res: Response): Pr
         email: user.email,
         name: user.name,
         role: user.role,
+        phone: user.phone,
         createdAt: user.createdAt
       }
     });

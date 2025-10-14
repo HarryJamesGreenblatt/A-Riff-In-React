@@ -8,6 +8,7 @@ const RegisterForm: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -30,7 +31,8 @@ const RegisterForm: React.FC = () => {
     setLoading(true);
 
     try {
-      await AuthService.register(email, password, name);
+      // Pass phone to register so the backend saves it in one request
+      await AuthService.register(email, password, name, phone);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.error || 'Registration failed. Please try again.');
@@ -71,6 +73,18 @@ const RegisterForm: React.FC = () => {
               autoComplete="email"
             />
           </div>
+
+          <div className="form-row">
+            <label htmlFor="phone">Phone (optional)</label>
+            <input
+              id="phone"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="(555) 555-5555"
+              autoComplete="tel"
+            />
+          </div>
           
           <div className="form-row">
             <label htmlFor="password">Password</label>
@@ -79,7 +93,7 @@ const RegisterForm: React.FC = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Enter your password"
               required
               autoComplete="new-password"
               minLength={8}
@@ -94,7 +108,7 @@ const RegisterForm: React.FC = () => {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Enter your password"
               required
               autoComplete="new-password"
               minLength={8}
