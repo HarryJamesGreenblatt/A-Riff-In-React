@@ -306,13 +306,24 @@ module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
   }
 }
 
+// Cosmos DB database and container setup module
+module cosmosDbSetup 'modules/cosmosDbSetup.bicep' = {
+  name: 'cosmosDbSetup'
+  scope: resourceGroup(existingCosmosDbResourceGroup)
+  params: {
+    cosmosDbAccountName: existingCosmosDbAccountName
+    databaseName: 'ARiffInReact'
+    containerName: 'activities'
+    throughput: 400
+  }
+}
+
 // Outputs
 output containerAppUrl string = 'https://${containerApp.properties.configuration.ingress.fqdn}'
 output managedIdentityId string = managedIdentity.id
 output managedIdentityClientId string = managedIdentity.properties.clientId
 output managedIdentityPrincipalId string = managedIdentity.properties.principalId
 output applicationInsightsConnectionString string = applicationInsights.properties.ConnectionString
-
-// NOTE: Static Web App URL is not output here because the resource is managed separately.
-// To get the Static Web App URL, use:
-//   az staticwebapp show --name swa-a-riff-in-react --resource-group riffinreact-rg --query defaultHostname -o tsv
+output cosmosDbDatabaseName string = cosmosDbSetup.outputs.databaseName
+output cosmosDbContainerName string = cosmosDbSetup.outputs.containerName
+output cosmosDbPartitionKey string = cosmosDbSetup.outputs.partitionKey
