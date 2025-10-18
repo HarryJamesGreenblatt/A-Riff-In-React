@@ -61,8 +61,10 @@ jobs:
         run: npm run build
         env:
           VITE_API_BASE_URL: https://${{ steps.get_api_url.outputs.api_url }}
-          VITE_EXTERNAL_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
-          VITE_EXTERNAL_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
+          VITE_ENTRA_CLIENT_ID: ${{ secrets.ENTRA_CLIENT_ID }}
+          VITE_ENTRA_TENANT_ID: ${{ secrets.ENTRA_TENANT_ID }}
+          VITE_ENTRA_USER_FLOW_AUTHORITY: ${{ secrets.ENTRA_USER_FLOW_AUTHORITY }}
+          VITE_REDIRECT_URI: ${{ secrets.FRONTEND_URL }}
       
       - name: Copy Static Web App config to build directory
         run: cp staticwebapp.config.json build/
