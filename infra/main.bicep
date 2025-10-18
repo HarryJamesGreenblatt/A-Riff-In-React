@@ -224,6 +224,10 @@ resource containerApp 'Microsoft.App/containerApps@2022-10-01' = {
               value: 'ARiffInReact'
             }
             {
+              name: 'COSMOS_CONTAINER_ID'
+              value: 'activities'
+            }
+            {
               name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
               secretRef: 'ai-connection-string'
             }
