@@ -9,6 +9,7 @@ on:
       - 'index.html'
       - 'vite.config.ts'
       - 'package.json'
+      - 'staticwebapp.config.json'
       - '.github/workflows/frontend-deploy.yml'
   workflow_dispatch:
 
@@ -62,6 +63,9 @@ jobs:
           VITE_API_BASE_URL: https://${{ steps.get_api_url.outputs.api_url }}
           VITE_EXTERNAL_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
           VITE_EXTERNAL_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
+      
+      - name: Copy Static Web App config to build directory
+        run: cp staticwebapp.config.json build/
       
       - name: Create Static Web App if it doesn't exist
         id: create_swa

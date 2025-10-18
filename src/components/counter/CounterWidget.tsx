@@ -72,7 +72,7 @@ export const CounterWidget: React.FC = () => {
             onClick={() => handleIncrement(1)}
             disabled={isIncrementing || isResetting}
             className="flex-1"
-            variant="default"
+            variant="primary"
           >
             {isIncrementing ? 'Incrementing...' : '+1'}
           </Button>
@@ -80,7 +80,7 @@ export const CounterWidget: React.FC = () => {
             onClick={() => handleIncrement(5)}
             disabled={isIncrementing || isResetting}
             className="flex-1"
-            variant="default"
+            variant="primary"
           >
             +5
           </Button>
@@ -88,7 +88,7 @@ export const CounterWidget: React.FC = () => {
             onClick={() => handleIncrement(10)}
             disabled={isIncrementing || isResetting}
             className="flex-1"
-            variant="default"
+            variant="primary"
           >
             +10
           </Button>
@@ -121,8 +121,8 @@ export const CounterWidget: React.FC = () => {
         <Button
           onClick={handleReset}
           disabled={isIncrementing || isResetting || (counter?.count ?? 0) === 0}
-          variant="destructive"
-          className="w-full"
+          variant="secondary"
+          className="w-full bg-red-600 hover:bg-red-700 text-white"
         >
           {isResetting ? 'Resetting...' : 'Reset Counter'}
         </Button>

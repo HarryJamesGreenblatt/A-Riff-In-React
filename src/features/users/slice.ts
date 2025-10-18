@@ -6,6 +6,7 @@ export interface User {
   email: string
   name: string
   role: 'admin' | 'user'
+  phone?: string
   createdAt: string
   updatedAt: string
 }

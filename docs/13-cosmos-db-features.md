@@ -4,10 +4,10 @@
 
 This document covers the implementation of Azure Cosmos DB-powered features in **A Riff In React**. Cosmos DB provides flexible, schema-less storage for dynamic user data, activity tracking, and future notification systems.
 
-## Current Status: ? **USER COUNTER IMPLEMENTED**
+## Current Status:  **USER COUNTER IMPLEMENTED**
 
-- **Phase 1**: User Counter - ? **COMPLETE**
-- **Phase 2**: Notification System - ?? **PLANNED**
+- **Phase 1**: User Counter -  **COMPLETE**
+- **Phase 2**: Notification System -  **PLANNED**
 
 ## Architecture
 
@@ -17,12 +17,12 @@ The application uses a **single Cosmos DB container** (`activities`) with multip
 
 ```
 Cosmos DB Database: ARiffInReact
-??? Container: activities
-    ??? Partition Key: userId
-    ??? Document Types:
-        ??? Activities (type: user_action, etc.)
-        ??? User Counters (type: user_counter)
-        ??? Notifications (type: notification) [planned]
+- Container: activities
+    - Partition Key: userId
+    - Document Types:
+        - Activities (type: user_action, etc.)
+        - User Counters (type: user_counter)
+        - Notifications (type: notification) [planned]
 ```
 
 ### Data Models
@@ -34,7 +34,7 @@ interface Activity {
   userId: string;                // Partition key
   type: string;                  // Activity type
   data: Record<string, any>;     // Flexible data
-  metadata?: Record<string, any>;
+  metadata: Record<string, any>;
   timestamp: string;             // ISO 8601
 }
 ```
@@ -60,22 +60,24 @@ interface Notification {
   message: string;
   read: boolean;
   createdAt: string;
-  expiresAt?: string;
+  expiresAt: string;
 }
 ```
 
-## Phase 1: User Counter Feature ?
+## Phase 1: User Counter Feature 
 
 ### Backend Implementation
 
 **API Endpoints**:
+
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| GET | `/api/counter` | Get user's counter | ? Yes |
-| POST | `/api/counter/increment` | Increment counter | ? Yes |
-| POST | `/api/counter/reset` | Reset to zero | ? Yes |
+| GET | `/api/counter` | Get user's counter |  Yes |
+| POST | `/api/counter/increment` | Increment counter |  Yes |
+| POST | `/api/counter/reset` | Reset to zero |  Yes |
 
 **Service Methods** (`api/src/services/cosmosService.ts`):
+
 ```typescript
 // Get or create user counter
 async getUserCounter(userId: string): Promise<UserCounter>
@@ -88,6 +90,7 @@ async resetUserCounter(userId: string): Promise<UserCounter>
 ```
 
 **Route Handlers** (`api/src/routes/counterRoutes.ts`):
+
 - JWT authentication required for all routes
 - Input validation (amount: 1-1000)
 - Error handling with appropriate status codes
@@ -95,6 +98,7 @@ async resetUserCounter(userId: string): Promise<UserCounter>
 ### Frontend Implementation
 
 **Redux Slice** (`src/features/counter/slice.ts`):
+
 ```typescript
 // RTK Query hooks
 useGetCounterQuery()           // Fetch counter
@@ -117,11 +121,11 @@ useResetCounterMutation()      // Reset counter
 
 ### Key Features
 
-? **User-Specific**: Each user has their own counter  
-? **Persistent**: Data survives logout/login  
-? **Optimistic Updates**: UI updates instantly  
-? **Validation**: Amount limited to 1-1000  
-? **Secure**: JWT authentication required  
+ **User-Specific**: Each user has their own counter  
+ **Persistent**: Data survives logout/login  
+ **Optimistic Updates**: UI updates instantly  
+ **Validation**: Amount limited to 1-1000  
+ **Secure**: JWT authentication required  
 
 ### Testing the Counter
 
@@ -132,6 +136,7 @@ useResetCounterMutation()      // Reset counter
 5. **Reset** counter (requires confirmation)
 
 Example API calls:
+
 ```bash
 # Get counter (requires JWT token)
 curl -H "Authorization: Bearer <token>" \
@@ -150,24 +155,27 @@ curl -X POST \
   http://localhost:8080/api/counter/reset
 ```
 
-## Phase 2: Notification System ??
+## Phase 2: Notification System 
 
 ### Planned Features
 
 **Backend Endpoints**:
+
 - `GET /api/notifications` - List user notifications
-- `GET /api/notifications?unreadOnly=true` - Unread notifications
+- `GET /api/notificationsunreadOnly=true` - Unread notifications
 - `POST /api/notifications` - Create notification (admin/system)
 - `PUT /api/notifications/:id/read` - Mark as read
 - `DELETE /api/notifications/:id` - Delete notification
 
 **Frontend Components**:
+
 - `NotificationBell.tsx` - Header icon with badge
 - `NotificationDropdown.tsx` - Quick view of recent alerts
 - `NotificationPage.tsx` - Full notification history
 - Real-time updates (polling or WebSocket)
 
 **Service Methods** (Already implemented in `cosmosService.ts`):
+
 ```typescript
 getNotifications(userId: string, unreadOnly: boolean)
 createNotification(notification: Omit<Notification, 'id' | 'createdAt'>)
@@ -188,10 +196,10 @@ markNotificationAsRead(notificationId: string, userId: string)
 **Partition Key**: `userId`
 
 **Benefits**:
-- ? Efficient per-user queries
-- ? Automatic data distribution
-- ? Cost-effective operations
-- ? Horizontal scalability
+-  Efficient per-user queries
+-  Automatic data distribution
+-  Cost-effective operations
+-  Horizontal scalability
 
 ### Query Optimization
 
@@ -337,6 +345,6 @@ The current architecture supports easy addition of new document types:
 
 ---
 
-**Status**: Phase 1 Complete ? | Phase 2 Planned ??  
+**Status**: Phase 1 Complete  | Phase 2 Planned   
 **Last Updated**: January 2025  
 **Next**: Implement notification system (Phase 2)
