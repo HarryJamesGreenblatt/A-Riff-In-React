@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import activityRoutes from './routes/activityRoutes';
+import counterRoutes from './routes/counterRoutes';
 
 // Initialize environment variables
 dotenv.config();
@@ -26,7 +27,7 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     authStrategy: 'JWT',
-    version: '1.0.2'
+    version: '1.0.3'
   });
 });
 
@@ -34,12 +35,13 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/activities', activityRoutes);
+app.use('/api/counter', counterRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
   res.status(200).json({ 
     message: 'A-Riff-In-React API is running',
-    version: '1.0.2',
+    version: '1.0.3',
     authStrategy: 'JWT',
     documentation: '/api-docs'
   });

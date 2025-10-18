@@ -32,6 +32,7 @@ Deploy and configure the backend API and Azure infrastructure.
 Production operations, troubleshooting, and success documentation.
 
 - **[12-deployment-success.md](./12-deployment-success.md)** - Deployment success summary and lessons learned
+- **[13-cosmos-db-features.md](./13-cosmos-db-features.md)** - Cosmos DB features: User Counter and Notifications
 
 ## 🚀 Quick Navigation
 
@@ -54,11 +55,16 @@ Production operations, troubleshooting, and success documentation.
 
 ### For Backend Work
 - [Backend API](./08-backend-api.md)
+- [Cosmos DB Features](./13-cosmos-db-features.md)
 - [Local Development](./04-local-development.md)
 
 ## 🔄 Document Maintenance
 
-### Recent Updates (October 12, 2025)
+### Recent Updates (January 2025)
+- **Cosmos DB Features**: Added user counter implementation and notification system planning
+- **Documentation Restructure**: Numbered Cosmos features doc to follow conventions
+
+### Previously (October 12, 2025)
 - **Authentication Strategy Change**: Migrated from MSAL/Entra External ID to JWT-based auth; `docs/07-authentication.md` is the canonical guide.
 - **Template-First Focus**: Emphasized portable, client-deployable architecture
 - **Simplified Deployment**: Removed manual Portal configuration requirements
@@ -82,12 +88,13 @@ Production operations, troubleshooting, and success documentation.
 - **Provider Registration** (09) must be completed before **Azure Deployment** (10)
 - **Development Setup** (03) is required for **Local Development** (04)
 - **Authentication** (07) demonstrates JWT patterns used in **Backend API** (08)
+- **Cosmos DB Features** (13) builds on **Backend API** (08) and **State Management** (06)
 
 ### Common Workflows
 - **Getting Started**: 01 → 02 → 03 → 04
 - **Frontend Development**: 04 → 05 → 06 → 07
 - **Deployment**: 09 → 10 → 11 → 12
-- **Full Implementation**: Follow numerical order 01-12
+- **Full Implementation**: Follow numerical order 01-13
 
 ## 🎯 Template Philosophy
 
@@ -115,6 +122,7 @@ When deploying this template, clients receive:
 - User registration and login (JWT-based)
 - Profile management
 - Activity logging examples
+- User counter feature (Cosmos DB)
 - Responsive UI
 
 ✅ **Complete Infrastructure** (Bicep templates)
@@ -142,6 +150,7 @@ When deploying this template, clients receive:
 - See the technical architecture → [02-architecture.md](./02-architecture.md)
 - Set up locally → [03-development-setup.md](./03-development-setup.md) + [04-local-development.md](./04-local-development.md)
 - Implement authentication → [07-authentication.md](./07-authentication.md)
+- Work with Cosmos DB → [13-cosmos-db-features.md](./13-cosmos-db-features.md)
 - Deploy to Azure → [10-azure-deployment.md](./10-azure-deployment.md)
 - Set up CI/CD → [11-github-actions-ci-cd.md](./11-github-actions-ci-cd.md)
 - Troubleshoot deployment → [12-deployment-success.md](./12-deployment-success.md)

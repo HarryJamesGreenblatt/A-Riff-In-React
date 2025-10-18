@@ -7,6 +7,7 @@ import About from "./pages/About";
 import RegisterPage from "./pages/Register";
 import Architecture from "./pages/Architecture";
 import AuthTest from "./pages/AuthTest";
+import Dashboard from "./pages/Dashboard";
 import { LoginForm } from "./components/auth/LoginForm";
 import "./App.css";
 
@@ -24,6 +25,7 @@ const App: React.FC = () => {
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/architecture" element={<Architecture />} />
                 <Route path="/auth-test" element={<AuthTest />} />
+                <Route path="/dashboard" element={<Dashboard />} />
               </Routes>
             </main>
             <Footer />
