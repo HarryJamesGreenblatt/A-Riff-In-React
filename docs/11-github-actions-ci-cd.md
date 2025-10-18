@@ -1,4 +1,3 @@
-````markdown
 # GitHub Actions: Azure CI/CD Pipeline
 
 **Status**: ✅ **SUCCESSFULLY CONFIGURED AND RUNNING**
@@ -8,10 +7,10 @@ This document covers the GitHub Actions workflows for **A Riff In React**, which
 ## 🎉 Current Status
 
 - ✅ **Workflow Status**: Fully operational and tested.
-- ✅ **Last Deployment**: Successful - September 6, 2025.
-- ✅ **Live API**: `<YOUR_API_URL>`
-- ✅ **Live Frontend**: `<YOUR_FRONTEND_URL>`
-- ✅ **Authentication**: Microsoft Entra External ID integrated.
+- ✅ **Last Deployment**: Successful
+- ✅ **Live API**: `https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io`
+- ✅ **Live Frontend**: `https://a-riff-in-react.harryjamesgreenblatt.com`
+- ✅ **Authentication**: JWT-based authentication integrated.
 - ✅ **Infrastructure**: Container Apps with managed identity for database access.
 - ✅ **Platform**: Successfully migrated from Windows App Service to Container Apps.
 
@@ -36,9 +35,10 @@ We use **two separate workflows** that handle different parts of the application
 The CI/CD pipelines require several secrets to be configured in your GitHub repository:
 
 1.  **AZURE_CREDENTIALS**: Azure service principal credentials in JSON format
-2.  **EXTERNAL_TENANT_ID**: Microsoft Entra External ID tenant ID
-3.  **EXTERNAL_CLIENT_ID**: Microsoft Entra External ID client ID
-4.  **STATIC_WEB_APPS_API_TOKEN**: Deployment token for Azure Static Web Apps
+2.  **JWT_SECRET**: Secret key for signing JWT tokens (min 32 characters)
+3.  **CONTAINER_REGISTRY_USERNAME**: GitHub username for container registry access
+4.  **CONTAINER_REGISTRY_PASSWORD**: GitHub Personal Access Token with package permissions
+5.  **STATIC_WEB_APPS_API_TOKEN**: Deployment token for Azure Static Web Apps
 
 ### Creating the Service Principal
 
@@ -61,7 +61,7 @@ name: Deploy API to Container Apps
 
 on:
   push:
-    branches: [main, fresh-start]
+    branches: [main]
     paths:
       - 'api/**'
       - '.github/workflows/container-deploy.yml'
@@ -102,7 +102,7 @@ name: Deploy Frontend to Static Web Apps
 
 on:
   push:
-    branches: [main, fresh-start]
+    branches: [main]
     paths-ignore:
       - 'api/**'
       - '.github/workflows/container-deploy.yml'
@@ -112,7 +112,7 @@ on:
 env:
   AZURE_RESOURCE_GROUP: riffinreact-rg
   AZURE_STATIC_WEB_APP_NAME: a-riff-in-react
-  API_URL: <YOUR_API_URL>
+  API_URL: https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io
 
 jobs:
   build-and-deploy:
@@ -135,8 +135,6 @@ jobs:
         run: npm run build
         env:
           VITE_API_BASE_URL: ${{ env.API_URL }}
-          VITE_EXTERNAL_CLIENT_ID: ${{ secrets.EXTERNAL_CLIENT_ID }}
-          VITE_EXTERNAL_TENANT_ID: ${{ secrets.EXTERNAL_TENANT_ID }}
       
       - name: Login to Azure
         uses: azure/login@v1
@@ -157,10 +155,10 @@ jobs:
 
 Key features:
 - Sets up Node.js environment
-- Builds React app with appropriate environment variables (using Vite prefixes)
+- Builds React app with appropriate environment variables
 - Deploys to Azure Static Web Apps
 - Configures API URL to point to Container App
-- Uses staticwebapp.config.json (at the root of the project) for SPA routing and MIME types
+- Uses staticwebapp.config.json for SPA routing and MIME types
 
 ## Important Configuration Files
 
@@ -189,7 +187,7 @@ This file is essential for proper SPA functioning:
     ".svg": "image/svg+xml"
   },
   "globalHeaders": {
-    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' *.azurecontainerapps.io *.microsoftonline.com *.microsoft.com",
+    "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' *.azurecontainerapps.io",
     "X-Content-Type-Options": "nosniff"
   }
 }
@@ -198,7 +196,7 @@ This file is essential for proper SPA functioning:
 This configuration:
 - Ensures SPA routes work by redirecting to index.html
 - Sets correct MIME types for JavaScript modules
-- Configures security headers
+- Configures security headers (note: no microsoftonline.com needed for JWT auth)
 - Is automatically deployed as part of the Static Web App workflow
 
 ## Workflow Integration
@@ -213,7 +211,7 @@ The two workflows work together but are triggered independently:
 1. Create the `.github/workflows` directory
 2. Add both workflow files as shown above
 3. Configure all required GitHub secrets
-4. Push to the `main` or `fresh-start` branch to trigger the initial deployment
+4. Push to the `main` branch to trigger the initial deployment
 
 ## Troubleshooting
 
@@ -226,6 +224,4 @@ If deployments fail:
 6. For Static Web App routing issues, check staticwebapp.config.json configuration
 7. For MIME type errors, ensure the mimeTypes section in staticwebapp.config.json is correctly configured
 
-This setup ensures a robust, secure, and modern deployment pipeline for the containerized application.
-
-````
+This setup ensures a robust, secure, and modern deployment pipeline for the containerized application with JWT authentication.

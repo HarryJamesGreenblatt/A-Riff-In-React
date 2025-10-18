@@ -1,6 +1,6 @@
 # Local Development Guide
 
-This guide provides step-by-step instructions for setting up and running the A Riff In React application locally using Docker Compose.
+This guide provides step-by-step instructions for setting up and running the A Riff In React application locally.
 
 ## Quick Start
 
@@ -9,13 +9,8 @@ This guide provides step-by-step instructions for setting up and running the A R
 # Install dependencies
 npm install
 
-# Start frontend for development (recommended)
-# Use `npm run dev` for an interactive dev server with HMR
+# Start frontend development server
 npm run dev
-
-# For a local production preview, build then preview:
-# npm run build
-# npm run preview
 
 # Open: http://localhost:5173
 ```
@@ -26,7 +21,7 @@ npm run dev
 docker-compose -f docker-compose.dev.yml up -d
 
 # In another terminal, start frontend
-npm run start
+npm run dev
 
 # Frontend: http://localhost:5173
 # API: http://localhost:3001
@@ -72,29 +67,38 @@ Before you begin, make sure you have the following installed:
 
 ### Frontend Configuration
 
-Create a `.env.local` file in the project root with the following content (canonical env var is `VITE_API_BASE_URL`):
+Create a `.env.local` file in the project root:
 
 ```env
-VITE_ENTRA_CLIENT_ID=your-client-id
-VITE_ENTRA_TENANT_ID=your-tenant-id
-VITE_REDIRECT_URI=http://localhost:5173
-VITE_POST_LOGOUT_URI=http://localhost:5173
+# API Configuration
 VITE_API_BASE_URL=http://localhost:3001
+
+# For production, use your Container App URL:
+# VITE_API_BASE_URL=https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io
 ```
 
 ### API Configuration
 
-Create a `.env` file in the project root (for Docker Compose) with the following:
+Create a `.env` file in the project root (for Docker Compose):
 
 ```env
-# For local development with Docker Compose
-SQL_SERVER_NAME=localhost
-SQL_DATABASE_NAME=ARiffInReact
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-min-32-chars-long
+JWT_EXPIRY=7d
+
+# Database Configuration (Local)
+SQL_SERVER=localhost
+SQL_DATABASE=ARiffInReact
 SQL_USER=sa
 SQL_PASSWORD=YourSecurePassword123!
+
+# Cosmos DB (Local Emulator)
 COSMOS_ENDPOINT=https://localhost:8081
 COSMOS_KEY=your-local-cosmos-key
 COSMOS_DATABASE=ARiffInReact
+
+# CORS Configuration
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
 
 ## Running the Application
@@ -115,7 +119,7 @@ This will:
 In a separate terminal:
 
 ```bash
-npm run start
+npm run dev
 ```
 
 This will start the Vite development server on port 5173.
@@ -125,6 +129,7 @@ This will start the Vite development server on port 5173.
 - Frontend: http://localhost:5173
 - API: http://localhost:3001
 - API Health Check: http://localhost:3001/health
+- Auth Test Page: http://localhost:5173/auth-test
 
 ## Database Setup
 
@@ -187,17 +192,17 @@ For API debugging, you can:
 2. Add console.log statements to the API code
 3. Use a tool like Postman to test API endpoints directly
 
-## Development Workflow
+## Development Best Practices
 
 ### The RIGHT Way:
 ```
 1. Make changes locally
-2. Test locally (npm run start + npm run test)
+2. Test locally (npm run dev + API tests)
 3. Commit only when working
 4. Push to trigger deployment
 ```
 
-### The WRONG Way (what we were doing):
+### The WRONG Way:
 ```
 1. Make changes
 2. Commit and push
@@ -206,25 +211,17 @@ For API debugging, you can:
 5. Repeat 😢
 ```
 
-### Recommended Workflow
-
-1. Make changes to the frontend or API code
-2. For API changes, Docker Compose will automatically detect changes and restart the container
-3. For frontend changes, Vite's hot module replacement will update the UI
-4. Test changes in the browser or with API client
-5. Commit changes with descriptive messages
-
 ## Environment Switching
 
 ### Local Development
 - Frontend: `http://localhost:5173`
 - API: `http://localhost:3001` or live Azure API
-- Auth: Redirect to localhost
+- Auth: JWT tokens stored in localStorage
 
 ### Production
-- Frontend: `<YOUR_FRONTEND_URL>` (custom domain, SSL enabled)
-- API: `<YOUR_API_URL>`
-- Auth: Redirect to production URL
+- Frontend: `https://a-riff-in-react.harryjamesgreenblatt.com`
+- API: `https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io`
+- Auth: JWT tokens with 7-day expiry
 
 ## Testing Strategy
 
@@ -245,12 +242,10 @@ For API debugging, you can:
 
 ## Branch Strategy
 
-### Current (can be improved later):
+### Current:
 ```
 main -> production
-main -> production
-fresh-start -> development/staging
-feature-branches -> merge to fresh-start -> then to main
+feature-branches -> merge to main
 ```
 
 ### Professional (future):
@@ -271,13 +266,14 @@ If you encounter CORS errors:
 2. Check that the API CORS configuration includes your frontend URL
 3. Ensure you're using the correct protocol (http vs https)
 
-### Authentication Issues
+### JWT Authentication Issues
 
-If Microsoft Entra authentication isn't working:
+If JWT authentication isn't working:
 
-1. Verify your app registration in the Azure portal
-2. Check that redirect URIs are correctly configured
-3. Ensure your Entra tenant and client IDs are correct in the `.env.local` file
+1. Verify `JWT_SECRET` is set in your API `.env` file
+2. Check that tokens are being stored in localStorage
+3. Verify the token hasn't expired (default: 7 days)
+4. Check browser console for auth errors
 
 ### Database Connection Issues
 
@@ -286,6 +282,7 @@ If the API can't connect to the database:
 1. Check your Docker Compose logs for connection errors
 2. Verify that the SQL Server container is running
 3. Ensure your database credentials are correct in the `.env` file
+4. Run the `api/schema.sql` script to initialize tables
 
 ## Additional Resources
 
@@ -294,3 +291,4 @@ If the API can't connect to the database:
 - [Docker Compose Documentation](https://docs.docker.com/compose/)
 - [Azure Cosmos DB Documentation](https://docs.microsoft.com/en-us/azure/cosmos-db/)
 - [Azure SQL Database Documentation](https://docs.microsoft.com/en-us/azure/azure-sql/)
+- [JWT.io](https://jwt.io/) - JWT token decoder and validator

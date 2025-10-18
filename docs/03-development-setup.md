@@ -47,7 +47,7 @@ src/
    - Development server tested and working
 
 2. ✅ **Basic Dependencies Installed**
-   - React 18.x with MSAL authentication support
+   - React 18.x with JWT authentication support
    - TypeScript 5.8.3 with strict configuration
    - ESLint with React and TypeScript rules
    - Vite 6.3.5 for fast development and building
@@ -87,44 +87,15 @@ src/
   }
 }
 ```
-   - Vite 6.3.5 for fast development and building
-   - ESLint 9.25.0 with React plugins configured
 
-3. ⏳ Configure TypeScript with strict settings
-4. ⏳ Set up Prettier code formatting
-5. ⏳ Create organized project structure
-6. ⏳ Add initial routing setup
-7. ⏳ Create basic layout components
+### Authentication Status
 
-### Current Status
+The project uses JWT-based authentication with email/password credentials. This approach was chosen for its:
+- **Template portability**: Works in any Azure subscription without external dependencies
+- **Zero configuration**: No separate tenant or Portal setup required
+- **Client ownership**: All authentication logic is in the codebase
 
-**✅ COMPLETED**: Basic React app foundation
-- Vite + React 18 + TypeScript setup working
-- Development server running on `http://localhost:5173`
-- Hot Module Replacement (HMR) functional
-- ESLint configuration in place
-- Basic file structure established
-
-**🎯 NEXT**: Configure development tools and project structure
-
-### Success Criteria
-
-- [x] React development server runs successfully
-- [x] TypeScript compilation works without errors
-- [ ] ESLint and Prettier are configured
-- [ ] Basic routing is functional
-
-### Authentication status (UPDATED)
-
-The project has migrated from MSAL/Entra External ID to an in-repo JWT authentication strategy to support a template-first, zero-portal-configuration deployment experience. The full migration is complete and documented; developers should follow the JWT-based guides below rather than the old MSAL notes.
-
-- Primary auth documentation: `docs/07-authentication.md` (JWT implementation and frontend integration)
-- Migration summary and verification: `docs/Auth/JWT-MIGRATION-COMPLETE.md`
-- One-time SQL permission step (if required): `docs/Auth/SQL-SETUP-STEP-BY-STEP.md`
-
-Notes:
-- The codebase and infrastructure have been updated to use JWT (bcrypt password hashing on the API, JWT tokens, and managed identity for database access).
-- Old MSAL/Entra artifacts and guidance have been archived. Do not follow MSAL/Entra configuration instructions in older documents.
+Primary auth documentation: `docs/07-authentication.md`
 
 ### Step 1 Completed: Basic Vite Setup ✅
 
@@ -133,7 +104,7 @@ Notes:
 - ✅ Dependencies installed successfully (189 packages)
 - ✅ Development server running on `http://localhost:5173/`
 - ✅ Hot Module Replacement (HMR) working
-- ✅ Basic React 18.x app with TypeScript 5.8.3 (using React 18.2.0 for MSAL compatibility)
+- ✅ Basic React 18.x app with TypeScript 5.8.3
 
 **Generated files:**
 - `package.json` - Project configuration and dependencies
@@ -192,12 +163,17 @@ The backend is a Node.js application using Express, designed to run as a contain
 
 2. **Configure local settings**:
    - Create a `.env` file in the root directory
-   - Fill in the required values, especially your database credentials:
+   - Fill in the required values:
      ```env
-     SQL_CONNECTION_STRING=your_connection_string
-     COSMOS_ENDPOINT=your_cosmos_endpoint
-     COSMOS_KEY=your_cosmos_key
-     COSMOS_DATABASE=your_cosmos_database
+     JWT_SECRET=your-secret-key-min-32-chars
+     JWT_EXPIRY=7d
+     SQL_SERVER=localhost
+     SQL_DATABASE=ARiffInReact
+     SQL_USER=sa
+     SQL_PASSWORD=YourPassword123!
+     COSMOS_ENDPOINT=https://localhost:8081
+     COSMOS_KEY=your-cosmos-key
+     COSMOS_DATABASE=ARiffInReact
      ```
 
 3. **Start the backend with Docker Compose**:
@@ -207,7 +183,7 @@ The backend is a Node.js application using Express, designed to run as a contain
    - The API will be available at `http://localhost:3001`.
 
 4. **Run the database schema**:
-   - Connect to your Azure SQL database using your preferred tool (e.g., Azure Data Studio, SSMS).
+   - Connect to your Azure SQL database or local SQL Server
    - Execute the script in `api/schema.sql` to create the `Users` table and related schema.
 
 ### Current Status
@@ -216,7 +192,7 @@ The backend is a Node.js application using Express, designed to run as a contain
 - Basic React app foundation
 - UI framework with Tailwind CSS and shadcn/ui patterns
 - Redux Toolkit state management with RTK Query
-- Authentication system with MSAL and Microsoft Entra External ID
+- JWT-based authentication system
 - Backend API for user persistence
 - Docker containerization for consistent development and deployment
 
@@ -229,7 +205,7 @@ The backend is a Node.js application using Express, designed to run as a contain
 - [x] TypeScript compilation works without errors
 - [x] UI framework integrated and functional
 - [x] Redux state management configured
-- [x] Authentication system implemented
+- [x] JWT authentication system implemented
 - [ ] Database connections established and tested end-to-end
 
 ---

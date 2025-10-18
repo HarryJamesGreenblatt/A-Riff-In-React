@@ -1,4 +1,3 @@
-````markdown
 # Azure Deployment Guide
 
 ## Infrastructure Overview
@@ -6,31 +5,31 @@
 - **Container Apps**: Express API as a containerized application
 - **Static Web Apps**: React SPA with global CDN distribution
 - **Database**: Azure SQL Database (shared server pattern) + Cosmos DB
-- **Authentication**: Microsoft Entra External ID
+- **Authentication**: JWT-based (email/password)
 - **Container Registry**: GitHub Container Registry (ghcr.io)
 
-**Status**: ✅ **FULLY DEPLOYED AND OPERATIONAL** (as of September 6, 2025)
+**Status**: ✅ **FULLY DEPLOYED AND OPERATIONAL**
 
-This guide documents the deployment of **A Riff In React** to Azure, including the complete infrastructure setup with Microsoft Entra External ID authentication.
+This guide documents the deployment of **A Riff In React** to Azure, including the complete infrastructure setup with JWT-based authentication.
 
 ## 🎉 Current Deployment Status
 
 - ✅ **Azure Infrastructure**: Container Apps environment deployed via Bicep
-✅ **Web Application**: Live at `<YOUR_FRONTEND_URL>` (custom domain, SSL enabled)
-- ✅ **Backend API**: Live at `<YOUR_API_URL>`
-- ✅ **Authentication**: Microsoft Entra External ID **FULLY WORKING** ✅
+- ✅ **Web Application**: Live at `https://a-riff-in-react.harryjamesgreenblatt.com` (custom domain, SSL enabled)
+- ✅ **Backend API**: Live at `https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io`
+- ✅ **Authentication**: JWT-based authentication **FULLY WORKING** ✅
 - ✅ **CI/CD Pipeline**: GitHub Actions workflows operational
 - ✅ **Database**: Azure SQL Database and Cosmos DB with managed identity
-- ✅ **Platform Migration**: Successfully migrated from Windows App Service to Container Apps (Sept 2025)
+- ✅ **Platform Migration**: Successfully migrated from Windows App Service to Container Apps
 
-## Authentication Status: ✅ FULLY WORKING
+## Authentication Status: ✅ JWT-Based
 
-**Microsoft Entra External ID Integration:**
-- Client ID: `<YOUR_ENTRA_CLIENT_ID>`
-- Tenant ID: `<YOUR_ENTRA_TENANT_ID>`
-- Redirect URIs: Configured for both localhost and production
-- Token Flow: Working perfectly with redirect-based authentication
-- User Profiles: Successfully extracted and displayed
+**JWT Authentication Implementation:**
+- Email/password registration and login
+- bcrypt password hashing (10 rounds)
+- JWT tokens with 7-day expiry
+- Tokens stored in localStorage
+- No external identity providers required
 
 ## Deployed Resources
 
@@ -51,83 +50,12 @@ This guide documents the deployment of **A Riff In React** to Azure, including t
 - Azure account with subscription
 - Azure CLI installed
 - Resource group created
-- **Azure Resource Providers registered** (see [Provider Registration Guide](./provider-registration.md))
+- **Azure Resource Providers registered** (see [Provider Registration Guide](./09-provider-registration.md))
 
 > ⚠️ **Important**: Before deploying, ensure all required Azure Resource Providers are registered in your subscription. You can use our automated script: `.\scripts\register-providers.ps1` (Windows) or `./scripts/register-providers.sh` (Linux/macOS).
 
-## Prerequisites
-- Azure account
-- Azure CLI installed
-- Resource group created
+## 1. Provision Azure Resources
 
-## 1. Microsoft Entra Tenant Setup
-
-To enable external user authentication with Microsoft Entra External ID, you can set up app registration either through the Azure portal or programmatically:
-
-### Manual Setup (Azure Portal)
-
-1. **Register Your App in Microsoft Entra**
-   - In the Azure Portal, go to **Azure Active Directory** > **App registrations** > **New registration**
-   - Configure redirect URIs and authentication settings
-   - Note the Application (client) ID and Directory (tenant) ID
-
-### Programmatic Setup
-
-1. **Register Your App in Microsoft Entra**
-   ```bash
-   # Login to Azure
-   az login
-   
-   # Create app registration
-   az ad app create \
-     --display-name "A-Riff-In-React-Entra" \
-     --sign-in-audience "AzureADandPersonalMicrosoftAccount" \
-    --web-redirect-uris "http://localhost:5173" "<YOUR_FRONTEND_URL>"
-   
-   # Get the application ID (client ID)
-   az ad app list --display-name "A-Riff-In-React-Entra" --query "[].appId" -o tsv
-   ```
-
-2. **Configure User Flows**
-   - In your Entra tenant, go to **User flows**
-   - Create a **Sign up and sign in** flow (e.g., `B2C_1_signupsignin`)
-   - Configure the user attributes, application claims, and identity providers
-   - Save the flow name for your deployment configuration
-
-   **Programmatic Alternative:**
-   ```bash
-   # Create user flow through REST API (requires access token)
-   # First get an access token for the Microsoft Graph API
-   accessToken=$(az account get-access-token --resource https://graph.microsoft.com --query accessToken -o tsv)
-   
-   # Create a sign-up/sign-in user flow (requires a separate JSON payload file)
-   curl -X POST \
-     -H "Authorization: Bearer $accessToken" \
-     -H "Content-Type: application/json" \
-     -d @userflow-payload.json \
-     "https://graph.microsoft.com/beta/identity/b2cUserFlows"
-   ```
-
-3. **Gather Configuration Values**
-   - Entra Tenant Name (e.g., `yourtenant`)
-   - Application (Client) ID from the app registration
-   - User Flow (Policy) Name (e.g., `B2C_1_signupsignin`)
-
-   **With Azure CLI:**
-   ```bash
-   # Get the application ID (client ID)
-   clientId=$(az ad app list --display-name "A-Riff-In-React-Entra" --query "[0].appId" -o tsv)
-   
-   # Get the tenant ID
-   tenantId=$(az account show --query tenantId -o tsv)
-   
-   # Export as environment variables
-   export B2C_TENANT_NAME="your-b2c-tenant"
-   export B2C_CLIENT_ID=$clientId
-   export B2C_SIGNIN_POLICY="B2C_1_signupsignin"
-   ```
-
-## 2. Provision Azure Resources
 The project includes a Bicep template in the `infra` folder that provisions:
 
 - Azure Container Apps (for containerized API hosting)
@@ -149,10 +77,10 @@ az login
 RESOURCE_GROUP=riffinreact-rg
 LOCATION=westus
 ENV_NAME=a-riff-in-react
-EXTERNAL_TENANT_ID=your-external-tenant-id
-EXTERNAL_CLIENT_ID=your-external-client-id
 CONTAINER_IMAGE=ghcr.io/username/a-riff-in-react-api:latest
-CONTAINER_REGISTRY=username
+CONTAINER_REGISTRY_USERNAME=username
+CONTAINER_REGISTRY_PASSWORD=your-pat-token
+JWT_SECRET=your-super-secret-jwt-key-min-32-chars-long
 EXISTING_SQL_SERVER_NAME=sequitur-sql-server
 EXISTING_SQL_SERVER_RG=db-rg
 EXISTING_SQL_DATABASE_NAME=riff-react-db
@@ -168,9 +96,9 @@ az deployment group create \
   --parameters environmentName=$ENV_NAME \
   location=$LOCATION \
   containerImage=$CONTAINER_IMAGE \
-  containerRegistry=$CONTAINER_REGISTRY \
-  externalTenantId=$EXTERNAL_TENANT_ID \
-  externalClientId=$EXTERNAL_CLIENT_ID \
+  containerRegistryUsername=$CONTAINER_REGISTRY_USERNAME \
+  containerRegistryPassword=$CONTAINER_REGISTRY_PASSWORD \
+  jwtSecret=$JWT_SECRET \
   existingSqlServerName=$EXISTING_SQL_SERVER_NAME \
   existingSqlServerResourceGroup=$EXISTING_SQL_SERVER_RG \
   existingSqlDatabaseName=$EXISTING_SQL_DATABASE_NAME \
@@ -198,29 +126,24 @@ The CI/CD pipeline requires a Service Principal with sufficient permissions to d
     *   `AZURE_RESOURCE_GROUP`: The primary resource group for this project (e.g., `riffinreact-rg`).
     *   `SHARED_SQL_SERVER_RG`: The resource group of the shared SQL server (e.g., `db-rg`).
     *   `SQL_ADMIN_PASSWORD`: The administrator password for the shared SQL server.
+    *   `JWT_SECRET`: Your JWT signing secret (min 32 characters).
+    *   `CONTAINER_REGISTRY_USERNAME`: GitHub username for container registry.
+    *   `CONTAINER_REGISTRY_PASSWORD`: GitHub Personal Access Token with package write permissions.
 
-## 3. Update Configuration Files
+## 2. Update Configuration Files
+
 Ensure your application can use both local development settings and deployed settings:
 
 1. **Create a `.env.local` file for local development**
-   ```
-   VITE_ENTRA_CLIENT_ID=your-client-id
-   VITE_ENTRA_TENANT_ID=your-external-tenant-id
-   VITE_REDIRECT_URI=http://localhost:5173
-   VITE_POST_LOGOUT_URI=http://localhost:5173
-  VITE_API_BASE_URL=http://localhost:3001
+   ```env
+   # API Configuration
+   VITE_API_BASE_URL=http://localhost:3001
    
-   # For docker-compose.yml
-   SQL_CONNECTION_STRING=Server=localhost;Database=ARiffInReact;User Id=sa;Password=YourPassword;TrustServerCertificate=True;
-   COSMOS_ENDPOINT=https://localhost:8081
-   COSMOS_KEY=your-local-cosmos-key
-   COSMOS_DATABASE=ARiffInReact
+   # For production:
+   # VITE_API_BASE_URL=https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io
    ```
 
-2. **Update `src/config/authConfig.ts` to use Entra configuration**
-   Update your configuration to use the Entra settings as shown in the `05-authentication-msal.md` documentation.
-
-3. **Create a `staticwebapp.config.json` file**
+2. **Create a `staticwebapp.config.json` file** (at project root)
    ```json
    {
      "navigationFallback": {
@@ -242,7 +165,7 @@ Ensure your application can use both local development settings and deployed set
        ".svg": "image/svg+xml"
      },
      "globalHeaders": {
-       "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' *.azurecontainerapps.io *.microsoftonline.com *.microsoft.com",
+       "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' *.azurecontainerapps.io",
        "X-Content-Type-Options": "nosniff"
      }
    }
@@ -252,13 +175,14 @@ Ensure your application can use both local development settings and deployed set
    - Setting correct MIME types for JavaScript modules
    - Configuring security headers
 
-## 4. Deploy the App
+## 3. Deploy the App
+
 The project includes two GitHub Actions workflows for CI/CD:
 
 *   **`container-deploy.yml`**: Builds and deploys the API container to Azure Container Apps
 *   **`static-web-deploy.yml`**: Builds and deploys the React frontend to Azure Static Web Apps
 
-These workflows are triggered on pushes to the `main` or `fresh-start` branches. They perform the following steps:
+These workflows are triggered on pushes to the `main` branch. They perform the following steps:
 
 1.  **Container Deploy Workflow**:
     *   Builds the Docker image for the API
@@ -270,9 +194,9 @@ These workflows are triggered on pushes to the `main` or `fresh-start` branches.
     *   Builds the React application with production environment variables
     *   Deploys the built assets to Azure Static Web Apps
 
-See `docs/09-github-actions-ci-cd.md` for detailed pipeline setup instructions.
+See `docs/11-github-actions-ci-cd.md` for detailed pipeline setup instructions.
 
-## 5. Monitor and Maintain
+## 4. Monitor and Maintain
 
 ### API Monitoring
 
@@ -303,7 +227,16 @@ FRONTEND_URL=$(az staticwebapp show -n $ENV_NAME -g $RESOURCE_GROUP --query "def
 echo "https://$FRONTEND_URL"
 ```
 
+## Optional: Extending with Enterprise Authentication
+
+While this template uses JWT authentication by default, you can extend it with enterprise identity providers if needed:
+
+- **Azure AD / Entra ID**: For organizational users
+- **OAuth Providers**: Google, GitHub, Microsoft social login
+- **SAML/OIDC**: Enterprise SSO integration
+
+See the archived documentation in `docs/archive/` for MSAL/Entra External ID implementation examples.
+
 ---
 
-> _For detailed deployment steps and troubleshooting, see the Flask template's [azure_deployment.md](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask/blob/main/docs/azure_deployment.md)_
-````
+> _For additional deployment examples, see the Flask template's [azure_deployment.md](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask/blob/main/docs/azure_deployment.md)_
