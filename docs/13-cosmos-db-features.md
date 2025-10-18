@@ -276,10 +276,10 @@ module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
 
 ### Deployment Checklist
 
-- [ ] Cosmos DB account exists
-- [ ] `activities` container created with `/userId` partition key
-- [ ] Managed identity has Cosmos DB Data Contributor role
-- [ ] Environment variables set in Container App
+- [x] Cosmos DB account exists
+- [x] `activities` container created with `/userId` partition key (automated via Bicep)
+- [x] Managed identity has Cosmos DB Data Contributor role (automated via Bicep)
+- [x] Environment variables set in Container App (automated via Bicep)
 - [ ] API endpoints tested with authentication
 
 ## Troubleshooting
