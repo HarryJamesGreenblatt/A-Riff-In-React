@@ -1,102 +1,21 @@
 # A Riff In React
 
-## 📢 Current Status: ✅ Counter Feature Complete - Notification System Implemented
+A Riff In React is a deployable React + Express template that accelerates building user-facing web apps with authenticated users, persistent activity data, and real-time-style notifications. It's designed so teams can clone, configure three values, and deploy quickly to Azure.
 
-**Date:** October 19, 2025
+## Core features
 
-**Status:** ✅ **Counter Feature Production-Ready — Notification System implemented & smoke-tested**
+- **Authenticated login**
+  - Email/password registration and login with JWT-based sessions and secure password hashing.
+- **Protected user dashboard**
+  - Route guards, a simple profile page, and per-user UI that requires authentication.
+- **Activity tracking**
+  - Flexible activity documents stored in Cosmos DB for event logs, counters, and activity feeds.
+- **Notification system**
+  - Create, list, mark-as-read, and delete notifications (Cosmos DB-backed) with frontend RTK Query support and optimistic updates.
 
-**Recent Achievements:**
-- ✅ **Counter Feature**: Fully operational with Cosmos DB persistence
-- ✅ **API Deployment**: Azure Container Apps with managed identity
-- ✅ **Frontend Deployment**: Azure Static Web Apps with custom domain
-- ✅ **Database Infrastructure**: Azure SQL + Cosmos DB with role-based access
-- ✅ **Authentication**: JWT-based auth with secure token handling
-- ✅ **Notification System**: Backend endpoints + Cosmos integration + frontend RTK Query slice and minimal dashboard UI
+## Why this template
 
-**What Works Right Now:**
-- ✅ User registration and login (email/password)
-- ✅ Protected dashboard route with user profile
-- ✅ Counter widget with persistence across sessions
-- ✅ Notifications: create, list, mark-as-read, delete (Cosmos DB-backed)
-- ✅ Real-time updates with optimistic UI patterns (RTK Query)
-
-**Current Status:**   
-- ✅ **Frontend**: Live at https://a-riff-in-react.harryjamesgreenblatt.com
-- ✅ **API Backend**: Live at https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io
-- ✅ **Authentication**: JWT tokens working correctly
-- ✅ **Counter**: Cosmos DB persistence verified
-- ✅ **Notifications**: End-to-end smoke-tested (API + Cosmos + dashboard)
-- ✅ **Infrastructure**: Fully containerized with CI/CD
-
-**Next Phase:** Notification UI polish, polling, and tests
-
----
-
-A production-ready React application template demonstrating hybrid Azure SQL Database + Cosmos DB architecture with portable, client-deployable authentication.
-
-## 🎯 Project Vision
-
-**A Riff In React** is a **deployment template** designed for clients to clone and deploy to their own Azure subscriptions with minimal configuration. It demonstrates:
-
-- ✅ **Hybrid Database Architecture**: Azure SQL (relational) + Cosmos DB (document)
-- ✅ **Containerized Deployment**: Docker + Azure Container Apps
-- ✅ **Portable Authentication**: JWT-based auth that works out-of-the-box
-- ✅ **Infrastructure as Code**: Complete Bicep templates
-- ✅ **Single-Tenant Design**: No external auth dependencies
-- ✅ **Feature Demonstrations**: Working counter with persistence
-
-> _This template is part of the "Scaffolding" series, which includes [A Fugue In Flask](https://github.com/HarryJamesGreenblatt/A-Fugue-In-Flask). Each template explores a different architectural stack while maintaining consistent deployment patterns._
-
-### Design Philosophy: Template-First
-
-Unlike enterprise applications that can afford complex, multi-tenant auth setups, this template prioritizes:
-
-1. **Client Deployability**: Clone → Configure (3 variables) → Deploy → Working App (15 minutes)
-2. **Zero Portal Configuration**: Everything defined in Bicep, no manual Azure setup
-3. **Full Client Ownership**: All code, all data, all infrastructure in their tenant
-4. **Extensibility**: Simple foundation that clients can enhance (add OAuth later if needed)
-
-### Example Use Case: Run Club Membership App
-
-While this is a general-purpose template, documentation uses a **run club** as the reference use case to demonstrate:
-- External user registration (club members, not employees)
-- Profile management (runner preferences, achievements)
-- Activity logging (runs, events, participation)
-- Hybrid data patterns (structured user data + flexible activity logs)
-
-## 📈 Development Progress
-
-### ✅ Phase 1: Foundation (COMPLETED)
-- ✅ **Documentation Framework**: Comprehensive docs structure
-- ✅ **Basic React App**: Vite + TypeScript + React 18
-- ✅ **Project Structure**: Feature-based organization
-
-### ✅ Phase 2: Infrastructure (COMPLETED)
-- ✅ **UI Framework**: Tailwind CSS + shadcn/ui-style components
-- ✅ **State Management**: Redux Toolkit + RTK Query
-- ✅ **Database Infrastructure**: Azure SQL + Cosmos DB deployed
-- ✅ **Backend API**: Express containerized on Azure Container Apps
-- ✅ **Azure Deployment**: Dual CI/CD pipelines with GitHub Actions
-- ✅ **Containerization**: Docker multi-stage builds
-
-### ✅ Phase 3: Authentication (COMPLETED)
-- ✅ **JWT Authentication**: Email/password registration and login
-- ✅ **User Management**: Profile CRUD operations
-- ✅ **Password Security**: bcrypt hashing, secure tokens
-- ✅ **Protected Routes**: Frontend auth guards, backend middleware
-
-### ✅ Phase 4: Feature Examples (COMPLETED)
-- ✅ Example: User profiles (Azure SQL)
-- ✅ Example: Activity logging (Cosmos DB)
-- ✅ Example: Data visualization
-- ✅ Example: Real-time updates
-
-### 🚀 Phase 5: Template Hardening (PLANNED)
-- [ ] Deployment documentation for clients
-- [ ] Environment configuration templates
-- [ ] Security best practices guide
-- [ ] Performance optimization
+This repository focuses on feature patterns you will use in many client apps: authentication, a user-specific dashboard, event/activity capture, and a notification mechanism. It packages those features with production-minded defaults (containerization, IaC, CI/CD) so you can adapt them rather than build from scratch.
 
 ## 🛠️ Technology Stack
 
