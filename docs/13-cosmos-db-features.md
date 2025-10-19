@@ -287,64 +287,59 @@ module cosmosRoleAssignment 'modules/cosmosRoleAssignment.bicep' = {
 ### Common Issues
 
 **Issue**: `404 Not Found` when calling `/api/counter`  
-**Solution**: Ensure counter routes are registered in `api/src/index.ts` and API is deployed
+**Solution**: 
+- Ensure counter routes are registered in `api/src/index.ts`
+- Verify API endpoint paths include `/api` prefix in client code
+- Check that API is deployed and accessible
+
+**Issue**: `500 Internal Server Error` with "invalid input: input is not string"  
+**Solution**: This occurs when `userId` is not a string (e.g., GUID object from SQL)
+- **Root cause**: SQL Server returns `UNIQUEIDENTIFIER` as objects, not strings
+- **Fix**: Convert to string before using: `String(user.id)` in auth routes
+- **Where to fix**: 
+  - `api/src/routes/authRoutes.ts`: `const userId = String(user.id);` before `generateToken()`
+  - `api/src/routes/counterRoutes.ts`: `const userId = String(req.user.userId);` before Cosmos calls
+- **Verification**: Re-login to get new token with userId as string
 
 **Issue**: `Unauthorized` or `403 Forbidden`  
 **Solution**: Verify JWT token is valid and not expired
+- Check localStorage has `authToken` in browser DevTools
+- Token expires after 7 days by default (configurable via `JWT_EXPIRY`)
+- Re-login if token expired
 
 **Issue**: Cosmos DB connection errors  
 **Solution**: 
-- Local: Check `COSMOS_KEY` and `COSMOS_ENDPOINT` in `.env`
-- Production: Verify managed identity has proper role assignment
+- **Local**: Check `COSMOS_KEY` and `COSMOS_ENDPOINT` in `.env`
+- **Production**: Verify managed identity has proper role assignment
+- **Fallback**: In-memory mode activates if Cosmos unavailable (dev only)
 
 **Issue**: Counter not persisting  
-**Solution**: Check Cosmos DB container exists and partition key is correct (`/userId`)
+**Solution**: 
+- Check Cosmos DB container exists: `activities`
+- Verify partition key is correct: `/userId`
+- Confirm managed identity has **Cosmos DB Data Contributor** role
+- Check container logs for initialization errors
 
-## Performance Considerations
+**Issue**: Counter resets to 0 after logout/login  
+**Solution**: 
+- Verify `userId` in JWT matches user ID in SQL
+- Check Cosmos document ID equals userId (both must be same string)
+- Look for Cosmos SDK errors in API logs
 
-### Request Units (RU)
+### Debug Steps
 
-Typical RU consumption:
-- **Get Counter**: ~3 RUs
-- **Increment Counter**: ~10 RUs (read + write)
-- **Reset Counter**: ~10 RUs (read + write)
-
-### Optimization Tips
-
-1. **Use partition key in queries**: Always filter by `userId`
-2. **Limit query results**: Use `OFFSET`/`LIMIT` for pagination
-3. **Leverage caching**: RTK Query automatically caches responses
-4. **Batch operations**: Group multiple writes when possible
-
-## Future Enhancements
-
-### Planned Features
-
-- [ ] **Notification System**: Real-time alerts and messages
-- [ ] **Activity Analytics**: Aggregate activity data
-- [ ] **Counter History**: Track counter changes over time
-- [ ] **WebSocket Support**: Real-time updates without polling
-- [ ] **Data Export**: Allow users to export their data
-
-### Extensibility
-
-The current architecture supports easy addition of new document types:
-
-1. Define TypeScript interface
-2. Add service methods in `cosmosService.ts`
-3. Create API routes
-4. Implement frontend slice and components
-5. Update queries to exclude new type from existing queries
-
-## References
-
-- [Azure Cosmos DB Documentation](https://docs.microsoft.com/azure/cosmos-db/)
-- [Cosmos DB Best Practices](https://docs.microsoft.com/azure/cosmos-db/best-practices)
-- [RTK Query Documentation](https://redux-toolkit.js.org/rtk-query/overview)
-- [Express.js Routing Guide](https://expressjs.com/en/guide/routing.html)
-
----
-
-**Status**: Phase 1 Complete  | Phase 2 Planned   
-**Last Updated**: January 2025  
-**Next**: Implement notification system (Phase 2)
+1. **Check API Health**: `curl https://<api-host>/health`
+2. **Verify Token**: Decode JWT at jwt.io (check userId is string, not object)
+3. **Test Counter Endpoint**: 
+   ```bash
+   curl -H "Authorization: Bearer <token>" \
+     https://<api-host>/api/counter
+   ```
+4. **Check Container Logs**:
+   ```bash
+   az containerapp logs show \
+     --name ca-api-a-riff-in-react \
+     --resource-group a-riff-in-react \
+     --follow
+   ```
+5. **Inspect Cosmos DB**: Use Data Explorer in Azure Portal to view documents

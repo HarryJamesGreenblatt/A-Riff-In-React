@@ -1,166 +1,123 @@
-# A-Riff-In-React Documentation
+# Documentation Index
 
-This documentation follows a logical progression from project understanding through implementation to deployment and operations.
+Welcome to the **A Riff In React** documentation! This guide covers everything from initial setup to deployment and feature implementation.
 
-## 📚 Documentation Structure
+## 📚 Table of Contents
 
-### Phase 1: Understanding & Setup
-Start here to understand the project and set up your development environment.
+### Getting Started
+1. [Project Overview](./01-project-overview.md) - Vision, goals, and architecture overview
+2. [Architecture Deep Dive](./02-architecture.md) - Technical decisions and system design
+3. [Development Setup](./03-development-setup.md) - Prerequisites and local environment setup
+4. [Local Development](./04-local-development.md) - Day-to-day development workflow
 
-- **[01-project-overview.md](./01-project-overview.md)** - Project vision, template philosophy, and architecture goals
-- **[01a-template-summary.md](./01a-template-summary.md)** - Quick summary for contributors
-- **[02-architecture.md](./02-architecture.md)** - Technical architecture, patterns, and design decisions
-- **[03-development-setup.md](./03-development-setup.md)** - Initial project setup and tooling configuration
-- **[04-local-development.md](./04-local-development.md)** - Complete local development workflow and best practices
+### Building Features
+5. [UI Framework](./05-ui-framework-setup.md) - Tailwind CSS and component library
+6. [State Management](./06-state-management.md) - Redux Toolkit patterns and best practices
+7. [Authentication](./07-authentication.md) - JWT-based authentication implementation
+8. [Backend API](./08-backend-api.md) - Express API structure and patterns
 
-### Phase 2: Frontend Implementation
-Build the React application with modern patterns and JWT authentication.
+### Deployment
+9. [Provider Registration](./09-provider-registration.md) - Azure service prerequisites
+10. [Azure Deployment](./10-azure-deployment.md) - Infrastructure deployment with Bicep
+11. [CI/CD Pipeline](./11-github-actions-ci-cd.md) - GitHub Actions workflows
+12. [Deployment Success](./12-deployment-success.md) - Verification and troubleshooting
 
-- **[05-ui-framework-setup.md](./05-ui-framework-setup.md)** - Tailwind CSS and shadcn/ui component integration
-- **[06-state-management.md](./06-state-management.md)** - Redux Toolkit and RTK Query implementation
-- **[07-authentication.md](./07-authentication.md)** - JWT-based authentication system
+### Features & Examples
+13. [Cosmos DB Features](./13-cosmos-db-features.md) - ✅ Counter feature (Phase 1 complete)
+14. [Notification System](./14-notification-system.md) - 📋 Phase 2 implementation plan
 
-### Phase 3: Backend & Infrastructure  
-Deploy and configure the backend API and Azure infrastructure.
+## 🎯 Quick Navigation
 
-- **[08-backend-api.md](./08-backend-api.md)** - Express.js API with Container Apps deployment
-- **[09-provider-registration.md](./09-provider-registration.md)** - Azure Resource Provider setup (required before deployment)
-- **[10-azure-deployment.md](./10-azure-deployment.md)** - Complete Azure infrastructure deployment
-- **[11-github-actions-ci-cd.md](./11-github-actions-ci-cd.md)** - Automated CI/CD pipeline setup
+### For First-Time Users
+Start here: [Project Overview](./01-project-overview.md) → [Development Setup](./03-development-setup.md)
 
-### Phase 4: Operations & Reference
-Production operations, troubleshooting, and success documentation.
+### For Deploying to Azure
+Skip to: [Provider Registration](./09-provider-registration.md) → [Azure Deployment](./10-azure-deployment.md)
 
-- **[12-deployment-success.md](./12-deployment-success.md)** - Deployment success summary and lessons learned
-- **[13-cosmos-db-features.md](./13-cosmos-db-features.md)** - Cosmos DB features: User Counter and Notifications
+### For Adding Features
+Check out: [State Management](./06-state-management.md) → [Cosmos DB Features](./13-cosmos-db-features.md)
 
-## 🚀 Quick Navigation
+### For Authentication
+See: [Authentication](./07-authentication.md) - Complete JWT implementation guide
 
-### For New Developers
-1. Start with [Project Overview](./01-project-overview.md)
-2. Read [Architecture](./02-architecture.md) to understand the system
-3. Follow [Development Setup](./03-development-setup.md) to get started
-4. Use [Local Development](./04-local-development.md) for day-to-day workflow
+## 📦 Document Status
 
-### For Deployment
-1. Ensure [Provider Registration](./09-provider-registration.md) is complete
-2. Follow [Azure Deployment](./10-azure-deployment.md) guide
-3. Set up [CI/CD Pipeline](./11-github-actions-ci-cd.md)
-4. Review [Deployment Success](./12-deployment-success.md) for verification
+| Document | Status | Last Updated |
+|----------|--------|--------------|
+| Project Overview | ✅ Complete | Oct 2025 |
+| Architecture | ✅ Complete | Oct 2025 |
+| Development Setup | ✅ Complete | Oct 2025 |
+| Local Development | ✅ Complete | Oct 2025 |
+| UI Framework | ✅ Complete | Oct 2025 |
+| State Management | ✅ Complete | Oct 2025 |
+| Authentication | ✅ Complete | Oct 2025 |
+| Backend API | ✅ Complete | Oct 2025 |
+| Provider Registration | ✅ Complete | Oct 2025 |
+| Azure Deployment | ✅ Complete | Oct 2025 |
+| CI/CD Pipeline | ✅ Complete | Oct 2025 |
+| Deployment Success | ✅ Complete | Oct 2025 |
+| Cosmos DB Features | ✅ Phase 1 Complete | Oct 19, 2025 |
+| Notification System | 📋 Planning | Oct 19, 2025 |
 
-### For Frontend Work
-- [UI Framework Setup](./05-ui-framework-setup.md)
-- [State Management](./06-state-management.md)
-- [Authentication](./07-authentication.md)
+## 🚀 Current Project Status
 
-### For Backend Work
-- [Backend API](./08-backend-api.md)
-- [Cosmos DB Features](./13-cosmos-db-features.md)
-- [Local Development](./04-local-development.md)
+**Latest Achievement**: ✅ **Counter Feature Complete**
+- User-specific counters with Cosmos DB persistence
+- Increment, custom amounts, and reset functionality
+- Data persists across sessions
+- Full integration with JWT authentication
 
-## 🔄 Document Maintenance
+**Next Phase**: 📋 **Notification System** (Phase 2 of Cosmos DB Features)
+- Real-time user notifications
+- Admin broadcast capabilities
+- Mark as read/unread
+- Notification history
 
-### Recent Updates (January 2025)
-- **Cosmos DB Features**: Added user counter implementation and notification system planning
-- **Documentation Restructure**: Numbered Cosmos features doc to follow conventions
+## 💡 Key Features Demonstrated
 
-### Previously (October 12, 2025)
-- **Authentication Strategy Change**: Migrated from MSAL/Entra External ID to JWT-based auth; `docs/07-authentication.md` is the canonical guide.
-- **Template-First Focus**: Emphasized portable, client-deployable architecture
-- **Simplified Deployment**: Removed manual Portal configuration requirements
-- **Archived**: MSAL documentation moved to `archive/` folder
+### ✅ Implemented
+- JWT-based authentication (email/password)
+- Protected routes with auth guards
+- User profile management
+- **Counter widget with Cosmos DB persistence** ← NEW!
+- Azure SQL for relational data
+- Cosmos DB for flexible document storage
+- Containerized deployment (Docker + Azure Container Apps)
+- Static web hosting (Azure Static Web Apps)
+- CI/CD with GitHub Actions
 
-### Previously (September 6, 2025)
-- Fixed duplicate numbering (02-architecture vs 02-development-setup)
-- Moved provider registration before deployment (critical dependency)
-- Consolidated local development guides
-- Improved logical flow and grouping
+### 📋 Planned
+- Notification system (Phase 2)
+- Activity tracking and analytics
+- WebSocket real-time updates
+- Advanced search and filtering
 
-### Contributing to Documentation
-- Follow the numbered structure for new documents
-- Update cross-references when adding new content
-- Keep the README updated with new sections
-- Test all links and commands before committing
+## 🔗 External Resources
 
-## 📋 Cross-References
+- [Azure Documentation](https://docs.microsoft.com/azure/)
+- [React Documentation](https://react.dev/)
+- [Redux Toolkit](https://redux-toolkit.js.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Express.js](https://expressjs.com/)
+- [Cosmos DB Best Practices](https://docs.microsoft.com/azure/cosmos-db/best-practices)
 
-### Key Dependencies
-- **Provider Registration** (09) must be completed before **Azure Deployment** (10)
-- **Development Setup** (03) is required for **Local Development** (04)
-- **Authentication** (07) demonstrates JWT patterns used in **Backend API** (08)
-- **Cosmos DB Features** (13) builds on **Backend API** (08) and **State Management** (06)
+## 🤝 Contributing
 
-### Common Workflows
-- **Getting Started**: 01 → 02 → 03 → 04
-- **Frontend Development**: 04 → 05 → 06 → 07
-- **Deployment**: 09 → 10 → 11 → 12
-- **Full Implementation**: Follow numerical order 01-13
+Found an issue or want to improve the docs? 
+1. Open an issue describing the problem
+2. Submit a PR with your proposed changes
+3. Reference the relevant doc section
 
-## 🎯 Template Philosophy
+## 📝 Documentation Style Guide
 
-This documentation reflects our **template-first** approach:
-
-**Key Principles:**
-1. **Portable**: Works in any Azure subscription without modification
-2. **Simple**: Zero manual configuration, fully automated deployment
-3. **Secure**: Industry-standard patterns (JWT, bcrypt, HTTPS)
-4. **Extensible**: Easy to customize for specific use cases
-
-**Not Included (By Design):**
-- Complex enterprise identity integrations (Azure AD, Entra External ID)
-- Multi-tenant architectures
-- Advanced OAuth flows
-- Separate B2C/External ID tenants
-
-**Why?** These add deployment friction. Clients needing these features can extend the template.
-
-## 📦 What Clients Get
-
-When deploying this template, clients receive:
-
-✅ **Working Application** (15-minute deployment)
-- User registration and login (JWT-based)
-- Profile management
-- Activity logging examples
-- User counter feature (Cosmos DB)
-- Responsive UI
-
-✅ **Complete Infrastructure** (Bicep templates)
-- Azure Container Apps for API
-- Azure Static Web Apps for frontend
-- Azure SQL Database for structured data
-- Cosmos DB for flexible data
-- Managed Identity for secure access
-- Container Registry for Docker images
-
-✅ **CI/CD Pipeline** (GitHub Actions)
-- Automated deployments on push
-- Docker image building
-- Health check verification
-
-✅ **Development Environment** (Docker Compose)
-- Local API and frontend development
-- Hot reload for both
-- Consistent with production
-
-## 🔍 Finding Information
-
-**If you need to...**
-- Understand the project vision → [01-project-overview.md](./01-project-overview.md)
-- See the technical architecture → [02-architecture.md](./02-architecture.md)
-- Set up locally → [03-development-setup.md](./03-development-setup.md) + [04-local-development.md](./04-local-development.md)
-- Implement authentication → [07-authentication.md](./07-authentication.md)
-- Work with Cosmos DB → [13-cosmos-db-features.md](./13-cosmos-db-features.md)
-- Deploy to Azure → [10-azure-deployment.md](./10-azure-deployment.md)
-- Set up CI/CD → [11-github-actions-ci-cd.md](./11-github-actions-ci-cd.md)
-- Troubleshoot deployment → [12-deployment-success.md](./12-deployment-success.md)
-
-## 🗂️ Archive
-
-Older documentation (superseded or no longer relevant) is stored in the `archive/` folder:
-- `07-authentication-msal.md` - Original MSAL/Entra External ID implementation (superseded by JWT auth)
-- `SSO-FIX-SUMMARY.md` - SSO troubleshooting notes (no longer applicable)
+- Use clear, concise language
+- Include code examples for technical concepts
+- Add visual diagrams where helpful
+- Keep sections focused and scannable
+- Update status badges when features change
 
 ---
 
-> **Note**: This documentation was restructured on October 12, 2025, to reflect the shift from MSAL/Entra External ID to JWT-based authentication, emphasizing template portability and client deployability.
+**Last Updated**: October 19, 2025  
+**Version**: 1.0 (Counter Feature Complete)  
+**Next Update**: Notification System Implementation
