@@ -15,7 +15,10 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    const counter = await cosmosService.getUserCounter(req.user.userId);
+    // Ensure userId is a string (defense against malformed tokens)
+    const userId = String(req.user.userId);
+
+    const counter = await cosmosService.getUserCounter(userId);
     res.status(200).json(counter);
   } catch (err: any) {
     // Improved logging
@@ -46,7 +49,8 @@ router.post('/increment', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(400).json({ error: 'Amount must be between 1 and 1000' });
     }
 
-    const counter = await cosmosService.incrementUserCounter(req.user.userId, amount);
+    const userId = String(req.user.userId);
+    const counter = await cosmosService.incrementUserCounter(userId, amount);
     res.status(200).json(counter);
   } catch (err: any) {
     console.error('Error incrementing counter:', err?.stack || err);
@@ -66,7 +70,8 @@ router.post('/reset', authenticateToken, async (req: AuthRequest, res) => {
       return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    const counter = await cosmosService.resetUserCounter(req.user.userId);
+    const userId = String(req.user.userId);
+    const counter = await cosmosService.resetUserCounter(userId);
     res.status(200).json(counter);
   } catch (err: any) {
     console.error('Error resetting counter:', err?.stack || err);

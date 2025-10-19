@@ -52,7 +52,7 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     res.status(201).json({
       success: true,
       user: {
-        id: user.id,
+        id: String(user.id), // Ensure ID is string
         email: user.email,
         name: user.name,
         role: user.role,
@@ -101,13 +101,16 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Ensure userId is a string (convert UNIQUEIDENTIFIER to string)
+    const userId = String(user.id);
+
     // Generate JWT token
-    const token = generateToken(user.id, user.email);
+    const token = generateToken(userId, user.email);
 
     res.status(200).json({
       token,
       user: {
-        id: user.id,
+        id: userId,
         email: user.email,
         name: user.name,
         role: user.role,
@@ -146,7 +149,7 @@ router.get('/me', authenticateToken, async (req: AuthRequest, res: Response): Pr
 
     res.status(200).json({
       user: {
-        id: user.id,
+        id: String(user.id),
         email: user.email,
         name: user.name,
         role: user.role,
