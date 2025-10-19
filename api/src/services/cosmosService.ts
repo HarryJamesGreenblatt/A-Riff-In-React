@@ -364,7 +364,9 @@ class CosmosService {
     // Ensure userId is a string for partition key
     const partitionKey = String(newNotification.userId);
 
-    const { resource } = await container.items.create(newNotification, { partitionKey });
+    // TS SDK types for RequestOptions may not include partitionKey depending on version.
+    // Cast to any to avoid TS2353 during build while still passing partitionKey at runtime.
+    const { resource } = await container.items.create(newNotification, { partitionKey } as any);
     return resource as Notification;
   }
 
