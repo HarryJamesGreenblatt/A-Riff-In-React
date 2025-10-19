@@ -29,6 +29,7 @@ interface Notification {
   createdAt?: string;
   expiresAt?: string;
   metadata?: Record<string, any>;
+  docType?: 'notification'; // Add docType to distinguish from activities
 }
 
 class CosmosService {
@@ -112,7 +113,7 @@ class CosmosService {
   async getActivities(userId?: string): Promise<Activity[]> {
     if (this.useInMemory) {
       const filtered = this.memoryResources
-        .filter((r: any) => r.type !== 'user_counter' && r.type !== 'notification')
+        .filter((r: any) => r.type !== 'user_counter' && r.docType !== 'notification')
         .filter((r: any) => (userId ? r.userId === userId : true))
         .sort((a: any, b: any) => (b.timestamp || '').localeCompare(a.timestamp || '')) as Activity[];
       return filtered as Activity[];
@@ -122,12 +123,12 @@ class CosmosService {
 
     // Build query based on parameters
     let querySpec: SqlQuerySpec = {
-      query: 'SELECT * FROM c WHERE c.type != "user_counter" AND c.type != "notification" ORDER BY c.timestamp DESC'
+      query: 'SELECT * FROM c WHERE c.type != "user_counter" AND (NOT IS_DEFINED(c.docType) OR c.docType != "notification") ORDER BY c.timestamp DESC'
     };
 
     if (userId) {
       querySpec = {
-        query: 'SELECT * FROM c WHERE c.userId = @userId AND c.type != "user_counter" AND c.type != "notification" ORDER BY c.timestamp DESC',
+        query: 'SELECT * FROM c WHERE c.userId = @userId AND c.type != "user_counter" AND (NOT IS_DEFINED(c.docType) OR c.docType != "notification") ORDER BY c.timestamp DESC',
         parameters: [
           {
             name: '@userId',
@@ -144,7 +145,7 @@ class CosmosService {
   async getRecentActivities(limit = 20): Promise<Activity[]> {
     if (this.useInMemory) {
       return (this.memoryResources
-        .filter((r: any) => r.type !== 'user_counter' && r.type !== 'notification')
+        .filter((r: any) => r.type !== 'user_counter' && r.docType !== 'notification')
         .sort((a: any, b: any) => (b.timestamp || '').localeCompare(a.timestamp || '')) as Activity[])
         .slice(0, limit);
     }
@@ -152,7 +153,7 @@ class CosmosService {
     const container = await this.initialize();
 
     const querySpec: SqlQuerySpec = {
-      query: `SELECT * FROM c WHERE c.type != "user_counter" AND c.type != "notification" ORDER BY c.timestamp DESC OFFSET 0 LIMIT ${limit}`
+      query: `SELECT * FROM c WHERE c.type != "user_counter" AND (NOT IS_DEFINED(c.docType) OR c.docType != "notification") ORDER BY c.timestamp DESC OFFSET 0 LIMIT ${limit}`
     };
 
     const { resources } = await container.items.query<Activity>(querySpec).fetchAll();
@@ -312,7 +313,7 @@ class CosmosService {
 
   async getNotifications(userId: string, unreadOnly: boolean = false): Promise<Notification[]> {
     if (this.useInMemory) {
-      const q = this.memoryResources.filter((r: any) => r.type === 'notification' && r.userId === userId) as Notification[];
+      const q = this.memoryResources.filter((r: any) => r.docType === 'notification' && r.userId === userId) as Notification[];
       const filtered = unreadOnly ? q.filter(n => !n.read) : q;
       return filtered.sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||''));
     }
@@ -321,8 +322,8 @@ class CosmosService {
 
     const querySpec: SqlQuerySpec = {
       query: unreadOnly
-        ? 'SELECT * FROM c WHERE c.userId = @userId AND c.type = "notification" AND c.read = false ORDER BY c.createdAt DESC'
-        : 'SELECT * FROM c WHERE c.userId = @userId AND c.type = "notification" ORDER BY c.createdAt DESC',
+        ? 'SELECT * FROM c WHERE c.userId = @userId AND c.docType = "notification" AND c.read = false ORDER BY c.createdAt DESC'
+        : 'SELECT * FROM c WHERE c.userId = @userId AND c.docType = "notification" ORDER BY c.createdAt DESC',
       parameters: [
         {
           name: '@userId',
@@ -341,7 +342,7 @@ class CosmosService {
         ...notification,
         id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         createdAt: new Date().toISOString(),
-        type: 'notification' as any
+        docType: 'notification'
       };
       this.memoryResources.push(newNotification as any);
       return newNotification;
@@ -353,7 +354,7 @@ class CosmosService {
       ...notification,
       id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       createdAt: new Date().toISOString(),
-      type: 'notification' as any
+      docType: 'notification'
     };
 
     const { resource } = await container.items.create(newNotification);
@@ -362,7 +363,7 @@ class CosmosService {
 
   async markNotificationAsRead(notificationId: string, userId: string): Promise<Notification> {
     if (this.useInMemory) {
-      const idx = this.memoryResources.findIndex((r: any) => r.type === 'notification' && r.id === notificationId && r.userId === userId);
+      const idx = this.memoryResources.findIndex((r: any) => r.docType === 'notification' && r.id === notificationId && r.userId === userId);
       if (idx === -1) throw new Error('Notification not found');
       const notification = this.memoryResources[idx] as Notification;
       const updatedNotification: Notification = { ...notification, read: true };
@@ -394,7 +395,7 @@ class CosmosService {
 
   async deleteNotification(notificationId: string, userId: string): Promise<void> {
     if (this.useInMemory) {
-      const idx = this.memoryResources.findIndex((r: any) => r.type === 'notification' && r.id === notificationId && r.userId === userId);
+      const idx = this.memoryResources.findIndex((r: any) => r.docType === 'notification' && r.id === notificationId && r.userId === userId);
       if (idx === -1) throw new Error('Notification not found');
       this.memoryResources.splice(idx, 1);
       return;
