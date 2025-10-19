@@ -21,6 +21,15 @@ app.use(cors());
 app.use(helmet());
 app.use(express.json());
 
+// JSON parse error handler - return 400 for invalid JSON instead of crashing
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err && (err instanceof SyntaxError || err.type === 'entity.parse.failed')) {
+    console.error('Invalid JSON payload received:', err?.message || err);
+    return res.status(400).json({ error: 'Invalid JSON payload' });
+  }
+  return next(err);
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ 

@@ -198,20 +198,24 @@ class CosmosService {
     const container = await this.initialize();
 
     try {
-      const { resource } = await container.item(userId, userId).read<UserCounter>();
+      // Ensure id and partition key are strings
+      const idStr = String(userId);
+      const partitionKey = String(userId);
+
+      const { resource } = await container.item(idStr, partitionKey).read<UserCounter>();
       if (resource && resource.type === 'user_counter') {
         return resource;
       }
     } catch (error: any) {
       // If not found, create a new counter
       if (error.code === 404) {
-        return this.createUserCounter(userId);
+        return this.createUserCounter(String(userId));
       }
       throw error;
     }
 
     // Fallback: create new counter
-    return this.createUserCounter(userId);
+    return this.createUserCounter(String(userId));
   }
 
   private async createUserCounter(userId: string): Promise<UserCounter> {
@@ -230,8 +234,8 @@ class CosmosService {
     const container = await this.initialize();
 
     const counter: UserCounter = {
-      id: userId,
-      userId,
+      id: String(userId),
+      userId: String(userId),
       count: 0,
       lastUpdated: new Date().toISOString(),
       type: 'user_counter'
@@ -267,7 +271,7 @@ class CosmosService {
     };
 
     const { resource } = await container
-      .item(userId, userId)
+      .item(String(userId), String(userId))
       .replace<UserCounter>(updatedCounter);
 
     return resource as UserCounter;
@@ -293,15 +297,15 @@ class CosmosService {
     const container = await this.initialize();
 
     const resetCounter: UserCounter = {
-      id: userId,
-      userId,
+      id: String(userId),
+      userId: String(userId),
       count: 0,
       lastUpdated: new Date().toISOString(),
       type: 'user_counter'
     };
 
     const { resource } = await container
-      .item(userId, userId)
+      .item(String(userId), String(userId))
       .replace<UserCounter>(resetCounter);
 
     return resource as UserCounter;
@@ -357,7 +361,10 @@ class CosmosService {
       docType: 'notification'
     };
 
-    const { resource } = await container.items.create(newNotification);
+    // Ensure userId is a string for partition key
+    const partitionKey = String(newNotification.userId);
+
+    const { resource } = await container.items.create(newNotification, { partitionKey });
     return resource as Notification;
   }
 
@@ -373,8 +380,11 @@ class CosmosService {
 
     const container = await this.initialize();
 
+    const idStr = String(notificationId);
+    const partitionKey = String(userId);
+
     const { resource: notification } = await container
-      .item(notificationId, userId)
+      .item(idStr, partitionKey)
       .read<Notification>();
 
     if (!notification) {
@@ -387,7 +397,7 @@ class CosmosService {
     };
 
     const { resource } = await container
-      .item(notificationId, userId)
+      .item(idStr, partitionKey)
       .replace<Notification>(updatedNotification);
 
     return resource as Notification;
@@ -403,7 +413,10 @@ class CosmosService {
 
     const container = await this.initialize();
 
-    await container.item(notificationId, userId).delete();
+    const idStr = String(notificationId);
+    const partitionKey = String(userId);
+
+    await container.item(idStr, partitionKey).delete();
   }
 }
 
