@@ -47,6 +47,13 @@ app.get('/', (req, res) => {
   });
 });
 
+// Central error handler (must be after routes)
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error('Unhandled error:', err?.stack || err);
+  const details = process.env.NODE_ENV === 'production' ? undefined : String(err?.message || err);
+  res.status(500).json({ error: 'Internal server error', details });
+});
+
 // Start server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

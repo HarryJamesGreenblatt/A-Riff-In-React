@@ -26,12 +26,12 @@ const initialState: CounterState = {
 export const counterApi = api.injectEndpoints({
   endpoints: (builder) => ({
     getCounter: builder.query<UserCounter, void>({
-      query: () => '/counter',
+      query: () => '/api/counter',
       providesTags: ['Counter'],
     }),
     incrementCounter: builder.mutation<UserCounter, { amount?: number }>({
       query: (body) => ({
-        url: '/counter/increment',
+        url: '/api/counter/increment',
         method: 'POST',
         body,
       }),
@@ -53,7 +53,7 @@ export const counterApi = api.injectEndpoints({
     }),
     resetCounter: builder.mutation<UserCounter, void>({
       query: () => ({
-        url: '/counter/reset',
+        url: '/api/counter/reset',
         method: 'POST',
       }),
       invalidatesTags: ['Counter'],

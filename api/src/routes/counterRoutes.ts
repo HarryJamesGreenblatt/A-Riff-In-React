@@ -17,9 +17,13 @@ router.get('/', authenticateToken, async (req: AuthRequest, res) => {
 
     const counter = await cosmosService.getUserCounter(req.user.userId);
     res.status(200).json(counter);
-  } catch (err) {
-    console.error('Error fetching counter:', err);
-    res.status(500).json({ error: 'Failed to retrieve counter' });
+  } catch (err: any) {
+    // Improved logging
+    console.error('Error fetching counter:', err?.stack || err);
+
+    // In non-production include error details to help debugging
+    const details = process.env.NODE_ENV === 'production' ? undefined : String(err?.message || err);
+    res.status(500).json({ error: 'Failed to retrieve counter', details });
   }
 });
 
@@ -44,9 +48,10 @@ router.post('/increment', authenticateToken, async (req: AuthRequest, res) => {
 
     const counter = await cosmosService.incrementUserCounter(req.user.userId, amount);
     res.status(200).json(counter);
-  } catch (err) {
-    console.error('Error incrementing counter:', err);
-    res.status(500).json({ error: 'Failed to increment counter' });
+  } catch (err: any) {
+    console.error('Error incrementing counter:', err?.stack || err);
+    const details = process.env.NODE_ENV === 'production' ? undefined : String(err?.message || err);
+    res.status(500).json({ error: 'Failed to increment counter', details });
   }
 });
 
@@ -63,9 +68,10 @@ router.post('/reset', authenticateToken, async (req: AuthRequest, res) => {
 
     const counter = await cosmosService.resetUserCounter(req.user.userId);
     res.status(200).json(counter);
-  } catch (err) {
-    console.error('Error resetting counter:', err);
-    res.status(500).json({ error: 'Failed to reset counter' });
+  } catch (err: any) {
+    console.error('Error resetting counter:', err?.stack || err);
+    const details = process.env.NODE_ENV === 'production' ? undefined : String(err?.message || err);
+    res.status(500).json({ error: 'Failed to reset counter', details });
   }
 });
 

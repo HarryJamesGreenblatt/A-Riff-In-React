@@ -33,20 +33,20 @@ export const activityApi = api.injectEndpoints({
         const params = new URLSearchParams();
         if (userId) params.append('userId', userId);
         params.append('limit', limit.toString());
-        return `/activities?${params.toString()}`;
+        return `/api/activities?${params.toString()}`;
       },
       providesTags: ['Activity'],
     }),
     createActivity: builder.mutation<Activity, Omit<Activity, 'id' | 'timestamp'>>({
       query: (activity) => ({
-        url: '/activities',
+        url: '/api/activities',
         method: 'POST',
         body: activity,
       }),
       invalidatesTags: ['Activity'],
     }),
     getActivityStream: builder.query<Activity[], void>({
-      query: () => '/activities/stream',
+      query: () => '/api/activities/stream',
       // This could be enhanced with WebSocket support for real-time updates
       providesTags: ['Activity'],
     }),
