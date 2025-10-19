@@ -391,6 +391,19 @@ class CosmosService {
 
     return resource as Notification;
   }
+
+  async deleteNotification(notificationId: string, userId: string): Promise<void> {
+    if (this.useInMemory) {
+      const idx = this.memoryResources.findIndex((r: any) => r.type === 'notification' && r.id === notificationId && r.userId === userId);
+      if (idx === -1) throw new Error('Notification not found');
+      this.memoryResources.splice(idx, 1);
+      return;
+    }
+
+    const container = await this.initialize();
+
+    await container.item(notificationId, userId).delete();
+  }
 }
 
 export const cosmosService = new CosmosService();

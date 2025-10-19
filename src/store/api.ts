@@ -30,6 +30,6 @@ export const api = createApi({
       return headers;
     },
   }),
-  tagTypes: ['User', 'Activity', 'Counter'],
+  tagTypes: ['User', 'Activity', 'Counter', 'Notification'],
   endpoints: () => ({}),
 });

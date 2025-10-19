@@ -4,6 +4,7 @@ import { api } from './api';
 import usersReducer from '../features/users/slice';
 import activityReducer from '../features/activity/slice';
 import counterReducer from '../features/counter/slice';
+import notificationsReducer from '../features/notifications/slice';
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     users: usersReducer,
     activity: activityReducer,
     counter: counterReducer,
+    notifications: notificationsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(api.middleware),
