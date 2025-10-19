@@ -36,7 +36,7 @@ export const notificationsApi = api.injectEndpoints({
         `/api/notifications${unreadOnly ? '?unreadOnly=true' : ''}`,
       providesTags: ['Notification'],
       // Update unread count when data is fetched
-      onQueryStarted: async (arg, { dispatch, queryFulfilled }) => {
+      onQueryStarted: async (_arg, { dispatch, queryFulfilled }) => {
         try {
           const { data } = await queryFulfilled;
           const unreadCount = data.filter(n => !n.read).length;
