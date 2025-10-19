@@ -1,10 +1,10 @@
 # A Riff In React
 
-## 📢 Current Status: ✅ Counter Feature Complete - Notification System Next
+## 📢 Current Status: ✅ Counter Feature Complete - Notification System Implemented
 
 **Date:** October 19, 2025
 
-**Status:** ✅ **Counter Feature Production-Ready - Moving to Notifications**
+**Status:** ✅ **Counter Feature Production-Ready — Notification System implemented & smoke-tested**
 
 **Recent Achievements:**
 - ✅ **Counter Feature**: Fully operational with Cosmos DB persistence
@@ -12,22 +12,24 @@
 - ✅ **Frontend Deployment**: Azure Static Web Apps with custom domain
 - ✅ **Database Infrastructure**: Azure SQL + Cosmos DB with role-based access
 - ✅ **Authentication**: JWT-based auth with secure token handling
+- ✅ **Notification System**: Backend endpoints + Cosmos integration + frontend RTK Query slice and minimal dashboard UI
 
 **What Works Right Now:**
 - ✅ User registration and login (email/password)
 - ✅ Protected dashboard route with user profile
 - ✅ Counter widget with persistence across sessions
-- ✅ Increment, custom amounts, and reset functionality
-- ✅ Real-time updates with optimistic UI
+- ✅ Notifications: create, list, mark-as-read, delete (Cosmos DB-backed)
+- ✅ Real-time updates with optimistic UI patterns (RTK Query)
 
 **Current Status:**   
 - ✅ **Frontend**: Live at https://a-riff-in-react.harryjamesgreenblatt.com
 - ✅ **API Backend**: Live at https://ca-api-a-riff-in-react.bravecliff-56e777dd.westus.azurecontainerapps.io
 - ✅ **Authentication**: JWT tokens working correctly
 - ✅ **Counter**: Cosmos DB persistence verified
+- ✅ **Notifications**: End-to-end smoke-tested (API + Cosmos + dashboard)
 - ✅ **Infrastructure**: Fully containerized with CI/CD
 
-**Next Phase:** Notification System (Phase 2 of Cosmos DB Features)
+**Next Phase:** Notification UI polish, polling, and tests
 
 ---
 
@@ -144,6 +146,7 @@ While this is a general-purpose template, documentation uses a **run club** as t
 │  /api/auth/login      - Authenticate & return JWT       │
 │  /api/users/*         - Profile management              │
 │  /api/activities/*    - Activity logging                │
+│  /api/notifications/* - Notification management         │
 └────────┬────────────────────────┬───────────────────────┘
          │                        │
          ▼                        ▼
