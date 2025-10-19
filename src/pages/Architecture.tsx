@@ -6,31 +6,28 @@ const Architecture: React.FC = () => (
 
     <section className="card-grid">
       <article className="feature-card card-large">
-        <h3 className="font-bold mb-2">Overview</h3>
-  <p className="text-gray-700 content-limited">A Riff In React follows a modular, feature-first architecture suitable for production apps. The frontend is built with React + TypeScript and deployed to Azure Static Web Apps, while the backend is an Express API container deployed to Azure Container Apps. The template demonstrates a hybrid persistence pattern using Azure SQL for structured data and Cosmos DB for document/real-time workloads.</p>
+        <h3 className="font-bold mb-2">Purpose</h3>
+        <p className="text-gray-700 content-limited">The architecture is optimized to support the template's core features: authenticated users, a protected dashboard, event/activity capture, and notifications. It prioritizes a clear separation between UI, state, and backend services so teams can extend features safely.</p>
       </article>
 
-      
       <article className="feature-card card-large">
-        <h3 className="font-bold mb-2">Infrastructure notes</h3>
-        <p className="text-gray-700">The template uses a shared SQL Server model to reduce cost: databases are created per-project on a shared server. Role assignments are handled via Bicep modules to grant managed identities access to the DB resources during deployment.</p>
-      </article>
-
-      <article className="feature-card card-wide">
-        <h3 className="font-bold mb-2">Deployment & CI/CD</h3>
-        <p className="text-gray-700 mb-2">CI/CD is implemented with GitHub Actions. Two workflows handle deployment:</p>
-        <ul className="list-disc ml-6 text-gray-600 mb-4">
-          <li><strong>API workflow</strong> — builds Docker image, pushes to GitHub Container Registry, deploys infra with Bicep and container to Azure Container Apps.</li>
-          <li><strong>Frontend workflow</strong> — builds the React app and deploys to Azure Static Web Apps using the Static Web Apps GitHub Action.</li>
+        <h3 className="font-bold mb-2">Platform components</h3>
+        <ul className="list-disc ml-6 text-gray-600">
+          <li><strong>Frontend</strong>: React 18 + TypeScript, Vite, Tailwind</li>
+          <li><strong>API</strong>: Express (Node 18) in a Docker container</li>
+          <li><strong>Data</strong>: Azure SQL (users/profiles), Cosmos DB (activities/notifications)</li>
         </ul>
       </article>
 
       <article className="feature-card card-wide">
-        <h3 className="font-bold mb-2">Authentication</h3>
-        <p className="text-gray-700">The default authentication implementation for this template is JWT-based (email/password). The codebase and documentation were migrated from an earlier MSAL/Entra External ID approach to a template-first JWT flow to enable zero-portal deployments. Developers can extend the template to use Entra/MSAL if desired — see the docs folder for guidance.</p>
+        <h3 className="font-bold mb-2">Operational notes</h3>
+        <p className="text-gray-700 mb-2">Bicep templates and GitHub Actions are provided to deploy the frontend and API. The deployment pattern uses managed identities for secure resource access where applicable.</p>
       </article>
 
-       
+      <article className="feature-card card-wide">
+        <h3 className="font-bold mb-2">Authentication model</h3>
+        <p className="text-gray-700">JWT-based authentication with token issuance on login and middleware-protected API routes. This model keeps the template self-contained; you can swap in Entra/MSAL later if required.</p>
+      </article>
     </section>
   </div>
 );

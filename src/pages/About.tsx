@@ -7,12 +7,12 @@ const About: React.FC = () => (
     <section className="card-grid">
       <article className="feature-card card-large">
         <h3 className="font-bold mb-2">TL;DR</h3>
-  <p className="text-gray-700 content-limited">A Riff In React is a pragmatic starter for React + TypeScript apps that need Azure integration, structured feature modules, and clear patterns for authentication and data.</p>
+        <p className="text-gray-700 content-limited">A Riff In React is a pragmatic starter for React + TypeScript apps that need Azure integration, structured feature modules, and clear patterns for authentication and data.</p>
       </article>
 
       <article className="feature-card card-tall">
         <h3 className="font-bold mb-2">Overview</h3>
-  <p className="text-gray-700 content-limited">This template demonstrates a production-ready approach for building modern web applications with React and TypeScript. It favors a feature-based project structure, clear separation between UI, state, and services, and pre-configured integration points for Azure services (Container Apps, Static Web Apps, Azure SQL, Cosmos DB).</p>
+        <p className="text-gray-700 content-limited">This template demonstrates a production-ready approach for building modern web applications with React and TypeScript. It favors a feature-based project structure, clear separation between UI, state, and services, and pre-configured integration points for Azure services (Container Apps, Static Web Apps, Azure SQL, Cosmos DB).</p>
       </article>
 
       <article className="feature-card card-wide">
