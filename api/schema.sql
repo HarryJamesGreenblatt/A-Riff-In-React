@@ -1,12 +1,11 @@
--- Create the database if it doesn't exist
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'ARiffInReact')
-BEGIN
-    CREATE DATABASE ARiffInReact;
-END
-GO
+-- Note: This script creates/migrates schema objects within the current database.
+-- IMPORTANT: Do NOT create the database from this script in CI/CD. The infra and workflows
+-- use an existing SQL database resource (`riff-react-db`) and deployments should run this
+-- script against that database (or run it manually when intentionally creating a new DB).
 
-USE ARiffInReact;
-GO
+-- ---------------------------------------------------------------------------
+-- Users table and schema migration
+-- ---------------------------------------------------------------------------
 
 -- Create Users table with JWT authentication fields
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Users')
@@ -14,7 +13,7 @@ BEGIN
     CREATE TABLE Users (
         id UNIQUEIDENTIFIER PRIMARY KEY DEFAULT NEWID(),
         email NVARCHAR(255) NOT NULL UNIQUE,
-        passwordHash NVARCHAR(255) NOT NULL,
+        passwordHash NVARCHAR(255) NULL,
         name NVARCHAR(255) NOT NULL,
         role NVARCHAR(50) NOT NULL DEFAULT 'member',
         emailVerified BIT NOT NULL DEFAULT 0,
